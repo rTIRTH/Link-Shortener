@@ -1,3 +1,5 @@
+  ![CI](https://github.com/rTIRTH/Link-Shortener/actions/workflows/ci.yml/badge.svg)
+
 # Link Shortener
 
 A multi-user URL shortener. Every account gets its own namespace, so
