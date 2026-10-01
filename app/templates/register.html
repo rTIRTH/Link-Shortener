@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Sign up · Link Shortener{% endblock %}
+{% block content %}
+<section class="narrow">
+  <h1>Create your account</h1>
+  {% if error %}<div class="flash error" role="alert">{{ error }}</div>{% endif %}
+  <form method="post" action="/register" class="stack">
+    <label>Username
+      <input name="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+"
+             value="{{ form.username if form else '' }}" autocomplete="username">
+      <small>This becomes part of your short links: yoursite.com/<b>username</b>/alias</small>
+    </label>
+    <label>Email
+      <input type="email" name="email" required value="{{ form.email if form else '' }}" autocomplete="email">
+    </label>
+    <label>Password
+      <input type="password" name="password" required minlength="8" maxlength="72" autocomplete="new-password">
+      <small>At least 8 characters.</small>
+    </label>
+    <button class="btn" type="submit">Create account</button>
+  </form>
+  <p class="muted">Already registered? <a href="/login">Log in</a></p>
+</section>
+{% endblock %}

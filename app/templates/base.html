@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Link Shortener{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">Link Shortener</a>
+    <nav>
+      {% if user %}
+        <a href="/dashboard">Dashboard</a>
+        <span class="who">{{ user.username }}</span>
+        <form method="post" action="/logout" class="inline"><button class="textbtn">Log out</button></form>
+      {% else %}
+        <a href="/login">Log in</a>
+        <a class="btn small" href="/register">Sign up</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    {% for category, message in flashes %}
+      <div class="flash {{ category }}" role="status">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

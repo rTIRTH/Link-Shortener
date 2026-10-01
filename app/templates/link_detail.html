@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ link.slug }} · Link Shortener{% endblock %}
+{% block content %}
+<p><a href="/dashboard">← All links</a></p>
+<section>
+  <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
+  <p class="dest-full">Redirects to <a href="{{ link.original_url }}" target="_blank" rel="noopener">{{ link.original_url }}</a></p>
+  <p class="muted">{{ link.click_count }} total click{{ '' if link.click_count == 1 else 's' }} · {{ recent_total }} in the last 14 days</p>
+</section>
+
+<section class="grid2">
+  <div>
+    <h2>Clicks per day</h2>
+    <div class="chart" role="img" aria-label="Clicks per day for the last 14 days">
+      {% for s in series %}
+        <div class="col" title="{{ s.label }}: {{ s.count }}">
+          <span class="val">{{ s.count if s.count else '' }}</span>
+          <div class="bar" style="height: {{ s.pct }}%"></div>
+          <span class="lbl">{{ s.label[:2] }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div>
+    <h2>QR code</h2>
+    <img class="qr" src="/dashboard/links/{{ link.id }}/qr.png" alt="QR code for {{ short_url }}" width="180" height="180">
+    <p><a href="/dashboard/links/{{ link.id }}/qr.png" download="{{ link.slug }}.png">Download PNG</a></p>
+  </div>
+</section>
+
+<section class="grid2">
+  <div>
+    <h2>Devices</h2>
+    {% if devices %}<ul class="plain">{% for name, n in devices %}<li><span>{{ name }}</span><b>{{ n }}</b></li>{% endfor %}</ul>
+    {% else %}<p class="muted">No clicks yet.</p>{% endif %}
+  </div>
+  <div>
+    <h2>Top referrers</h2>
+    {% if referrers %}<ul class="plain">{% for name, n in referrers %}<li><span>{{ name }}</span><b>{{ n }}</b></li>{% endfor %}</ul>
+    {% else %}<p class="muted">No clicks yet.</p>{% endif %}
+  </div>
+</section>
+
+<form method="post" action="/dashboard/links/{{ link.id }}/delete" onsubmit="return confirm('Delete this link?')">
+  <button class="btn danger" type="submit">Delete link</button>
+</form>
+{% endblock %}

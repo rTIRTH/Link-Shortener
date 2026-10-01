@@ -1,0 +1,36 @@
+# Run everything locally with:  docker compose up --build
+# Then open http://localhost:8000
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://linkshortener:linkshortener@db:5432/linkshortener
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: local-dev-secret-change-me
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: linkshortener
+      POSTGRES_PASSWORD: linkshortener
+      POSTGRES_DB: linkshortener
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U linkshortener"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  pgdata:

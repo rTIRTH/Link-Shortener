@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Link Shortener{% endblock %}
+{% block content %}
+<section>
+  <h1>Your links</h1>
+  <p class="muted">{{ rows|length }} link{{ '' if rows|length == 1 else 's' }} · {{ total_clicks }} total click{{ '' if total_clicks == 1 else 's' }}</p>
+
+  <form method="post" action="/dashboard/links" class="create">
+    <label class="grow">Long URL
+      <input name="original_url" placeholder="https://example.com/a/very/long/page" required>
+    </label>
+    <label>Custom alias <small>(optional)</small>
+      <input name="slug" placeholder="my-portfolio" maxlength="32">
+    </label>
+    <label>Expires on <small>(optional)</small>
+      <input type="date" name="expires_on">
+    </label>
+    <button class="btn" type="submit">Shorten</button>
+  </form>
+</section>
+
+<section>
+  {% if rows %}
+  <form method="post" id="bulk">
+    <div class="toolbar">
+      <button class="btn small danger" type="submit" formaction="/dashboard/links/bulk-delete"
+              onclick="return confirm('Delete the selected links? This cannot be undone.')">Delete selected</button>
+      <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip">Download QR codes</button>
+      <a class="btn small ghost" href="/dashboard/links/export.csv">Export CSV</a>
+      <small class="muted">QR download uses the selected links, or all links if none are selected.</small>
+    </div>
+    <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th><input type="checkbox" id="all" aria-label="Select all links"></th>
+        <th>Short link</th><th>Destination</th><th class="num">Clicks</th><th>Expires</th><th></th>
+      </tr></thead>
+      <tbody>
+      {% for row in rows %}
+        <tr>
+          <td><input type="checkbox" name="ids" value="{{ row.link.id }}" class="pick" aria-label="Select {{ row.link.slug }}"></td>
+          <td><a class="mono" href="{{ row.short_url }}" target="_blank" rel="noopener">{{ row.short_url|replace('https://','')|replace('http://','') }}</a></td>
+          <td class="dest" title="{{ row.link.original_url }}">{{ row.link.original_url }}</td>
+          <td class="num">{{ row.link.click_count }}</td>
+          <td>{% if row.link.expires_at %}{{ row.link.expires_at.strftime('%d %b %Y') }}{% if row.expired %} <span class="tag">expired</span>{% endif %}{% else %}<span class="muted">never</span>{% endif %}</td>
+          <td><a href="/dashboard/links/{{ row.link.id }}">Stats</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </form>
+  <script>
+    document.getElementById('all').addEventListener('change', function (e) {
+      document.querySelectorAll('.pick').forEach(function (c) { c.checked = e.target.checked; });
+    });
+  </script>
+  {% else %}
+    <div class="empty"><h3>No links yet</h3><p>Paste a long URL above to create your first short link.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

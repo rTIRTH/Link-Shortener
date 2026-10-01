@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Short links with your name on them.</h1>
+  <p class="lede">Every account gets its own namespace, so <code>/you/portfolio</code> is always yours,
+  even if someone else also picks <code>portfolio</code>. Track clicks, expire links, export everything.</p>
+  <p><a class="btn" href="/register">Create a free account</a>
+     <a class="btn ghost" href="/login">Log in</a></p>
+</section>
+<section class="facts">
+  <div><h3>Click analytics</h3><p>Daily clicks, devices and referrers for every link.</p></div>
+  <div><h3>QR codes</h3><p>Download one QR code or a zip of all of them.</p></div>
+  <div><h3>Your data</h3><p>Export to CSV and delete links in bulk.</p></div>
+</section>
+{% endblock %}

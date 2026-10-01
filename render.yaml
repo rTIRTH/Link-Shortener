@@ -1,0 +1,32 @@
+# Render "Blueprint": creates the web service, Postgres and Redis (Key Value) together.
+services:
+  - type: web
+    name: link-shortener
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true            # redeploy on every push to the connected branch
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: HTTPS_ONLY
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: link-shortener-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: link-shortener-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: link-shortener-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []             # only your own services can connect
+
+databases:
+  - name: link-shortener-db
+    plan: free
