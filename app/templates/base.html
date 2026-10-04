@@ -12,6 +12,7 @@
     <nav>
       {% if user %}
         <a href="/dashboard">Dashboard</a>
+        {% if is_admin %}<a href="/admin">Admin</a>{% endif %}
         <span class="who">{{ user.username }}</span>
         <form method="post" action="/logout" class="inline"><button class="textbtn">Log out</button></form>
       {% else %}

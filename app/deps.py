@@ -1,6 +1,7 @@
-from fastapi import Depends, Request
+from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
+from .config import settings
 from .database import get_db
 from .models import User
 
@@ -17,6 +18,13 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User | 
 def require_user(user: User | None = Depends(get_current_user)) -> User:
     if user is None:
         raise NotAuthenticated()
+    return user
+
+
+def require_admin(user: User = Depends(require_user)) -> User:
+    # 404 (not 403) so strangers can't even tell the page exists
+    if user.username not in settings.admin_usernames:
+        raise HTTPException(404, "Page not found.")
     return user
 
 

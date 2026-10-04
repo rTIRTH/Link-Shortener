@@ -8,7 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .config import settings
 from .database import make_session_factory
 from .deps import NotAuthenticated
-from .routers import auth, dashboard, redirect
+from .routers import admin, auth, dashboard, redirect
 from .templating import BASE_DIR, render
 
 
@@ -42,5 +42,6 @@ def create_app(database_url: str | None = None) -> FastAPI:
     # because /{username}/{slug} would otherwise swallow other two-part URLs.
     app.include_router(auth.router)
     app.include_router(dashboard.router)
+    app.include_router(admin.router)
     app.include_router(redirect.router)
     return app

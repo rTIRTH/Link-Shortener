@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from ..cache import rate_limit
 from ..database import get_db
 from ..deps import client_ip, get_current_user
-from ..models import User
+from ..models import User, utcnow
 from ..security import hash_password, verify_password
 from ..templating import flash, render
 from ..utils import validate_email, validate_password, validate_username
@@ -53,7 +53,12 @@ def register(
                       error="That username or email is already registered.",
                       form={"username": username, "email": email})
 
-    user = User(username=username, email=email, password_hash=hash_password(password))
+    user = User(
+        username=username,
+        email=email,
+        password_hash=hash_password(password),
+        last_login_at=utcnow(),
+    )
     db.add(user)
     db.commit()
     request.session["user_id"] = user.id
@@ -83,6 +88,8 @@ def login(
     if not user or not verify_password(password, user.password_hash):
         return render(request, "login.html", status_code=400,
                       error="Wrong username/email or password.", form={"identifier": identifier})
+    user.last_login_at = utcnow()
+    db.commit()
     request.session.clear()
     request.session["user_id"] = user.id
     return RedirectResponse("/dashboard", status_code=303)

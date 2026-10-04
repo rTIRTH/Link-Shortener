@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Admin · Link Shortener{% endblock %}
+{% block content %}
+<h1>Admin</h1>
+<p class="muted">Private overview. Only usernames listed in ADMIN_USERNAMES can see this page.</p>
+
+<section class="facts">
+  <div><h3>{{ stats.users }}</h3><p>Users</p></div>
+  <div><h3>{{ stats.active_7d }}</h3><p>Logged in during the last 7 days</p></div>
+  <div><h3>{{ stats.links }}</h3><p>Links</p></div>
+  <div><h3>{{ stats.clicks }}</h3><p>Recorded clicks</p></div>
+</section>
+
+<section>
+  <h2>Users (newest first, max 100)</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Username</th><th>Email</th><th>Signed up</th><th>Last login</th><th class="num">Links</th></tr></thead>
+    <tbody>
+    {% for u, link_count in users %}
+      <tr>
+        <td class="mono">{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.created_at.strftime('%d %b %Y %H:%M') }} UTC</td>
+        <td>{% if u.last_login_at %}{{ u.last_login_at.strftime('%d %b %Y %H:%M') }} UTC{% else %}<span class="muted">never</span>{% endif %}</td>
+        <td class="num">{{ link_count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>Top links by clicks</h2>
+  {% if top_links %}
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Link</th><th>Destination</th><th class="num">Clicks</th></tr></thead>
+    <tbody>
+    {% for link, username in top_links %}
+      <tr>
+        <td class="mono">{{ username }}/{{ link.slug }}</td>
+        <td class="dest" title="{{ link.original_url }}">{{ link.original_url }}</td>
+        <td class="num">{{ link.click_count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}<p class="muted">No links yet.</p>{% endif %}
+</section>
+{% endblock %}

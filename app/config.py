@@ -22,6 +22,10 @@ class Settings:
         self.base_url = os.getenv("BASE_URL", "").rstrip("/")
         self.https_only = os.getenv("HTTPS_ONLY", "false").lower() == "true"
         self.cache_ttl = int(os.getenv("CACHE_TTL", "3600"))
+        # Comma-separated usernames allowed to open /admin, e.g. "r_tirth,alice"
+        self.admin_usernames = {
+            u.strip().lower() for u in os.getenv("ADMIN_USERNAMES", "").split(",") if u.strip()
+        }
 
 
 settings = Settings()
