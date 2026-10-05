@@ -303,3 +303,8 @@ def test_deleting_a_link_clears_cache_under_old_username(alice, redis_fake):
     alice.post("/dashboard/links/1/delete")
     assert redis_fake.get("link:alice:tmp") is None
     assert alice.get("/alice/tmp").status_code == 404
+
+
+def test_stylesheet_url_is_versioned(client):
+    html = client.get("/login").text
+    assert re.search(r'/static/style\.css\?v=[0-9a-f]{10}"', html)

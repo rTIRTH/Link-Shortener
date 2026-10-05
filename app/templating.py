@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 
 from fastapi import Request
@@ -8,6 +9,11 @@ from .profile import THEMES
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
+# Changes whenever style.css changes, so browsers never keep showing an old stylesheet.
+templates.env.globals["css_version"] = hashlib.md5(
+    (BASE_DIR / "static" / "style.css").read_bytes()
+).hexdigest()[:10]
 
 
 def flash(request: Request, message: str, category: str = "info") -> None:
