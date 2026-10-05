@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Account settings · Link Shortener{% endblock %}
+{% block content %}
+<div class="account">
+  <header class="account-head">
+    <img class="avatar big" id="head-avatar" src="/static/avatars/{{ user.avatar }}.svg" alt="" width="72" height="72">
+    <div>
+      <h1>{{ user.username }}</h1>
+      <p class="muted">{{ user.email }}</p>
+    </div>
+    <form method="post" action="/logout" class="push-right"><button class="btn ghost small" type="submit">Log out</button></form>
+  </header>
+
+  <nav class="subnav" aria-label="Settings sections">
+    <a href="#profile">Profile</a><a href="#email">Email</a><a href="#password">Password</a>
+    <a href="#appearance">Appearance</a><a href="#danger">Delete account</a>
+  </nav>
+
+  <section class="panel" id="profile">
+    <h2>Avatar</h2>
+    <p class="muted">Pick one of the 20 pixel animals.</p>
+    <form method="post" action="/account/avatar">
+      <fieldset class="avatar-grid">
+        <legend class="sr-only">Choose your avatar</legend>
+        {% for key in avatars %}
+        <label class="avatar-opt">
+          <input type="radio" name="avatar" value="{{ key }}" {% if key == user.avatar %}checked{% endif %}>
+          <img src="/static/avatars/{{ key }}.svg" alt="{{ key|capitalize }}" width="64" height="64" loading="lazy">
+        </label>
+        {% endfor %}
+      </fieldset>
+      <button class="btn" type="submit">Save avatar</button>
+    </form>
+
+    <h2 class="gap">Username</h2>
+    <p class="muted">Your short links look like <code>/{{ user.username }}/alias</code>. If you change your username,
+    your old links keep working, and your previous names stay reserved for you
+    ({{ old_usernames|length }} of {{ max_old }} used{% if old_usernames %}: {{ old_usernames|join(', ') }}{% endif %}).</p>
+    <form method="post" action="/account/username" class="stack">
+      <label>New username
+        <input name="new_username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" autocomplete="off">
+        <small>3-20 characters: letters, numbers, underscore.</small>
+      </label>
+      <label>Current password
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <div><button class="btn" type="submit">Change username</button></div>
+    </form>
+  </section>
+
+  <section class="panel" id="email">
+    <h2>Email</h2>
+    <p class="muted">Current email: <b>{{ user.email }}</b></p>
+    {% if not email_ready %}
+      <div class="flash">Changing email is not available on this server yet (email sending is not set up).</div>
+    {% else %}
+      {% if pending %}
+        <div class="flash">A code was sent to <b>{{ pending.new_email }}</b>.
+          <a href="/account/email/verify">Enter the code</a></div>
+        <form method="post" action="/account/email/cancel"><button class="btn ghost small" type="submit">Cancel email change</button></form>
+      {% endif %}
+      <p class="muted">We email a 6-digit code to the <b>new</b> address. The change only happens once you enter it.</p>
+      <form method="post" action="/account/email/request" class="stack">
+        <label>New email address
+          <input type="email" name="new_email" required autocomplete="email">
+        </label>
+        <label>Current password
+          <input type="password" name="password" required autocomplete="current-password">
+        </label>
+        <div><button class="btn" type="submit">Send verification code</button></div>
+      </form>
+    {% endif %}
+  </section>
+
+  <section class="panel" id="password">
+    <h2>Password</h2>
+    <form method="post" action="/account/password" class="stack">
+      <label>Current password
+        <input type="password" name="current_password" required autocomplete="current-password">
+      </label>
+      <label>New password
+        <input type="password" name="new_password" required minlength="8" maxlength="72" autocomplete="new-password">
+        <small>8-72 characters.</small>
+      </label>
+      <div><button class="btn" type="submit">Change password</button></div>
+    </form>
+  </section>
+
+  <section class="panel" id="appearance">
+    <h2>Appearance</h2>
+    <p class="muted">Choose how the site looks. "System" follows your device's setting.</p>
+    <form method="post" action="/account/theme">
+      <fieldset class="theme-grid">
+        <legend class="sr-only">Theme</legend>
+        {% for value, label, hint in [('system','System default','Match my device'),('light','Light','Always light'),('dark','Dark','Always dark')] %}
+        <label class="theme-opt">
+          <input type="radio" name="theme" value="{{ value }}" {% if value == user.theme %}checked{% endif %}>
+          <span class="theme-card"><b>{{ label }}</b><small>{{ hint }}</small></span>
+        </label>
+        {% endfor %}
+      </fieldset>
+      <button class="btn" type="submit">Save appearance</button>
+    </form>
+  </section>
+
+  <section class="panel danger" id="danger">
+    <h2>Delete account</h2>
+    <p>This permanently deletes your account, all your links, and their click history. Short links you
+    already shared will stop working. This cannot be undone.</p>
+    <form method="post" action="/account/delete" class="stack"
+          onsubmit="return confirm('Delete your account and all your links permanently?')">
+      <label>Type your username (<code>{{ user.username }}</code>) to confirm
+        <input name="confirm" required autocomplete="off">
+      </label>
+      <label>Current password
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <div><button class="btn danger-solid" type="submit">Delete my account</button></div>
+    </form>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.querySelectorAll('input[name="avatar"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      document.getElementById('head-avatar').src = '/static/avatars/' + r.value + '.svg';
+    });
+  });
+  document.querySelectorAll('input[name="theme"]').forEach(function (r) {
+    r.addEventListener('change', function () { document.documentElement.dataset.theme = r.value; });
+  });
+</script>
+{% endblock %}

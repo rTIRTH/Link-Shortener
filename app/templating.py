@@ -4,6 +4,7 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
 from .config import settings
+from .profile import THEMES
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
@@ -18,6 +19,8 @@ def flash(request: Request, message: str, category: str = "info") -> None:
 
 
 def render(request: Request, name: str, user=None, status_code: int = 200, **context):
+    theme = user.theme if user else request.cookies.get("theme")
+    context["theme"] = theme if theme in THEMES else "system"
     context["user"] = user
     context["is_admin"] = bool(user and user.username in settings.admin_usernames)
     context["flashes"] = request.session.pop("_flashes", [])

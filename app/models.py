@@ -26,9 +26,17 @@ class User(Base):
     last_login_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    avatar: Mapped[str] = mapped_column(String(32), default="cat", server_default="cat")
+    theme: Mapped[str] = mapped_column(String(8), default="system", server_default="system")
 
     links: Mapped[list["Link"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"
+    )
+    old_usernames: Mapped[list["UsernameAlias"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    email_change: Mapped["EmailChange | None"] = relationship(
+        back_populates="user", cascade="all, delete-orphan", uselist=False
     )
 
 
@@ -61,3 +69,30 @@ class Click(Base):
     referrer: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     link: Mapped[Link] = relationship(back_populates="clicks")
+
+
+class UsernameAlias(Base):
+    """A previous username. It keeps old short links working and stays reserved."""
+
+    __tablename__ = "username_aliases"
+
+    username: Mapped[str] = mapped_column(String(20), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user: Mapped[User] = relationship(back_populates="old_usernames")
+
+
+class EmailChange(Base):
+    """A pending email change waiting for the one-time code (max one per user)."""
+
+    __tablename__ = "email_changes"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    new_email: Mapped[str] = mapped_column(String(255))
+    code_hash: Mapped[str] = mapped_column(String(64))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+
+    user: Mapped[User] = relationship(back_populates="email_change")

@@ -15,7 +15,7 @@ from ..cache import cache_delete, rate_limit
 from ..config import settings
 from ..database import get_db
 from ..deps import require_user
-from ..models import Click, Link, User, as_utc, utcnow
+from ..models import Click, Link, User, UsernameAlias, as_utc, utcnow
 from ..templating import flash, render
 from ..utils import csv_safe, generate_slug, validate_slug, validate_url
 
@@ -24,6 +24,13 @@ router = APIRouter(prefix="/dashboard")
 
 def cache_key(username: str, slug: str) -> str:
     return f"link:{username}:{slug}"
+
+
+def forget_link(db: Session, user: User, slug: str) -> None:
+    """Remove a link from the Redis cache under the current AND previous usernames."""
+    old = db.scalars(select(UsernameAlias.username).where(UsernameAlias.user_id == user.id))
+    for name in [user.username, *old]:
+        cache_delete(cache_key(name, slug))
 
 
 def short_url(request: Request, user: User, link: Link) -> str:
@@ -132,7 +139,7 @@ def bulk_delete(
         return RedirectResponse("/dashboard", status_code=303)
     links = user_links(db, user, ids)  # only the user's own links can match
     for link in links:
-        cache_delete(cache_key(user.username, link.slug))
+        forget_link(db, user, link.slug)
         db.delete(link)
     db.commit()
     flash(request, f"Deleted {len(links)} link(s).", "success")
@@ -233,7 +240,7 @@ def delete_one(
     user: User = Depends(require_user), db: Session = Depends(get_db),
 ):
     link = get_owned_link(db, user, link_id)
-    cache_delete(cache_key(user.username, link.slug))
+    forget_link(db, user, link.slug)
     db.delete(link)
     db.commit()
     flash(request, "Link deleted.", "success")

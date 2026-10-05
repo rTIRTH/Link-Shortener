@@ -1,12 +1,16 @@
+import secrets
+
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from ..cache import rate_limit
+from ..config import settings
 from ..database import get_db
 from ..deps import client_ip, get_current_user
-from ..models import User, utcnow
+from ..models import User, UsernameAlias, utcnow
+from ..profile import AVATARS, THEMES
 from ..security import hash_password, verify_password
 from ..templating import flash, render
 from ..utils import validate_email, validate_password, validate_username
@@ -48,16 +52,21 @@ def register(
                       error=str(e), form={"username": username, "email": email})
 
     exists = db.scalar(select(User).where(or_(User.username == username, User.email == email)))
+    if not exists:  # previous usernames of other people stay reserved
+        exists = db.get(UsernameAlias, username)
     if exists:
         return render(request, "register.html", status_code=400,
                       error="That username or email is already registered.",
                       form={"username": username, "email": email})
 
+    cookie_theme = request.cookies.get("theme")
     user = User(
         username=username,
         email=email,
         password_hash=hash_password(password),
         last_login_at=utcnow(),
+        avatar=secrets.choice(AVATARS),
+        theme=cookie_theme if cookie_theme in THEMES else "system",
     )
     db.add(user)
     db.commit()
@@ -92,7 +101,10 @@ def login(
     db.commit()
     request.session.clear()
     request.session["user_id"] = user.id
-    return RedirectResponse("/dashboard", status_code=303)
+    response = RedirectResponse("/dashboard", status_code=303)
+    response.set_cookie("theme", user.theme, max_age=365 * 24 * 3600, httponly=True,
+                        samesite="lax", secure=settings.https_only)
+    return response
 
 
 @router.post("/logout")

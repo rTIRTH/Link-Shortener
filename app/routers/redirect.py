@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from ..cache import cache_get, cache_set
 from ..config import settings
 from ..database import get_db
-from ..models import Click, Link, User, as_utc, utcnow
+from ..models import Click, Link, User, UsernameAlias, as_utc, utcnow
 from ..utils import parse_device
 from .dashboard import cache_key
 
@@ -53,6 +53,12 @@ def follow(
         link = db.scalar(
             select(Link).join(User).where(User.username == username, Link.slug == slug)
         )
+        if not link:  # maybe the owner renamed themselves: old usernames still work
+            link = db.scalar(
+                select(Link)
+                .join(UsernameAlias, UsernameAlias.user_id == Link.user_id)
+                .where(UsernameAlias.username == username, Link.slug == slug)
+            )
         if not link:
             raise HTTPException(404, "This short link does not exist.")
         expires = as_utc(link.expires_at) if link.expires_at else None
