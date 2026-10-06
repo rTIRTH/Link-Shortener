@@ -77,43 +77,12 @@
           {% if link.expires_at %}
             <small class="block">{{ 'ended' if row.status == 'expired' else 'ends' }} <time data-utc="{{ link.expires_at|utc_iso }}">{{ link.expires_at|utc_text }}</time></small>
           {% endif %}
-          <button type="button" class="btn small ghost toggle" data-toggle-settings="settings-{{ link.id }}"
-                  aria-expanded="false" aria-controls="settings-{{ link.id }}">Schedule &amp; password</button>
         </td>
         <td>
           <div class="btn-row">
-            <a class="btn small" href="/dashboard/links/{{ link.id }}/edit">Edit</a>
+            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}/edit">Edit</a>
             <a class="btn small ghost" href="/dashboard/links/{{ link.id }}">Stats</a>
           </div>
-        </td>
-      </tr>
-      <tr class="settings-row" id="settings-{{ link.id }}" hidden>
-        <td></td>
-        <td colspan="6">
-          <form method="post" action="/dashboard/links/{{ link.id }}/settings" class="quick">
-            <div class="more-grid">
-              <label>Starts at <small>(your local time, empty = no limit)</small>
-                <input type="datetime-local" name="starts_at" value="{{ link.starts_at|utc_input }}" data-utc="{{ link.starts_at|utc_iso }}">
-                <input type="hidden" name="starts_at_utc">
-              </label>
-              <label>Ends at <small>(your local time, empty = no limit)</small>
-                <input type="datetime-local" name="expires_at" value="{{ link.expires_at|utc_input }}" data-utc="{{ link.expires_at|utc_iso }}">
-                <input type="hidden" name="expires_at_utc">
-              </label>
-              <label>Password {% if row.locked %}<small>(one is set)</small>{% else %}<small>(none set)</small>{% endif %}
-                <select name="password_action">
-                  <option value="keep" selected>{{ 'Keep the current password' if row.locked else 'No password' }}</option>
-                  <option value="set">{{ 'Change the password' if row.locked else 'Set a password' }}</option>
-                  {% if row.locked %}<option value="remove">Remove the password</option>{% endif %}
-                </select>
-                <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="New password (4-72 characters)">
-              </label>
-            </div>
-            <div class="btn-row">
-              <button class="btn small" type="submit">Save</button>
-              <button class="btn small ghost" type="button" data-close-settings="settings-{{ link.id }}">Cancel</button>
-            </div>
-          </form>
         </td>
       </tr>
     {% endfor %}

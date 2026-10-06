@@ -362,35 +362,3 @@ def edit_save(
     forget_link(db, user, link.slug)  # visitors must see the new settings straight away
     flash(request, "Link updated.", "success")
     return RedirectResponse("/dashboard", status_code=303)
-
-
-@router.post("/links/{link_id}/settings")
-def quick_settings(
-    request: Request,
-    link_id: int,
-    starts_at: str = Form(""),
-    starts_at_utc: str = Form(""),
-    expires_at: str = Form(""),
-    expires_at_utc: str = Form(""),
-    password_action: str = Form("keep"),
-    new_password: str = Form(""),
-    user: User = Depends(require_user),
-    db: Session = Depends(get_db),
-):
-    """Change only the schedule and password, straight from the dashboard table."""
-    link = get_owned_link(db, user, link_id)
-    try:
-        start, end, new_hash = read_settings(
-            link, starts_at, starts_at_utc, expires_at, expires_at_utc,
-            password_action, new_password,
-        )
-    except ValueError as e:
-        flash(request, f"{e} Nothing was changed.", "error")
-        return RedirectResponse("/dashboard", status_code=303)
-    link.starts_at = start
-    link.expires_at = end
-    link.password_hash = new_hash
-    db.commit()
-    forget_link(db, user, link.slug)
-    flash(request, f"Saved settings for {link.slug}.", "success")
-    return RedirectResponse("/dashboard", status_code=303)

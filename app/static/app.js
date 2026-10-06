@@ -33,23 +33,15 @@
     });
   });
 
-  // 4) dashboard: open/close the "Schedule & password" panel under a link
-  function setPanel(id, open) {
-    var row = document.getElementById(id);
-    if (!row) return;
-    row.toggleAttribute('hidden', !open);
-    document.querySelectorAll('[data-toggle-settings="' + id + '"]').forEach(function (b) {
-      b.setAttribute('aria-expanded', String(open));
-    });
-  }
-  document.querySelectorAll('[data-toggle-settings]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var id = btn.getAttribute('data-toggle-settings');
-      var row = document.getElementById(id);
-      setPanel(id, row && row.hasAttribute('hidden'));
-    });
-  });
-  document.querySelectorAll('[data-close-settings]').forEach(function (btn) {
-    btn.addEventListener('click', function () { setPanel(btn.getAttribute('data-close-settings'), false); });
+  // 4) edit page: only show the "new password" box when "set/change" is selected
+  document.querySelectorAll('.new-password').forEach(function (box) {
+    var form = box.closest('form');
+    var radios = form.querySelectorAll('input[name="password_action"]');
+    function sync() {
+      var chosen = form.querySelector('input[name="password_action"]:checked');
+      box.hidden = !chosen || chosen.value !== 'set';
+    }
+    radios.forEach(function (r) { r.addEventListener('change', sync); });
+    sync();
   });
 })();

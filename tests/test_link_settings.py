@@ -304,23 +304,23 @@ def test_script_is_versioned(client):
     assert re.search(r'/static/app\.js\?v=[0-9a-f]{10}"', client.get("/login").text)
 
 
-# ---------- inline settings panel on the dashboard ----------
+# ---------- dashboard table ----------
 
-def quick(client, link_id=1, **fields):
-    data = {"password_action": "keep", **fields}
-    return client.post(f"/dashboard/links/{link_id}/settings", data=data)
-
-
-def test_dashboard_has_buttons_and_panel_for_each_link(alice):
+def test_edit_and_stats_are_matching_buttons_on_one_row(alice):
     make(alice, "one1")
-    make(alice, "two2", link_password="open-sesame")
     page = alice.get("/dashboard").text
-    assert page.count('class="settings-row"') == 2
-    assert page.count("/settings") == 2
-    assert 'class="btn small ghost" href="/dashboard/links/1"' in page  # Stats button
-    assert 'class="btn small" href="/dashboard/links/1/edit"' in page  # Edit button
-    assert "Remove the password" in page  # only offered for the protected link
-    assert page.count("Remove the password") == 1
+    row = page[page.index('<div class="btn-row">'):]
+    row = row[:row.index("</div>")]
+    assert 'class="btn small ghost" href="/dashboard/links/1/edit">Edit<' in row
+    assert 'class="btn small ghost" href="/dashboard/links/1">Stats<' in row
+    assert row.index("Edit") < row.index("Stats")
+
+
+def test_dashboard_has_no_inline_settings_panel(alice):
+    make(alice, "one1")
+    page = alice.get("/dashboard").text
+    assert "Schedule &amp; password" not in page and "settings-row" not in page
+    assert alice.post("/dashboard/links/1/settings", data={}).status_code in (404, 405)
 
 
 def test_dashboard_never_nests_forms(alice):
@@ -350,68 +350,19 @@ def test_row_checkboxes_belong_to_the_bulk_form(alice):
     assert 'name="ids" value="1" form="bulk"' in alice.get("/dashboard").text
 
 
-def test_quick_settings_sets_schedule_and_password(alice, app):
+def test_edit_page_offers_set_or_no_password_when_none_is_set(alice):
     make(alice)
-    r = quick(alice, starts_at_utc=iso(timedelta(days=1)), expires_at_utc=iso(timedelta(days=4)),
-              password_action="set", new_password="quick-pass")
-    assert r.status_code == 303 and r.headers["location"] == "/dashboard"
-    row = link_row(app)
-    assert row.starts_at and row.expires_at and row.password_hash
-    assert alice.get("/alice/lnk").status_code == 403  # not started yet
+    page = alice.get("/dashboard/links/1/edit").text
+    assert "No password" in page and "Set a password" in page
+    assert "Change the password" not in page and "Remove the password" not in page
 
 
-def test_quick_settings_leaves_destination_alone(alice, app):
-    make(alice)
-    quick(alice, password_action="set", new_password="quick-pass")
-    assert link_row(app).original_url == URL
-
-
-def test_quick_settings_change_and_remove_password(alice):
-    make(alice, link_password="old-pass")
-    quick(alice, password_action="set", new_password="new-pass")
-    assert alice.post("/alice/lnk", data={"password": "old-pass"}).status_code == 403
-    assert alice.post("/alice/lnk", data={"password": "new-pass"}).status_code == 302
-    quick(alice, password_action="remove")
-    assert alice.get("/alice/lnk").status_code == 302
-
-
-def test_quick_settings_keep_leaves_password_but_clears_empty_dates(alice, app):
-    make(alice, link_password="old-pass", expires_at_utc=iso(timedelta(days=3)))
-    quick(alice)  # keep password, dates left empty
-    row = link_row(app)
-    assert row.password_hash and row.expires_at is None
-
-
-def test_quick_settings_clears_the_cache(alice, redis_fake):
-    make(alice)
-    alice.get("/alice/lnk")
-    assert redis_fake.get("link:alice:lnk")
-    quick(alice, password_action="set", new_password="quick-pass")
-    assert redis_fake.get("link:alice:lnk") is None
-    assert alice.get("/alice/lnk").status_code == 200  # password page right away
-
-
-def test_quick_settings_rejects_bad_input_and_changes_nothing(alice, app):
-    make(alice, link_password="old-pass")
-    quick(alice, password_action="set", new_password="x")
-    quick(alice, password_action="explode")
-    quick(alice, starts_at_utc=iso(timedelta(days=3)), expires_at_utc=iso(timedelta(days=1)))
-    quick(alice, starts_at="garbage")
-    row = link_row(app)
-    assert row.starts_at is None and row.expires_at is None
-    assert alice.post("/alice/lnk", data={"password": "old-pass"}).status_code == 302
-    assert "Nothing was changed" in alice.get("/dashboard").text
-
-
-def test_quick_settings_only_for_the_owner(alice, make_client):
-    from tests.conftest import register
-
-    bob = make_client()
-    register(bob, "bob")
-    make(bob, "bobs")
-    assert quick(alice, password_action="set", new_password="hacked!!").status_code == 404
-    assert bob.get("/bob/bobs").status_code == 302  # still open
-    assert quick(make_client()).status_code == 303  # logged out: sent to the login page
+def test_edit_page_offers_change_or_remove_when_password_is_set(alice):
+    make(alice, link_password="open-sesame")
+    page = alice.get("/dashboard/links/1/edit").text
+    assert "Keep the current password" in page
+    assert "Change the password" in page and "Remove the password" in page
+    assert "Set a password" not in page
 
 
 # ---------- table layout: QR button and column order ----------

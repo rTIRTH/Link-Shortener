@@ -35,18 +35,32 @@
       {% if link.password_hash %}
         <p class="muted">This link is <b>password protected</b>. Visitors must enter the password before they are sent to the destination.</p>
       {% else %}
-        <p class="muted">This link is open to everyone. Add a password if only some people should use it.</p>
+        <p class="muted">This link has <b>no password</b>, so anyone with the link can open it.</p>
       {% endif %}
-      <fieldset class="stack">
+      <fieldset class="choices">
         <legend class="sr-only">Password options</legend>
-        <label class="inline-choice"><input type="radio" name="password_action" value="keep" checked> {{ 'Keep the current password' if link.password_hash else 'No password' }}</label>
-        <label class="inline-choice"><input type="radio" name="password_action" value="set"> {{ 'Change the password' if link.password_hash else 'Set a password' }}</label>
-        <label>New password
-          <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="4-72 characters">
-          <small>Only used when "{{ 'Change' if link.password_hash else 'Set' }}" is selected.</small>
-        </label>
         {% if link.password_hash %}
-        <label class="inline-choice"><input type="radio" name="password_action" value="remove"> Remove the password</label>
+          <label class="choice"><input type="radio" name="password_action" value="keep" checked>
+            <span><b>Keep the current password</b><small>Nothing changes.</small></span></label>
+          <label class="choice"><input type="radio" name="password_action" value="set">
+            <span><b>Change the password</b><small>Replace it with a new one.</small></span></label>
+          <div class="new-password">
+            <label>New password
+              <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="4-72 characters">
+            </label>
+          </div>
+          <label class="choice"><input type="radio" name="password_action" value="remove">
+            <span><b>Remove the password</b><small>Anyone with the link can open it.</small></span></label>
+        {% else %}
+          <label class="choice"><input type="radio" name="password_action" value="keep" checked>
+            <span><b>No password</b><small>Anyone with the link can open it.</small></span></label>
+          <label class="choice"><input type="radio" name="password_action" value="set">
+            <span><b>Set a password</b><small>Visitors must enter it first.</small></span></label>
+          <div class="new-password">
+            <label>New password
+              <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="4-72 characters">
+            </label>
+          </div>
         {% endif %}
       </fieldset>
     </section>
