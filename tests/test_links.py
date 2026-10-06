@@ -9,7 +9,7 @@ from tests.conftest import register
 
 def create(client, url="https://example.com/long/page", slug="", expires_on=""):
     return client.post("/dashboard/links", data={
-        "original_url": url, "slug": slug, "expires_on": expires_on})
+        "original_url": url, "slug": slug, "expires_at": expires_on})
 
 
 def test_create_and_redirect(alice):

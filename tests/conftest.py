@@ -45,3 +45,10 @@ def make_client(app):
     def _make():
         return TestClient(app, follow_redirects=False)
     return _make
+
+
+@pytest.fixture(autouse=True)
+def _reset_local_rate_limits():
+    cache._local.clear()
+    yield
+    cache._local.clear()

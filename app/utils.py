@@ -2,6 +2,7 @@ import ipaddress
 import re
 import secrets
 import string
+from datetime import datetime, time, timezone
 from urllib.parse import urlparse
 
 BASE62 = string.ascii_letters + string.digits
@@ -96,3 +97,33 @@ def parse_device(user_agent: str | None) -> str:
 def csv_safe(value: str) -> str:
     """Stop spreadsheet formula injection when the CSV is opened in Excel."""
     return "'" + value if value[:1] in ("=", "+", "-", "@") else value
+
+
+def parse_moment(utc_value: str, visible_value: str, *, end_of_day: bool = False):
+    """Turn a form value into an aware UTC datetime (or None when blank).
+
+    The browser sends the exact moment in UTC (``utc_value``). Without JavaScript we only
+    get the visible field, which we read as UTC. A bare date means the whole day: the start
+    of it for a start time, the end of it for an end time.
+    """
+    raw = (utc_value or "").strip() or (visible_value or "").strip()
+    if not raw:
+        return None
+    try:
+        moment = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        raise ValueError("That date or time is not valid.") from None
+    if "T" not in raw and " " not in raw:  # date only
+        moment = datetime.combine(moment.date(), time(23, 59, 59) if end_of_day else time.min)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    moment = moment.astimezone(timezone.utc)
+    if not 2000 <= moment.year <= 2100:
+        raise ValueError("That date or time is not valid.")
+    return moment
+
+
+def validate_link_password(password: str) -> str:
+    if len(password) < 4 or len(password.encode()) > 72:
+        raise ValueError("A link password must be 4-72 characters.")
+    return password

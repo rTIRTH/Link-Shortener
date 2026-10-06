@@ -1,4 +1,5 @@
 import hashlib
+from datetime import timezone
 from pathlib import Path
 
 from fastapi import Request
@@ -11,9 +12,21 @@ BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 # Changes whenever style.css changes, so browsers never keep showing an old stylesheet.
-templates.env.globals["css_version"] = hashlib.md5(
-    (BASE_DIR / "static" / "style.css").read_bytes()
-).hexdigest()[:10]
+for _asset in ("css", "js"):
+    _file = "style.css" if _asset == "css" else "app.js"
+    templates.env.globals[f"{_asset}_version"] = hashlib.md5(
+        (BASE_DIR / "static" / _file).read_bytes()
+    ).hexdigest()[:10]
+
+
+def _utc(dt):
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+
+# Times are stored in UTC. The page shows the UTC text, then app.js swaps in local time.
+templates.env.filters["utc_iso"] = lambda dt: _utc(dt).isoformat() if dt else ""
+templates.env.filters["utc_text"] = lambda dt: _utc(dt).strftime("%d %b %Y %H:%M UTC") if dt else ""
+templates.env.filters["utc_input"] = lambda dt: _utc(dt).strftime("%Y-%m-%dT%H:%M") if dt else ""
 
 
 def flash(request: Request, message: str, category: str = "info") -> None:

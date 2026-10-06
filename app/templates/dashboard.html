@@ -12,10 +12,23 @@
     <label>Custom alias <small>(optional)</small>
       <input name="slug" placeholder="my-portfolio" maxlength="32">
     </label>
-    <label>Expires on <small>(optional)</small>
-      <input type="date" name="expires_on">
-    </label>
     <button class="btn" type="submit">Shorten</button>
+    <details class="more">
+      <summary>More options: schedule and password</summary>
+      <div class="more-grid">
+        <label>Starts at <small>(optional, your local time)</small>
+          <input type="datetime-local" name="starts_at">
+          <input type="hidden" name="starts_at_utc">
+        </label>
+        <label>Ends at <small>(optional, your local time)</small>
+          <input type="datetime-local" name="expires_at">
+          <input type="hidden" name="expires_at_utc">
+        </label>
+        <label>Password <small>(optional)</small>
+          <input type="password" name="link_password" maxlength="72" autocomplete="new-password" placeholder="Visitors must enter it">
+        </label>
+      </div>
+    </details>
   </form>
 </section>
 
@@ -33,17 +46,30 @@
     <table>
       <thead><tr>
         <th><input type="checkbox" id="all" aria-label="Select all links"></th>
-        <th>Short link</th><th>Destination</th><th class="num">Clicks</th><th>Expires</th><th></th>
+        <th>Short link</th><th>Destination</th><th class="num">Clicks</th><th>Status</th><th></th>
       </tr></thead>
       <tbody>
       {% for row in rows %}
         <tr>
           <td><input type="checkbox" name="ids" value="{{ row.link.id }}" class="pick" aria-label="Select {{ row.link.slug }}"></td>
-          <td><a class="mono" href="{{ row.short_url }}" target="_blank" rel="noopener">{{ row.short_url|replace('https://','')|replace('http://','') }}</a></td>
+          <td>
+            <a class="mono" href="{{ row.short_url }}" target="_blank" rel="noopener">{{ row.short_url|replace('https://','')|replace('http://','') }}</a>
+            {% if row.locked %}<span class="tag lock" title="Visitors need a password">Password</span>{% endif %}
+          </td>
           <td class="dest" title="{{ row.link.original_url }}">{{ row.link.original_url }}</td>
           <td class="num">{{ row.link.click_count }}</td>
-          <td>{% if row.link.expires_at %}{{ row.link.expires_at.strftime('%d %b %Y') }}{% if row.expired %} <span class="tag">expired</span>{% endif %}{% else %}<span class="muted">never</span>{% endif %}</td>
-          <td><a href="/dashboard/links/{{ row.link.id }}">Stats</a></td>
+          <td>
+            {% if row.status == 'expired' %}<span class="tag bad">Expired</span>
+            {% elif row.status == 'scheduled' %}<span class="tag warn">Scheduled</span>
+            {% else %}<span class="tag ok">Active</span>{% endif %}
+            {% if row.link.starts_at and row.status == 'scheduled' %}
+              <small class="block">starts <time data-utc="{{ row.link.starts_at|utc_iso }}">{{ row.link.starts_at|utc_text }}</time></small>
+            {% endif %}
+            {% if row.link.expires_at %}
+              <small class="block">{{ 'ended' if row.status == 'expired' else 'ends' }} <time data-utc="{{ row.link.expires_at|utc_iso }}">{{ row.link.expires_at|utc_text }}</time></small>
+            {% endif %}
+          </td>
+          <td class="actions"><a href="/dashboard/links/{{ row.link.id }}">Stats</a> · <a href="/dashboard/links/{{ row.link.id }}/edit">Edit</a></td>
         </tr>
       {% endfor %}
       </tbody>

@@ -50,7 +50,9 @@ class Link(Base):
     slug: Mapped[str] = mapped_column(String(32))
     original_url: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     click_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
     owner: Mapped[User] = relationship(back_populates="links")

@@ -6,6 +6,13 @@
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
   <p class="dest-full">Redirects to <a href="{{ link.original_url }}" target="_blank" rel="noopener">{{ link.original_url }}</a></p>
   <p class="muted">{{ link.click_count }} total click{{ '' if link.click_count == 1 else 's' }} · {{ recent_total }} in the last 14 days</p>
+  <p>
+    <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad'}[status] }}">{{ status|capitalize }}</span>
+    {% if link.password_hash %}<span class="tag lock">Password protected</span>{% endif %}
+    {% if link.starts_at %}<small class="muted">starts <time data-utc="{{ link.starts_at|utc_iso }}">{{ link.starts_at|utc_text }}</time></small>{% endif %}
+    {% if link.expires_at %}<small class="muted">ends <time data-utc="{{ link.expires_at|utc_iso }}">{{ link.expires_at|utc_text }}</time></small>{% endif %}
+  </p>
+  <p><a class="btn small" href="/dashboard/links/{{ link.id }}/edit">Edit link</a></p>
 </section>
 
 <section class="grid2">

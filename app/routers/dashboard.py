@@ -2,7 +2,7 @@ import csv
 import io
 import zipfile
 from collections import Counter
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 
 import qrcode
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
@@ -16,8 +16,16 @@ from ..config import settings
 from ..database import get_db
 from ..deps import require_user
 from ..models import Click, Link, User, UsernameAlias, as_utc, utcnow
+from ..security import hash_password
 from ..templating import flash, render
-from ..utils import csv_safe, generate_slug, validate_slug, validate_url
+from ..utils import (
+    csv_safe,
+    generate_slug,
+    parse_moment,
+    validate_link_password,
+    validate_slug,
+    validate_url,
+)
 
 router = APIRouter(prefix="/dashboard")
 
@@ -31,6 +39,25 @@ def forget_link(db: Session, user: User, slug: str) -> None:
     old = db.scalars(select(UsernameAlias.username).where(UsernameAlias.user_id == user.id))
     for name in [user.username, *old]:
         cache_delete(cache_key(name, slug))
+
+
+def link_status(link: Link, now: datetime | None = None) -> str:
+    """'expired', 'scheduled' (not started yet) or 'active'."""
+    now = now or utcnow()
+    if link.expires_at and as_utc(link.expires_at) <= now:
+        return "expired"
+    if link.starts_at and as_utc(link.starts_at) > now:
+        return "scheduled"
+    return "active"
+
+
+def read_schedule(starts_at: str, starts_at_utc: str, expires_at: str, expires_at_utc: str):
+    """Parse the start/end form fields. Raises ValueError with a friendly message."""
+    start = parse_moment(starts_at_utc, starts_at)
+    end = parse_moment(expires_at_utc, expires_at, end_of_day=True)
+    if start and end and start >= end:
+        raise ValueError("The end time must be after the start time.")
+    return start, end
 
 
 def short_url(request: Request, user: User, link: Link) -> str:
@@ -58,7 +85,8 @@ def dashboard(request: Request, user: User = Depends(require_user), db: Session 
         {
             "link": link,
             "short_url": short_url(request, user, link),
-            "expired": bool(link.expires_at and as_utc(link.expires_at) <= utcnow()),
+            "status": link_status(link),
+            "locked": bool(link.password_hash),
         }
         for link in links
     ]
@@ -71,7 +99,11 @@ def create_link(
     request: Request,
     original_url: str = Form(...),
     slug: str = Form(""),
-    expires_on: str = Form(""),
+    starts_at: str = Form(""),
+    starts_at_utc: str = Form(""),
+    expires_at: str = Form(""),
+    expires_at_utc: str = Form(""),
+    link_password: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -86,15 +118,13 @@ def create_link(
     except ValueError as e:
         return back(str(e))
 
-    expires_at = None
-    if expires_on.strip():
-        try:
-            day = date.fromisoformat(expires_on.strip())
-        except ValueError:
-            return back("Expiry date is not valid.")
-        expires_at = datetime.combine(day, time(23, 59, 59), tzinfo=timezone.utc)
-        if expires_at <= utcnow():
-            return back("Expiry date must be in the future.")
+    try:
+        start, end = read_schedule(starts_at, starts_at_utc, expires_at, expires_at_utc)
+        if end and end <= utcnow():
+            raise ValueError("The end time must be in the future.")
+        pw_hash = hash_password(validate_link_password(link_password)) if link_password else None
+    except ValueError as e:
+        return back(str(e))
 
     custom = slug.strip()
     if custom:
@@ -116,7 +146,14 @@ def create_link(
         else:
             return back("Could not generate a unique code. Try again.")
 
-    link = Link(user_id=user.id, slug=slug_value, original_url=url, expires_at=expires_at)
+    link = Link(
+        user_id=user.id,
+        slug=slug_value,
+        original_url=url,
+        starts_at=start,
+        expires_at=end,
+        password_hash=pw_hash,
+    )
     db.add(link)
     try:
         db.commit()
@@ -150,7 +187,10 @@ def bulk_delete(
 def export_csv(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
     buf = io.StringIO()
     writer = csv.writer(buf)
-    writer.writerow(["short_url", "slug", "original_url", "clicks", "created_at", "expires_at"])
+    writer.writerow([
+        "short_url", "slug", "original_url", "clicks", "created_at",
+        "starts_at", "expires_at", "password_protected",
+    ])
     for link in user_links(db, user):
         writer.writerow([
             short_url(request, user, link),
@@ -158,7 +198,9 @@ def export_csv(request: Request, user: User = Depends(require_user), db: Session
             csv_safe(link.original_url),
             link.click_count,
             as_utc(link.created_at).isoformat(),
+            as_utc(link.starts_at).isoformat() if link.starts_at else "",
             as_utc(link.expires_at).isoformat() if link.expires_at else "",
+            "yes" if link.password_hash else "no",
         ])
     return Response(
         buf.getvalue(),
@@ -227,6 +269,7 @@ def link_detail(
         request, "link_detail.html", user,
         link=link,
         short_url=short_url(request, user, link),
+        status=link_status(link),
         series=series,
         recent_total=len(clicks),
         devices=Counter(c.device for c in clicks).most_common(),
@@ -244,4 +287,61 @@ def delete_one(
     db.delete(link)
     db.commit()
     flash(request, "Link deleted.", "success")
+    return RedirectResponse("/dashboard", status_code=303)
+
+
+@router.get("/links/{link_id}/edit")
+def edit_page(
+    request: Request, link_id: int,
+    user: User = Depends(require_user), db: Session = Depends(get_db),
+):
+    link = get_owned_link(db, user, link_id)
+    return render(
+        request, "edit_link.html", user,
+        link=link, short_url=short_url(request, user, link), status=link_status(link),
+    )
+
+
+@router.post("/links/{link_id}/edit")
+def edit_save(
+    request: Request,
+    link_id: int,
+    original_url: str = Form(...),
+    starts_at: str = Form(""),
+    starts_at_utc: str = Form(""),
+    expires_at: str = Form(""),
+    expires_at_utc: str = Form(""),
+    password_action: str = Form("keep"),
+    new_password: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    link = get_owned_link(db, user, link_id)
+    edit_url = f"/dashboard/links/{link.id}/edit"
+
+    def back(message: str):
+        flash(request, message, "error")
+        return RedirectResponse(edit_url, status_code=303)
+
+    try:
+        url = validate_url(original_url, blocked_hosts=(request.url.hostname or "",))
+        start, end = read_schedule(starts_at, starts_at_utc, expires_at, expires_at_utc)
+        if password_action == "set":
+            new_hash = hash_password(validate_link_password(new_password))
+        elif password_action == "remove":
+            new_hash = None
+        elif password_action == "keep":
+            new_hash = link.password_hash
+        else:
+            raise ValueError("Unknown password option.")
+    except ValueError as e:
+        return back(str(e))
+
+    link.original_url = url
+    link.starts_at = start
+    link.expires_at = end
+    link.password_hash = new_hash
+    db.commit()
+    forget_link(db, user, link.slug)  # visitors must see the new settings straight away
+    flash(request, "Link updated.", "success")
     return RedirectResponse("/dashboard", status_code=303)

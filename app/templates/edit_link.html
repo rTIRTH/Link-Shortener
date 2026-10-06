@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Edit link · Link Shortener{% endblock %}
+{% block content %}
+<div class="account">
+  <p><a href="/dashboard">← All links</a> · <a href="/dashboard/links/{{ link.id }}">Stats</a></p>
+  <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
+  <p class="muted">The short address stays the same. You can change where it goes, when it works, and who can open it.</p>
+
+  <form method="post" action="/dashboard/links/{{ link.id }}/edit">
+    <section class="panel">
+      <h2>Destination</h2>
+      <label>Long URL
+        <input name="original_url" value="{{ link.original_url }}" required>
+      </label>
+    </section>
+
+    <section class="panel">
+      <h2>Schedule</h2>
+      <p class="muted">Before the start time and after the end time, visitors see a message instead of being redirected. Times are in your local time. Leave a box empty for no limit.</p>
+      <div class="more-grid">
+        <label>Starts at
+          <input type="datetime-local" name="starts_at" value="{{ link.starts_at|utc_input }}" data-utc="{{ link.starts_at|utc_iso }}">
+          <input type="hidden" name="starts_at_utc">
+        </label>
+        <label>Ends at
+          <input type="datetime-local" name="expires_at" value="{{ link.expires_at|utc_input }}" data-utc="{{ link.expires_at|utc_iso }}">
+          <input type="hidden" name="expires_at_utc">
+        </label>
+      </div>
+      <p class="muted">Right now this link is <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad'}[status] }}">{{ status|capitalize }}</span></p>
+    </section>
+
+    <section class="panel">
+      <h2>Password</h2>
+      {% if link.password_hash %}
+        <p class="muted">This link is <b>password protected</b>. Visitors must enter the password before they are sent to the destination.</p>
+      {% else %}
+        <p class="muted">This link is open to everyone. Add a password if only some people should use it.</p>
+      {% endif %}
+      <fieldset class="stack">
+        <legend class="sr-only">Password options</legend>
+        <label class="inline-choice"><input type="radio" name="password_action" value="keep" checked> {{ 'Keep the current password' if link.password_hash else 'No password' }}</label>
+        <label class="inline-choice"><input type="radio" name="password_action" value="set"> {{ 'Change the password' if link.password_hash else 'Set a password' }}</label>
+        <label>New password
+          <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="4-72 characters">
+          <small>Only used when "{{ 'Change' if link.password_hash else 'Set' }}" is selected.</small>
+        </label>
+        {% if link.password_hash %}
+        <label class="inline-choice"><input type="radio" name="password_action" value="remove"> Remove the password</label>
+        {% endif %}
+      </fieldset>
+    </section>
+
+    <button class="btn" type="submit">Save changes</button>
+    <a class="btn ghost" href="/dashboard">Cancel</a>
+  </form>
+</div>
+{% endblock %}
