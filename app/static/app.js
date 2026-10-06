@@ -32,4 +32,24 @@
       });
     });
   });
+
+  // 4) dashboard: open/close the "Schedule & password" panel under a link
+  function setPanel(id, open) {
+    var row = document.getElementById(id);
+    if (!row) return;
+    row.toggleAttribute('hidden', !open);
+    document.querySelectorAll('[data-toggle-settings="' + id + '"]').forEach(function (b) {
+      b.setAttribute('aria-expanded', String(open));
+    });
+  }
+  document.querySelectorAll('[data-toggle-settings]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id = btn.getAttribute('data-toggle-settings');
+      var row = document.getElementById(id);
+      setPanel(id, row && row.hasAttribute('hidden'));
+    });
+  });
+  document.querySelectorAll('[data-close-settings]').forEach(function (btn) {
+    btn.addEventListener('click', function () { setPanel(btn.getAttribute('data-close-settings'), false); });
+  });
 })();

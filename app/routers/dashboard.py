@@ -60,6 +60,23 @@ def read_schedule(starts_at: str, starts_at_utc: str, expires_at: str, expires_a
     return start, end
 
 
+def read_settings(
+    link: Link, starts_at: str, starts_at_utc: str, expires_at: str, expires_at_utc: str,
+    password_action: str, new_password: str,
+):
+    """Schedule + password choice from a form -> (start, end, new_password_hash)."""
+    start, end = read_schedule(starts_at, starts_at_utc, expires_at, expires_at_utc)
+    if password_action == "set":
+        new_hash = hash_password(validate_link_password(new_password))
+    elif password_action == "remove":
+        new_hash = None
+    elif password_action == "keep":
+        new_hash = link.password_hash
+    else:
+        raise ValueError("Unknown password option.")
+    return start, end, new_hash
+
+
 def short_url(request: Request, user: User, link: Link) -> str:
     base = settings.base_url or str(request.base_url).rstrip("/")
     return f"{base}/{user.username}/{link.slug}"
@@ -325,15 +342,10 @@ def edit_save(
 
     try:
         url = validate_url(original_url, blocked_hosts=(request.url.hostname or "",))
-        start, end = read_schedule(starts_at, starts_at_utc, expires_at, expires_at_utc)
-        if password_action == "set":
-            new_hash = hash_password(validate_link_password(new_password))
-        elif password_action == "remove":
-            new_hash = None
-        elif password_action == "keep":
-            new_hash = link.password_hash
-        else:
-            raise ValueError("Unknown password option.")
+        start, end, new_hash = read_settings(
+            link, starts_at, starts_at_utc, expires_at, expires_at_utc,
+            password_action, new_password,
+        )
     except ValueError as e:
         return back(str(e))
 
@@ -344,4 +356,36 @@ def edit_save(
     db.commit()
     forget_link(db, user, link.slug)  # visitors must see the new settings straight away
     flash(request, "Link updated.", "success")
+    return RedirectResponse("/dashboard", status_code=303)
+
+
+@router.post("/links/{link_id}/settings")
+def quick_settings(
+    request: Request,
+    link_id: int,
+    starts_at: str = Form(""),
+    starts_at_utc: str = Form(""),
+    expires_at: str = Form(""),
+    expires_at_utc: str = Form(""),
+    password_action: str = Form("keep"),
+    new_password: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Change only the schedule and password, straight from the dashboard table."""
+    link = get_owned_link(db, user, link_id)
+    try:
+        start, end, new_hash = read_settings(
+            link, starts_at, starts_at_utc, expires_at, expires_at_utc,
+            password_action, new_password,
+        )
+    except ValueError as e:
+        flash(request, f"{e} Nothing was changed.", "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    link.starts_at = start
+    link.expires_at = end
+    link.password_hash = new_hash
+    db.commit()
+    forget_link(db, user, link.slug)
+    flash(request, f"Saved settings for {link.slug}.", "success")
     return RedirectResponse("/dashboard", status_code=303)
