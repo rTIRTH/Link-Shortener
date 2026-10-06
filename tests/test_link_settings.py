@@ -412,3 +412,37 @@ def test_quick_settings_only_for_the_owner(alice, make_client):
     assert quick(alice, password_action="set", new_password="hacked!!").status_code == 404
     assert bob.get("/bob/bobs").status_code == 302  # still open
     assert quick(make_client()).status_code == 303  # logged out: sent to the login page
+
+
+# ---------- table layout: QR button and column order ----------
+
+def test_table_columns_are_in_the_requested_order(alice):
+    make(alice, "one1")
+    page = alice.get("/dashboard").text
+    head = page[page.index("<thead>"):page.index("</thead>")]
+    order = ["Short link", "Destination", "Clicks", "QR", "Status"]
+    positions = [head.index(f">{name}<") for name in order]
+    assert positions == sorted(positions)
+    row = page[page.index("<tbody>"):]
+    assert row.index("qr-btn") < row.index("tag ok") < row.index("/edit") < row.index("Stats")
+
+
+def test_qr_button_downloads_the_png(alice):
+    make(alice, "one1")
+    page = alice.get("/dashboard").text
+    assert 'href="/dashboard/links/1/qr.png?download=1"' in page
+    assert 'download="one1-qr.png"' in page
+    r = alice.get("/dashboard/links/1/qr.png?download=1")
+    assert r.content.startswith(b"\x89PNG")
+    assert r.headers["content-disposition"] == 'attachment; filename="one1-qr.png"'
+    # the plain URL (used as an image on the stats page) is not forced to download
+    assert "content-disposition" not in alice.get("/dashboard/links/1/qr.png").headers
+
+
+def test_qr_download_is_owner_only(alice, make_client):
+    from tests.conftest import register
+
+    bob = make_client()
+    register(bob, "bob")
+    make(bob, "bobs")
+    assert alice.get("/dashboard/links/1/qr.png?download=1").status_code == 404

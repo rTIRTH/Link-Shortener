@@ -256,11 +256,16 @@ def get_owned_link(db: Session, user: User, link_id: int) -> Link:
 
 @router.get("/links/{link_id}/qr.png")
 def qr_single(
-    request: Request, link_id: int,
+    request: Request, link_id: int, download: bool = Query(False),
     user: User = Depends(require_user), db: Session = Depends(get_db),
 ):
     link = get_owned_link(db, user, link_id)
-    return Response(qr_png_bytes(short_url(request, user, link)), media_type="image/png")
+    headers = {}
+    if download:  # the dashboard button: save the file instead of showing it
+        headers["Content-Disposition"] = f'attachment; filename="{link.slug}-qr.png"'
+    return Response(
+        qr_png_bytes(short_url(request, user, link)), media_type="image/png", headers=headers
+    )
 
 
 @router.get("/links/{link_id}")

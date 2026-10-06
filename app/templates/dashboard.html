@@ -46,7 +46,7 @@
   <table>
     <thead><tr>
       <th><input type="checkbox" id="all" aria-label="Select all links"></th>
-      <th>Short link</th><th>Destination</th><th class="num">Clicks</th><th>Status</th><th></th>
+      <th>Short link</th><th>Destination</th><th class="num">Clicks</th><th>QR</th><th>Status</th><th></th>
     </tr></thead>
     <tbody>
     {% for row in rows %}
@@ -59,6 +59,14 @@
         </td>
         <td class="dest" title="{{ link.original_url }}">{{ link.original_url }}</td>
         <td class="num">{{ link.click_count }}</td>
+        <td>
+          <a class="btn small ghost qr-btn" href="/dashboard/links/{{ link.id }}/qr.png?download=1"
+             download="{{ link.slug }}-qr.png" title="Download QR code" aria-label="Download QR code for {{ link.slug }}">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
+              <path d="M1 1h6v6H1zM3 3v2h2V3zM9 1h6v6H9zM11 3v2h2V3zM1 9h6v6H1zM3 11v2h2v-2zM9 9h2v2H9zM12 9h3v2h-3zM9 12h3v3H9zM13 12h2v3h-2z"/>
+            </svg>QR
+          </a>
+        </td>
         <td>
           {% if row.status == 'expired' %}<span class="tag bad">Expired</span>
           {% elif row.status == 'scheduled' %}<span class="tag warn">Scheduled</span>
@@ -74,14 +82,14 @@
         </td>
         <td>
           <div class="btn-row">
-            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}">Stats</a>
             <a class="btn small" href="/dashboard/links/{{ link.id }}/edit">Edit</a>
+            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}">Stats</a>
           </div>
         </td>
       </tr>
       <tr class="settings-row" id="settings-{{ link.id }}" hidden>
         <td></td>
-        <td colspan="5">
+        <td colspan="6">
           <form method="post" action="/dashboard/links/{{ link.id }}/settings" class="quick">
             <div class="more-grid">
               <label>Starts at <small>(your local time, empty = no limit)</small>
