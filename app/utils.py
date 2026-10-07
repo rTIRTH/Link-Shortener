@@ -99,21 +99,48 @@ def csv_safe(value: str) -> str:
     return "'" + value if value[:1] in ("=", "+", "-", "@") else value
 
 
+_DISPLAY_RE = re.compile(
+    r"(\d{1,2})/(\d{1,2})/(\d{4})"  # DD/MM/YYYY (a weekday name in front is ignored)
+    r"(?:[\s,]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([AaPp][Mm])?)?"  # optional time
+)
+
+
+def _parse_display(raw: str):
+    """Read 'Sunday, 11/10/2026, 09:30:15 PM' (the format shown in the date picker)."""
+    found = _DISPLAY_RE.search(raw)
+    if not found:
+        raise ValueError("That date or time is not valid.")
+    day, month, year, hour, minute, second, ampm = found.groups()
+    if hour is None:
+        return datetime(int(year), int(month), int(day)), True
+    hour = int(hour)
+    if ampm:
+        if not 1 <= hour <= 12:
+            raise ValueError("That date or time is not valid.")
+        hour = hour % 12 + (12 if ampm.lower() == "pm" else 0)
+    return datetime(int(year), int(month), int(day), hour, int(minute), int(second or 0)), False
+
+
 def parse_moment(utc_value: str, visible_value: str, *, end_of_day: bool = False):
     """Turn a form value into an aware UTC datetime (or None when blank).
 
     The browser sends the exact moment in UTC (``utc_value``). Without JavaScript we only
-    get the visible field, which we read as UTC. A bare date means the whole day: the start
-    of it for a start time, the end of it for an end time.
+    get the visible field, which we read as UTC. It may be ISO text or the picker's format
+    (``Sunday, 11/10/2026, 09:30:15 PM``). A bare date means the whole day: the start of it
+    for a start time, the end of it for an end time.
     """
     raw = (utc_value or "").strip() or (visible_value or "").strip()
     if not raw:
         return None
     try:
-        moment = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        try:
+            moment = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            date_only = "T" not in raw and " " not in raw
+        except ValueError:
+            moment, date_only = _parse_display(raw)
     except ValueError:
         raise ValueError("That date or time is not valid.") from None
-    if "T" not in raw and " " not in raw:  # date only
+    if date_only:
         moment = datetime.combine(moment.date(), time(23, 59, 59) if end_of_day else time.min)
     if moment.tzinfo is None:
         moment = moment.replace(tzinfo=timezone.utc)

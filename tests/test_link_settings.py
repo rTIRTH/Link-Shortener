@@ -45,6 +45,21 @@ def test_parse_moment_variants():
             parse_moment("", bad)
 
 
+def test_parse_moment_reads_the_picker_format():
+    got = parse_moment("", "Sunday, 11/10/2026, 09:30:15 PM")
+    parts = (got.year, got.month, got.day, got.hour, got.minute, got.second)
+    assert parts == (2026, 10, 11, 21, 30, 15)
+    assert parse_moment("", "Monday, 12/10/2026, 12:00:00 AM").hour == 0
+    assert parse_moment("", "Monday, 12/10/2026, 12:00:00 PM").hour == 12
+    assert parse_moment("", "12/10/2026, 07:05 pm").minute == 5  # seconds and weekday optional
+    start = parse_moment("", "Monday, 12/10/2026")  # date only: start of day...
+    end = parse_moment("", "Monday, 12/10/2026", end_of_day=True)  # ...or end of day
+    assert (start.hour, end.hour, end.second) == (0, 23, 59)
+    for bad in ("31/02/2026", "Monday, 12/13/2026", "12/10/2026, 13:00:00 PM", "12/10/2026, 10:99"):
+        with pytest.raises(ValueError):
+            parse_moment("", bad)
+
+
 def test_link_password_rules():
     assert validate_link_password("abcd") == "abcd"
     for bad in ("abc", "x" * 73):
@@ -184,7 +199,8 @@ def test_edit_page_shows_current_settings(alice):
     page = alice.get("/dashboard/links/1/edit")
     assert page.status_code == 200
     assert "password protected" in page.text
-    assert 'value="2099-01-02T03:04"' in page.text
+    assert 'value="Friday, 02/01/2099, 03:04:00 AM"' in page.text
+    assert 'data-utc="2099-01-02T03:04:00+00:00"' in page.text
 
 
 def test_edit_destination_updates_redirect_and_cache(alice, redis_fake):
@@ -397,3 +413,39 @@ def test_qr_download_is_owner_only(alice, make_client):
     register(bob, "bob")
     make(bob, "bobs")
     assert alice.get("/dashboard/links/1/qr.png?download=1").status_code == 404
+
+
+# ---------- the date and time picker markup ----------
+
+def test_pages_use_the_picker_not_the_browser_date_box(alice):
+    make(alice)
+    for url in ("/dashboard", "/dashboard/links/1/edit"):
+        page = alice.get(url).text
+        assert page.count("data-dtp") == 2 and 'type="datetime-local"' not in page
+        assert 'name="starts_at_utc"' in page and 'name="expires_at_utc"' in page
+        assert "/static/datetime-picker.js?v=" in page
+    dashboard = alice.get("/dashboard").text
+    assert 'data-kind="start"' in dashboard and 'data-kind="end"' in dashboard
+
+
+def test_picker_text_without_javascript_is_read_as_utc(alice, app):
+    make(alice, starts_at="Monday, 12/10/2099, 06:00:00 PM", expires_at="Tuesday, 13/10/2099")
+    row = link_row(app)
+    assert (row.starts_at.hour, row.starts_at.day) == (18, 12)
+    assert (row.expires_at.hour, row.expires_at.minute, row.expires_at.second) == (23, 59, 59)
+
+
+def test_edit_keeps_dates_when_the_prefilled_text_is_resubmitted(alice, app):
+    make(alice, starts_at_utc="2099-01-02T03:04:05Z", expires_at_utc="2099-02-03T04:05:06Z")
+    page = alice.get("/dashboard/links/1/edit").text
+    start_text, end_text = "Friday, 02/01/2099, 03:04:05 AM", "Tuesday, 03/02/2099, 04:05:06 AM"
+    assert start_text in page and end_text in page
+    edit(alice, starts_at=start_text, expires_at=end_text)
+    row = link_row(app)
+    assert (row.starts_at.hour, row.starts_at.second) == (3, 5)
+    assert (row.expires_at.hour, row.expires_at.second) == (4, 6)
+
+
+def test_bad_picker_text_is_rejected(alice):
+    make(alice, "bad9", starts_at="31/02/2099")
+    assert alice.get("/alice/bad9").status_code == 404

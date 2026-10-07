@@ -12,11 +12,15 @@ BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 # Changes whenever style.css changes, so browsers never keep showing an old stylesheet.
-for _asset in ("css", "js"):
-    _file = "style.css" if _asset == "css" else "app.js"
-    templates.env.globals[f"{_asset}_version"] = hashlib.md5(
-        (BASE_DIR / "static" / _file).read_bytes()
-    ).hexdigest()[:10]
+def _version(*names: str) -> str:
+    digest = hashlib.md5()
+    for name in names:
+        digest.update((BASE_DIR / "static" / name).read_bytes())
+    return digest.hexdigest()[:10]
+
+
+templates.env.globals["css_version"] = _version("style.css")
+templates.env.globals["js_version"] = _version("app.js", "datetime-picker.js")
 
 
 def _utc(dt):
@@ -26,6 +30,9 @@ def _utc(dt):
 # Times are stored in UTC. The page shows the UTC text, then app.js swaps in local time.
 templates.env.filters["utc_iso"] = lambda dt: _utc(dt).isoformat() if dt else ""
 templates.env.filters["utc_text"] = lambda dt: _utc(dt).strftime("%d %b %Y %H:%M UTC") if dt else ""
+templates.env.filters["utc_pretty"] = (
+    lambda dt: _utc(dt).strftime("%A, %d/%m/%Y, %I:%M:%S %p") if dt else ""
+)
 templates.env.filters["utc_input"] = lambda dt: _utc(dt).strftime("%Y-%m-%dT%H:%M") if dt else ""
 
 

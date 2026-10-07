@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Dashboard · Link Shortener{% endblock %}
+{% from "_picker.html" import datetime_picker %}
 {% block content %}
 <section>
   <h1>Your links</h1>
@@ -16,14 +17,8 @@
     <details class="more">
       <summary>More options: schedule and password</summary>
       <div class="more-grid">
-        <label>Starts at <small>(optional, your local time)</small>
-          <input type="datetime-local" name="starts_at">
-          <input type="hidden" name="starts_at_utc">
-        </label>
-        <label>Ends at <small>(optional, your local time)</small>
-          <input type="datetime-local" name="expires_at">
-          <input type="hidden" name="expires_at_utc">
-        </label>
+        {{ datetime_picker("Starts at", "starts_at", "start") }}
+        {{ datetime_picker("Ends at", "expires_at", "end") }}
         <label>Password <small>(optional)</small>
           <input type="password" name="link_password" maxlength="72" autocomplete="new-password" placeholder="Visitors must enter it">
         </label>

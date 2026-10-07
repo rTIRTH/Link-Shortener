@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Edit link · Link Shortener{% endblock %}
+{% from "_picker.html" import datetime_picker %}
 {% block content %}
 <div class="account">
   <p><a href="/dashboard">← All links</a> · <a href="/dashboard/links/{{ link.id }}">Stats</a></p>
@@ -18,14 +19,8 @@
       <h2>Schedule</h2>
       <p class="muted">Before the start time and after the end time, visitors see a message instead of being redirected. Times are in your local time. Leave a box empty for no limit.</p>
       <div class="more-grid">
-        <label>Starts at
-          <input type="datetime-local" name="starts_at" value="{{ link.starts_at|utc_input }}" data-utc="{{ link.starts_at|utc_iso }}">
-          <input type="hidden" name="starts_at_utc">
-        </label>
-        <label>Ends at
-          <input type="datetime-local" name="expires_at" value="{{ link.expires_at|utc_input }}" data-utc="{{ link.expires_at|utc_iso }}">
-          <input type="hidden" name="expires_at_utc">
-        </label>
+        {{ datetime_picker("Starts at", "starts_at", "start", link.starts_at, "empty means no limit") }}
+        {{ datetime_picker("Ends at", "expires_at", "end", link.expires_at, "empty means no limit") }}
       </div>
       <p class="muted">Right now this link is <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad'}[status] }}">{{ status|capitalize }}</span></p>
     </section>
