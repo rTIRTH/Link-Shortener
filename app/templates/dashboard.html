@@ -7,10 +7,10 @@
   <p class="muted">{{ rows|length }} link{{ '' if rows|length == 1 else 's' }} · {{ total_clicks }} total click{{ '' if total_clicks == 1 else 's' }}</p>
 
   <form method="post" action="/dashboard/links" class="create">
-    <label class="grow">Long URL
+    <label class="grow"><span class="lbl">Long URL</span>
       <input name="original_url" placeholder="https://example.com/a/very/long/page" required>
     </label>
-    <label>Custom alias <small>(optional)</small>
+    <label><span class="lbl">Custom alias <small>(optional)</small></span>
       <input name="slug" placeholder="my-portfolio" maxlength="32">
     </label>
     <button class="btn" type="submit">Shorten</button>
@@ -19,10 +19,13 @@
       <div class="more-grid">
         {{ datetime_picker("Starts at", "starts_at", "start") }}
         {{ datetime_picker("Ends at", "expires_at", "end") }}
-        <label>Password <small>(optional)</small>
-          <input type="password" name="link_password" maxlength="72" autocomplete="new-password" placeholder="Visitors must enter it">
-        </label>
+        <div class="field">
+          <label for="link_password">Password <small>(optional)</small></label>
+          <input type="password" id="link_password" name="link_password" maxlength="72"
+                 autocomplete="new-password" placeholder="Visitors must enter it">
+        </div>
       </div>
+      <p class="field-note">Times use your local time. Leave a box empty for no limit.</p>
     </details>
   </form>
 </section>

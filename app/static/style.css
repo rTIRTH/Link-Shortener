@@ -27,7 +27,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
 a { color: var(--accent); }
-main { max-width: 960px; margin: 0 auto; padding: 24px 20px 64px; }
+main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 64px; }
 h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .4rem; letter-spacing: -0.01em; }
 h2 { font-size: 1.1rem; margin: 0 0 .6rem; }
 .muted, small { color: var(--muted); }
@@ -174,11 +174,13 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 .qr-btn svg { flex: none; }
 
 /* ---- date and time picker ---- */
-.dtp-field { display: grid; gap: 4px; min-width: 0; }
-.dtp-field > label { display: block; font-weight: 600; font-size: .92rem; }
-.dtp-field > label small { font-weight: 400; color: var(--muted); }
+.dtp-field, .field { display: grid; gap: 4px; min-width: 0; }
+.dtp-field > label, .field > label { display: block; font-weight: 600; font-size: .92rem; }
+.dtp-field > label small, .field > label small { font-weight: 400; color: var(--muted); }
+.lbl small { font-weight: 400; color: var(--muted); }
+.field-note { margin: 12px 0 0; font-size: .85rem; color: var(--muted); }
 .dtp { position: relative; }
-.dtp-input { padding-right: 46px; }
+.dtp-input { display: block; padding-right: 46px; }  /* block: no gap under the box */
 .dtp-toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 36px; height: 34px;
               display: grid; place-items: center; border: 0; border-radius: 6px; background: none;
               color: var(--accent); cursor: pointer; }
@@ -239,3 +241,7 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
                grid-template-columns: 1fr; gap: 14px 0; max-height: 90vh; overflow: auto; }
   .dtp-popup.align-right { left: 8px; right: 8px; }
 }
+
+/* the schedule/password boxes line up on one row */
+.more-grid { align-items: start; }
+.dest { max-width: 240px; }

@@ -449,3 +449,13 @@ def test_edit_keeps_dates_when_the_prefilled_text_is_resubmitted(alice, app):
 def test_bad_picker_text_is_rejected(alice):
     make(alice, "bad9", starts_at="31/02/2099")
     assert alice.get("/alice/bad9").status_code == 404
+
+
+def test_create_form_fields_share_one_label_layout(alice):
+    page = alice.get("/dashboard").text
+    assert '<span class="lbl">Custom alias' in page and '<span class="lbl">Long URL' in page
+    assert 'for="link_password"' in page and 'id="link_password"' in page
+    assert 'name="link_password"' in page
+    assert "Times use your local time" in page
+    for hint in ("(optional, your local time)", "empty means no limit"):
+        assert hint not in page  # long hints wrapped and pushed the inputs out of line

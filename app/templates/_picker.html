@@ -1,5 +1,5 @@
 {# Date and time picker. Needs /static/datetime-picker.js. Without JavaScript it is a plain text box. #}
-{% macro datetime_picker(label, name, kind, dt=None, hint="optional, your local time") -%}
+{% macro datetime_picker(label, name, kind, dt=None, hint="optional") -%}
 <div class="dtp-field">
   <label for="{{ name }}-input">{{ label }} {% if hint %}<small>({{ hint }})</small>{% endif %}</label>
   <div class="dtp" data-dtp data-kind="{{ kind }}">
