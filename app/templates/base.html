@@ -34,7 +34,7 @@
       </details>
       {% if user %}
         <details class="menu" id="usermenu">
-          <summary aria-label="{{ _('Account menu for {username}', username=user.username) }}">
+          <summary class="avatar-btn" aria-label="{{ _('Account menu for {username}', username=user.username) }}">
             <img class="avatar" src="/static/avatars/{{ user.avatar }}.svg" alt="" width="36" height="36">
           </summary>
           <div class="menu-panel">
