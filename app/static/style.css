@@ -248,7 +248,7 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 
 /* ---- top bar: Dashboard next to the logo, language button next to the profile icon ---- */
 .topbar { flex-wrap: wrap; gap: 10px 16px; }
-.topbar-left { display: flex; align-items: center; gap: 22px; }
+.topbar-left { display: flex; align-items: baseline; gap: 22px; }  /* logo and Dashboard share one text baseline */
 .topbar-right { display: flex; align-items: center; gap: 14px; }
 .topbar-left .navlink { text-decoration: none; font-weight: 600; }
 

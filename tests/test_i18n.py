@@ -384,3 +384,9 @@ def test_picker_gets_its_language_data(client):
     blob = re.search(r'<script type="application/json" id="i18n-data">(.*?)</script>', page, re.S)
     data = json.loads(blob.group(1))
     assert data["lang"] == "gu" and data["months"][0] == "જાન્યુઆરી"
+
+
+def test_logo_and_dashboard_link_share_a_text_baseline():
+    css = (APP / "static" / "style.css").read_text(encoding="utf-8")
+    rule = re.search(r"\.topbar-left\s*\{([^}]*)\}", css).group(1)
+    assert "align-items: baseline" in rule  # centring the boxes left the smaller text sitting high
