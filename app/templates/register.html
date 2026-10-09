@@ -1,24 +1,25 @@
 {% extends "base.html" %}
-{% block title %}Sign up · Link Shortener{% endblock %}
+{% block title %}{{ _("Sign up") }} · Link Shortener{% endblock %}
 {% block content %}
+{% set u %}<b>username</b>{% endset %}
 <section class="narrow">
-  <h1>Create your account</h1>
+  <h1>{{ _("Create your account") }}</h1>
   {% if error %}<div class="flash error" role="alert">{{ error }}</div>{% endif %}
   <form method="post" action="/register" class="stack">
-    <label>Username
+    <label>{{ _("Username") }}
       <input name="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+"
              value="{{ form.username if form else '' }}" autocomplete="username">
-      <small>This becomes part of your short links: yoursite.com/<b>username</b>/alias</small>
+      <small>{{ _h("This becomes part of your short links: yoursite.com/{u}/alias", u=u) }}</small>
     </label>
-    <label>Email
+    <label>{{ _("Email") }}
       <input type="email" name="email" required value="{{ form.email if form else '' }}" autocomplete="email">
     </label>
-    <label>Password
+    <label>{{ _("Password") }}
       <input type="password" name="password" required minlength="8" maxlength="72" autocomplete="new-password">
-      <small>At least 8 characters.</small>
+      <small>{{ _("At least 8 characters.") }}</small>
     </label>
-    <button class="btn" type="submit">Create account</button>
+    <button class="btn" type="submit">{{ _("Create account") }}</button>
   </form>
-  <p class="muted">Already registered? <a href="/login">Log in</a></p>
+  <p class="muted">{{ _("Already registered?") }} <a href="/login">{{ _("Log in") }}</a></p>
 </section>
 {% endblock %}

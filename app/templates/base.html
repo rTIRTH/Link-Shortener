@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="{{ theme }}">
+<html lang="{{ lang }}" data-theme="{{ theme }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,12 +8,33 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/">Link Shortener</a>
-    <nav>
+    <div class="topbar-left">
+      <a class="brand" href="/">Link Shortener</a>
+      {% if user %}<a class="navlink" href="/dashboard">{{ _("Dashboard") }}</a>{% endif %}
+    </div>
+    <nav class="topbar-right">
+      <details class="menu langmenu" id="langmenu">
+        <summary class="lang-btn" aria-label="{{ _('Change language') }}">
+          <span class="lang-icon" aria-hidden="true"><span class="la">A</span><span class="lb">अ</span></span>
+          <span class="lang-name">{{ current_language }}</span>
+          <span class="lang-chev" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6 8 10.5 12.5 6"/></svg>
+          </span>
+        </summary>
+        <div class="menu-panel lang-panel">
+          <form method="post" action="/language">
+            <input type="hidden" name="next" value="{{ request.url.path }}">
+            {% for code, name in languages.items() %}
+              <button class="menu-item lang-option" type="submit" name="lang" value="{{ code }}" lang="{{ code }}"{% if code == lang %} aria-current="true"{% endif %}>
+                <span>{{ name }}</span>{% if code == lang %}<span class="tick" aria-hidden="true">&#10003;</span>{% endif %}
+              </button>
+            {% endfor %}
+          </form>
+        </div>
+      </details>
       {% if user %}
-        <a href="/dashboard">Dashboard</a>
         <details class="menu" id="usermenu">
-          <summary aria-label="Account menu for {{ user.username }}">
+          <summary aria-label="{{ _('Account menu for {username}', username=user.username) }}">
             <img class="avatar" src="/static/avatars/{{ user.avatar }}.svg" alt="" width="36" height="36">
           </summary>
           <div class="menu-panel">
@@ -21,14 +42,14 @@
               <img class="avatar" src="/static/avatars/{{ user.avatar }}.svg" alt="" width="40" height="40">
               <div><strong>{{ user.username }}</strong><small>{{ user.email }}</small></div>
             </div>
-            <a class="menu-item" href="/account">Account settings</a>
+            <a class="menu-item" href="/account">{{ _("Account settings") }}</a>
             {% if is_admin %}<a class="menu-item" href="/admin">Admin</a>{% endif %}
-            <form method="post" action="/logout"><button class="menu-item" type="submit">Log out</button></form>
+            <form method="post" action="/logout"><button class="menu-item" type="submit">{{ _("Log out") }}</button></form>
           </div>
         </details>
       {% else %}
-        <a href="/login">Log in</a>
-        <a class="btn small" href="/register">Sign up</a>
+        <a href="/login">{{ _("Log in") }}</a>
+        <a class="btn small" href="/register">{{ _("Sign up") }}</a>
       {% endif %}
     </nav>
   </header>
@@ -40,12 +61,22 @@
   </main>
   <script>
     (function () {
-      var menu = document.getElementById('usermenu');
-      if (!menu) return;
-      document.addEventListener('click', function (e) { if (menu.open && !menu.contains(e.target)) menu.open = false; });
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu.open = false; });
+      var menus = document.querySelectorAll('details.menu');
+      if (!menus.length) return;
+      document.addEventListener('click', function (e) {
+        menus.forEach(function (m) { if (m.open && !m.contains(e.target)) m.open = false; });
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') menus.forEach(function (m) { m.open = false; });
+      });
+      menus.forEach(function (m) {   // opening one menu closes the other
+        m.addEventListener('toggle', function () {
+          if (m.open) menus.forEach(function (o) { if (o !== m) o.open = false; });
+        });
+      });
     })();
   </script>
+  <script type="application/json" id="i18n-data">{{ js_i18n|tojson }}</script>
   <script src="/static/app.js?v={{ js_version }}" defer></script>
   <script src="/static/datetime-picker.js?v={{ js_version }}" defer></script>
   {% block scripts %}{% endblock %}

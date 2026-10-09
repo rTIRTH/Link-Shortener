@@ -4,3 +4,6 @@ extend-exclude = ["alembic/versions"]
 [lint]
 select = ["E", "F", "I", "B", "UP"]
 ignore = ["B008"]   # FastAPI's Depends()/Form() in defaults is the intended pattern
+
+[lint.per-file-ignores]
+"app/locales/*" = ["E501"]  # translation data: one sentence per line is easier to review

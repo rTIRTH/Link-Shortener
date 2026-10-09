@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Log in · Link Shortener{% endblock %}
+{% block title %}{{ _("Log in") }} · Link Shortener{% endblock %}
 {% block content %}
 <section class="narrow">
-  <h1>Log in</h1>
+  <h1>{{ _("Log in") }}</h1>
   {% if error %}<div class="flash error" role="alert">{{ error }}</div>{% endif %}
   <form method="post" action="/login" class="stack">
-    <label>Username or email
+    <label>{{ _("Username or email") }}
       <input name="identifier" required value="{{ form.identifier if form else '' }}" autocomplete="username">
     </label>
-    <label>Password
+    <label>{{ _("Password") }}
       <input type="password" name="password" required autocomplete="current-password">
     </label>
-    <button class="btn" type="submit">Log in</button>
+    <button class="btn" type="submit">{{ _("Log in") }}</button>
   </form>
-  <p class="muted">New here? <a href="/register">Create an account</a></p>
+  <p class="muted">{{ _("New here?") }} <a href="/register">{{ _("Create an account") }}</a></p>
 </section>
 {% endblock %}

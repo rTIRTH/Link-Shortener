@@ -10,10 +10,18 @@
 (function () {
   'use strict';
 
-  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+  // The page sends month/weekday names and button text in the visitor's language.
+  var DATA = {};
+  try { DATA = JSON.parse(document.getElementById('i18n-data').textContent) || {}; } catch (e) { DATA = {}; }
+  var UI = DATA.ui || {};
+  var MONTHS = DATA.months || ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
     'September', 'October', 'November', 'December'];
-  var WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  var SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  var WEEKDAYS = DATA.weekdays || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var SHORT = DATA.short || ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  function tr(key, fallback, params) {
+    var text = UI[key] || fallback;
+    return text.replace(/\{(\w+)\}/g, function (m, name) { return params && name in params ? params[name] : m; });
+  }
   var ROWS = 7;      // rows visible in a time wheel
   var CENTER = 3;    // index of the selected (middle) row
   var current = null; // the picker whose popup is open
@@ -200,7 +208,7 @@
       var text = input.value.trim();
       if (!text) { sel = null; commit(); syncUI(); return true; }
       var parsed = parseText(text);
-      if (!parsed) { showError('Use a date like ' + example() + ', optionally with a time like 09:30 PM.'); return false; }
+      if (!parsed) { showError(tr('bad_date', 'Use a date like {example}, optionally with a time like 09:30 PM.', { example: example() })); return false; }
       sel = parsed.date;
       if (parsed.time) time = parsed.time;
       view = { y: sel.y, m: sel.m };
@@ -297,7 +305,7 @@
       popup = el('div', 'dtp-popup');
       popup.hidden = true;
       popup.setAttribute('role', 'dialog');
-      popup.setAttribute('aria-label', 'Choose ' + kind + ' date and time');
+      popup.setAttribute('aria-label', kind === 'end' ? tr('choose_end', 'Choose end date and time') : tr('choose_start', 'Choose start date and time'));
       // clicking blank space inside must not steal focus away and close the popup
       popup.addEventListener('mousedown', function (e) {
         if (!e.target.closest('button, select, input, [tabindex]')) e.preventDefault();
@@ -305,30 +313,30 @@
 
       var cal = el('div', 'dtp-cal');
       var head = el('div', 'dtp-head');
-      ui.prev = button('dtp-nav', '\u2039', 'Previous month');
-      ui.next = button('dtp-nav', '\u203A', 'Next month');
+      ui.prev = button('dtp-nav', '\u2039', tr('prev_month', 'Previous month'));
+      ui.next = button('dtp-nav', '\u203A', tr('next_month', 'Next month'));
       ui.month = el('select');
-      ui.month.setAttribute('aria-label', 'Month');
+      ui.month.setAttribute('aria-label', tr('month', 'Month'));
       MONTHS.forEach(function (name, i) { var o = el('option', null, name); o.value = i + 1; ui.month.appendChild(o); });
       ui.year = el('select');
-      ui.year.setAttribute('aria-label', 'Year');
+      ui.year.setAttribute('aria-label', tr('year', 'Year'));
       head.appendChild(ui.prev); head.appendChild(ui.month); head.appendChild(ui.year); head.appendChild(ui.next);
       var weekdays = el('div', 'dtp-weekdays');
       SHORT.forEach(function (s) { weekdays.appendChild(el('span', null, s)); });
       ui.grid = el('div', 'dtp-grid');
       ui.grid.setAttribute('role', 'group');
-      ui.grid.setAttribute('aria-label', 'Days');
+      ui.grid.setAttribute('aria-label', tr('days', 'Days'));
       cal.appendChild(head); cal.appendChild(weekdays); cal.appendChild(ui.grid);
 
       var box = el('div', 'dtp-time');
-      box.appendChild(el('div', 'dtp-time-title', 'Time'));
+      box.appendChild(el('div', 'dtp-time-title', tr('time', 'Time')));
       var cols = el('div', 'dtp-cols');
-      var wh = makeWheel('Hour', range(1, 12, true), function (i) {
+      var wh = makeWheel(tr('hour', 'Hour'), range(1, 12, true), function (i) {
         time.h = ((i + 1) % 12) + (time.h >= 12 ? 12 : 0);
         timeChanged();
       });
-      var wm = makeWheel('Minute', range(0, 59, true), function (i) { time.mi = i; timeChanged(); });
-      var ws = makeWheel('Second', range(0, 59, true), function (i) { time.s = i; timeChanged(); });
+      var wm = makeWheel(tr('minute', 'Minute'), range(0, 59, true), function (i) { time.mi = i; timeChanged(); });
+      var ws = makeWheel(tr('second', 'Second'), range(0, 59, true), function (i) { time.s = i; timeChanged(); });
       ui.hour = wh; ui.minute = wm; ui.second = ws;
       cols.appendChild(wh.el); cols.appendChild(el('span', 'dtp-colon', ':'));
       cols.appendChild(wm.el); cols.appendChild(el('span', 'dtp-colon', ':'));
@@ -343,9 +351,9 @@
       box.appendChild(cols);
 
       var foot = el('div', 'dtp-foot');
-      var clear = button('btn small ghost', 'Clear');
-      var todayBtn = button('btn small ghost', 'Today');
-      var done = button('btn small', 'Done');
+      var clear = button('btn small ghost', tr('clear', 'Clear'));
+      var todayBtn = button('btn small ghost', tr('today', 'Today'));
+      var done = button('btn small', tr('done', 'Done'));
       foot.appendChild(clear); foot.appendChild(todayBtn); foot.appendChild(done);
 
       popup.appendChild(cal); popup.appendChild(box); popup.appendChild(foot);
@@ -436,7 +444,7 @@
     } else if (input.value.trim()) {
       applyText();
     }
-    input.placeholder = 'e.g. ' + example();
+    input.placeholder = tr('example', 'e.g. {example}', { example: example() });
 
     toggle.addEventListener('click', function () { if (isOpen) api.close(); else api.open(true); });
     input.addEventListener('focus', function () { if (!api.skipOpen) api.open(false); });

@@ -1,67 +1,69 @@
 {% extends "base.html" %}
-{% block title %}Edit link · Link Shortener{% endblock %}
-{% from "_picker.html" import datetime_picker %}
+{% block title %}{{ _("Edit link") }} · Link Shortener{% endblock %}
+{% from "_picker.html" import datetime_picker with context %}
 {% block content %}
+{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired')} %}
+{% set state %}<span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad'}[status] }}">{{ state_names[status] }}</span>{% endset %}
 <div class="account">
-  <p><a href="/dashboard">← All links</a> · <a href="/dashboard/links/{{ link.id }}">Stats</a></p>
+  <p><a href="/dashboard">{{ _("← All links") }}</a> · <a href="/dashboard/links/{{ link.id }}">{{ _("Stats") }}</a></p>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
-  <p class="muted">The short address stays the same. You can change where it goes, when it works, and who can open it.</p>
+  <p class="muted">{{ _("The short address stays the same. You can change where it goes, when it works, and who can open it.") }}</p>
 
   <form method="post" action="/dashboard/links/{{ link.id }}/edit">
     <section class="panel">
-      <h2>Destination</h2>
-      <label>Long URL
+      <h2>{{ _("Destination") }}</h2>
+      <label>{{ _("Long URL") }}
         <input name="original_url" value="{{ link.original_url }}" required>
       </label>
     </section>
 
     <section class="panel">
-      <h2>Schedule</h2>
-      <p class="muted">Before the start time and after the end time, visitors see a message instead of being redirected. Times are in your local time. Leave a box empty for no limit.</p>
+      <h2>{{ _("Schedule") }}</h2>
+      <p class="muted">{{ _("Before the start time and after the end time, visitors see a message instead of being redirected. Times are in your local time. Leave a box empty for no limit.") }}</p>
       <div class="more-grid">
-        {{ datetime_picker("Starts at", "starts_at", "start", link.starts_at, "optional") }}
-        {{ datetime_picker("Ends at", "expires_at", "end", link.expires_at, "optional") }}
+        {{ datetime_picker(_("Starts at"), "starts_at", "start", link.starts_at) }}
+        {{ datetime_picker(_("Ends at"), "expires_at", "end", link.expires_at) }}
       </div>
-      <p class="muted">Right now this link is <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad'}[status] }}">{{ status|capitalize }}</span></p>
+      <p class="muted">{{ _h("Right now this link is {state}.", state=state) }}</p>
     </section>
 
     <section class="panel">
-      <h2>Password</h2>
+      <h2>{{ _("Password") }}</h2>
       {% if link.password_hash %}
-        <p class="muted">This link is <b>password protected</b>. Visitors must enter the password before they are sent to the destination.</p>
+        <p class="muted">{{ _("This link is password protected. Visitors must enter the password before they are sent to the destination.") }}</p>
       {% else %}
-        <p class="muted">This link has <b>no password</b>, so anyone with the link can open it.</p>
+        <p class="muted">{{ _("This link has no password, so anyone with the link can open it.") }}</p>
       {% endif %}
       <fieldset class="choices">
-        <legend class="sr-only">Password options</legend>
+        <legend class="sr-only">{{ _("Password options") }}</legend>
         {% if link.password_hash %}
           <label class="choice"><input type="radio" name="password_action" value="keep" checked>
-            <span><b>Keep the current password</b><small>Nothing changes.</small></span></label>
+            <span><b>{{ _("Keep the current password") }}</b><small>{{ _("Nothing changes.") }}</small></span></label>
           <label class="choice"><input type="radio" name="password_action" value="set">
-            <span><b>Change the password</b><small>Replace it with a new one.</small></span></label>
+            <span><b>{{ _("Change the password") }}</b><small>{{ _("Replace it with a new one.") }}</small></span></label>
           <div class="new-password">
-            <label>New password
-              <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="4-72 characters">
+            <label>{{ _("New password") }}
+              <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="{{ _('4-72 characters') }}">
             </label>
           </div>
           <label class="choice"><input type="radio" name="password_action" value="remove">
-            <span><b>Remove the password</b><small>Anyone with the link can open it.</small></span></label>
+            <span><b>{{ _("Remove the password") }}</b><small>{{ _("Anyone with the link can open it.") }}</small></span></label>
         {% else %}
           <label class="choice"><input type="radio" name="password_action" value="keep" checked>
-            <span><b>No password</b><small>Anyone with the link can open it.</small></span></label>
+            <span><b>{{ _("No password") }}</b><small>{{ _("Anyone with the link can open it.") }}</small></span></label>
           <label class="choice"><input type="radio" name="password_action" value="set">
-            <span><b>Set a password</b><small>Visitors must enter it first.</small></span></label>
+            <span><b>{{ _("Set a password") }}</b><small>{{ _("Visitors must enter it first.") }}</small></span></label>
           <div class="new-password">
-            <label>New password
-              <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="4-72 characters">
+            <label>{{ _("New password") }}
+              <input type="password" name="new_password" maxlength="72" autocomplete="new-password" placeholder="{{ _('4-72 characters') }}">
             </label>
           </div>
         {% endif %}
       </fieldset>
     </section>
 
-    <button class="btn" type="submit">Save changes</button>
-    <a class="btn ghost" href="/dashboard">Cancel</a>
+    <button class="btn" type="submit">{{ _("Save changes") }}</button>
+    <a class="btn ghost" href="/dashboard">{{ _("Cancel") }}</a>
   </form>
 </div>
 {% endblock %}

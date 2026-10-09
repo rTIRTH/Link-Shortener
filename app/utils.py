@@ -9,6 +9,7 @@ BASE62 = string.ascii_letters + string.digits
 RESERVED_USERNAMES = {
     "dashboard", "static", "login", "logout", "register", "docs", "redoc",
     "openapi", "health", "api", "admin", "www", "u", "links", "account", "settings", "profile",
+    "language",
 }
 USERNAME_RE = re.compile(r"^[a-z0-9_]{3,20}$")
 SLUG_RE = re.compile(r"^[A-Za-z0-9_-]{3,32}$")

@@ -28,6 +28,7 @@ class User(Base):
     )
     avatar: Mapped[str] = mapped_column(String(32), default="cat", server_default="cat")
     theme: Mapped[str] = mapped_column(String(8), default="system", server_default="system")
+    language: Mapped[str] = mapped_column(String(5), default="en", server_default="en")
 
     links: Mapped[list["Link"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"

@@ -8,7 +8,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from .config import settings
 from .database import make_session_factory
 from .deps import NotAuthenticated
-from .routers import account, admin, auth, dashboard, redirect
+from .i18n import get_lang, translate
+from .routers import account, admin, auth, dashboard, language, redirect
 from .templating import BASE_DIR, render
 
 
@@ -31,8 +32,9 @@ def create_app(database_url: str | None = None) -> FastAPI:
 
     @app.exception_handler(StarletteHTTPException)
     async def _http_error(request: Request, exc: StarletteHTTPException):
+        message = translate(get_lang(request), str(exc.detail))
         return render(request, "error.html", status_code=exc.status_code,
-                      code=exc.status_code, message=exc.detail)
+                      code=exc.status_code, message=message)
 
     @app.get("/health", include_in_schema=False)
     def health():
@@ -44,5 +46,6 @@ def create_app(database_url: str | None = None) -> FastAPI:
     app.include_router(dashboard.router)
     app.include_router(admin.router)
     app.include_router(account.router)
+    app.include_router(language.router)
     app.include_router(redirect.router)
     return app

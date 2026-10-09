@@ -124,8 +124,8 @@ def create_link(
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
-    def back(message: str):
-        flash(request, message, "error")
+    def back(message: str, **params):
+        flash(request, message, "error", **params)
         return RedirectResponse("/dashboard", status_code=303)
 
     if not rate_limit(f"rl:create:{user.id}", 30, 60):
@@ -151,7 +151,7 @@ def create_link(
             return back(str(e))
         taken = db.scalar(select(Link.id).where(Link.user_id == user.id, Link.slug == slug_value))
         if taken:
-            return back(f"You already have a link called '{slug_value}'.")
+            return back("You already have a link called '{slug}'.", slug=slug_value)
     else:
         for _ in range(10):  # retry on the (very unlikely) collision
             slug_value = generate_slug()
@@ -177,7 +177,7 @@ def create_link(
     except IntegrityError:
         db.rollback()
         return back("That alias was just taken. Try another.")
-    flash(request, f"Created {short_url(request, user, link)}", "success")
+    flash(request, "Created {url}", "success", url=short_url(request, user, link))
     return RedirectResponse("/dashboard", status_code=303)
 
 
@@ -196,7 +196,7 @@ def bulk_delete(
         forget_link(db, user, link.slug)
         db.delete(link)
     db.commit()
-    flash(request, f"Deleted {len(links)} link(s).", "success")
+    flash(request, "Deleted {n} link(s).", "success", n=len(links))
     return RedirectResponse("/dashboard", status_code=303)
 
 

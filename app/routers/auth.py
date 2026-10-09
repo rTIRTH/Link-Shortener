@@ -9,11 +9,13 @@ from ..cache import rate_limit
 from ..config import settings
 from ..database import get_db
 from ..deps import client_ip, get_current_user
+from ..i18n import get_lang
 from ..models import User, UsernameAlias, utcnow
 from ..profile import AVATARS, THEMES
 from ..security import hash_password, verify_password
 from ..templating import flash, render
 from ..utils import validate_email, validate_password, validate_username
+from .language import set_language_cookie
 
 router = APIRouter()
 
@@ -67,12 +69,15 @@ def register(
         last_login_at=utcnow(),
         avatar=secrets.choice(AVATARS),
         theme=cookie_theme if cookie_theme in THEMES else "system",
+        language=get_lang(request),
     )
     db.add(user)
     db.commit()
     request.session["user_id"] = user.id
     flash(request, "Account created. Welcome to Link Shortener!", "success")
-    return RedirectResponse("/dashboard", status_code=303)
+    response = RedirectResponse("/dashboard", status_code=303)
+    set_language_cookie(response, user.language)
+    return response
 
 
 @router.get("/login")
@@ -104,6 +109,7 @@ def login(
     response = RedirectResponse("/dashboard", status_code=303)
     response.set_cookie("theme", user.theme, max_age=365 * 24 * 3600, httponly=True,
                         samesite="lax", secure=settings.https_only)
+    set_language_cookie(response, user.language)  # their saved language follows them
     return response
 
 

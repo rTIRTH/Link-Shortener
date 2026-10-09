@@ -13,6 +13,7 @@ from ..cache import cache_delete, rate_limit
 from ..config import settings
 from ..database import get_db
 from ..deps import require_user
+from ..i18n import EMAIL_BODY, EMAIL_SUBJECT, get_lang, translate
 from ..mailer import email_enabled, send_email
 from ..models import Click, EmailChange, Link, User, UsernameAlias, as_utc, utcnow
 from ..profile import AVATARS, MAX_OLD_USERNAMES, THEMES
@@ -28,8 +29,8 @@ RESEND_AFTER_SECONDS = 60
 MAX_CODE_ATTEMPTS = 5
 
 
-def back(request: Request, message: str, category: str = "error", anchor: str = ""):
-    flash(request, message, category)
+def back(request: Request, message: str, category: str = "error", anchor: str = "", **params):
+    flash(request, message, category, **params)
     return RedirectResponse(f"/account{anchor}", status_code=303)
 
 
@@ -118,8 +119,8 @@ def change_username(request: Request, new_username: str = Form(...), password: s
     if alias:  # taking back one of your own old names
         db.delete(alias)
     elif len(user.old_usernames) >= MAX_OLD_USERNAMES:
-        return back(request, f"You have already used {MAX_OLD_USERNAMES} previous usernames, "
-                             "which is the limit.", anchor="#profile")
+        return back(request, "You have already used {max} previous usernames, "
+                             "which is the limit.", anchor="#profile", max=MAX_OLD_USERNAMES)
     db.add(UsernameAlias(username=user.username, user_id=user.id))
     user.username = new_name
     try:
@@ -127,8 +128,8 @@ def change_username(request: Request, new_username: str = Form(...), password: s
     except IntegrityError:
         db.rollback()
         return back(request, "That username was just taken. Try another.", anchor="#profile")
-    return back(request, f"Username changed to {new_name}. Your old links still work.",
-                "success", "#profile")
+    return back(request, "Username changed to {name}. Your old links still work.",
+                "success", "#profile", name=new_name)
 
 
 # ---------- password ----------
@@ -151,7 +152,7 @@ def change_password(request: Request, current_password: str = Form(...),
 
 # ---------- email change with a one-time code ----------
 
-def issue_code(db: Session, user: User, new_email: str) -> bool:
+def issue_code(db: Session, user: User, new_email: str, lang: str = "en") -> bool:
     """Create (or replace) the pending change and email the code. True if it was sent."""
     code = f"{secrets.randbelow(1_000_000):06d}"
     pending = db.get(EmailChange, user.id)
@@ -164,10 +165,9 @@ def issue_code(db: Session, user: User, new_email: str) -> bool:
     pending.sent_at = utcnow()
     pending.attempts = 0
     db.commit()
-    body = (f"Your Link Shortener verification code is {code}.\n\n"
-            "It expires in 10 minutes. If you did not ask to change your email, "
-            "you can ignore this message.")
-    if send_email(new_email, "Your Link Shortener verification code", body):
+    subject = translate(lang, EMAIL_SUBJECT)
+    body = translate(lang, EMAIL_BODY, code=code)
+    if send_email(new_email, subject, body):
         return True
     db.delete(pending)
     db.commit()
@@ -201,14 +201,14 @@ def email_request(request: Request, new_email: str = Form(...), password: str = 
 
     wait = cooldown_left(live_pending(db, user))
     if wait:
-        return back(request, f"Please wait {wait} seconds before asking for another code.",
-                    anchor="#email")
+        return back(request, "Please wait {seconds} seconds before asking for another code.",
+                    anchor="#email", seconds=wait)
     if not rate_limit(f"rl:emailcode:{user.id}", 5, 3600):
         return back(request, "Too many codes requested. Try again in an hour.", anchor="#email")
-    if not issue_code(db, user, new_email):
+    if not issue_code(db, user, new_email, get_lang(request)):
         return back(request, "We could not send the email. Please try again later.",
                     anchor="#email")
-    flash(request, f"We sent a 6-digit code to {new_email}.", "success")
+    flash(request, "We sent a 6-digit code to {email}.", "success", email=new_email)
     return RedirectResponse("/account/email/verify", status_code=303)
 
 
@@ -248,7 +248,7 @@ def verify_code(request: Request, code: str = Form(...), user: User = Depends(re
     user.email = pending.new_email
     db.delete(pending)
     db.commit()
-    return back(request, f"Email changed to {user.email}.", "success", "#email")
+    return back(request, "Email changed to {email}.", "success", "#email", email=user.email)
 
 
 @router.post("/email/resend")
@@ -259,11 +259,12 @@ def email_resend(request: Request, user: User = Depends(require_user),
         return back(request, "There is no email change in progress.", anchor="#email")
     wait = cooldown_left(pending)
     if wait:
-        flash(request, f"Please wait {wait} seconds before asking for another code.", "error")
+        flash(request, "Please wait {seconds} seconds before asking for another code.", "error",
+              seconds=wait)
         return RedirectResponse("/account/email/verify", status_code=303)
     if not rate_limit(f"rl:emailcode:{user.id}", 5, 3600):
         return back(request, "Too many codes requested. Try again in an hour.", anchor="#email")
-    if not issue_code(db, user, pending.new_email):
+    if not issue_code(db, user, pending.new_email, get_lang(request)):
         return back(request, "We could not send the email. Please try again later.",
                     anchor="#email")
     flash(request, "We sent a new code.", "success")

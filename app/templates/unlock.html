@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Protected link · Link Shortener{% endblock %}
+{% block title %}{{ _("Protected link") }} · Link Shortener{% endblock %}
 {% block content %}
 <section class="narrow">
-  <h1>This link is protected</h1>
-  <p class="muted">Enter the password you were given to continue.</p>
+  <h1>{{ _("This link is protected") }}</h1>
+  <p class="muted">{{ _("Enter the password you were given to continue.") }}</p>
   {% if error %}<div class="flash error" role="alert">{{ error }}</div>{% endif %}
   <form method="post" action="/{{ username }}/{{ slug }}" class="stack">
-    <label>Password
+    <label>{{ _("Password") }}
       <input type="password" name="password" required autofocus autocomplete="off">
     </label>
-    <button class="btn" type="submit">Continue</button>
+    <button class="btn" type="submit">{{ _("Continue") }}</button>
   </form>
 </section>
 {% endblock %}

@@ -1,31 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Dashboard · Link Shortener{% endblock %}
-{% from "_picker.html" import datetime_picker %}
+{% block title %}{{ _("Dashboard") }} · Link Shortener{% endblock %}
+{% from "_picker.html" import datetime_picker with context %}
 {% block content %}
 <section>
-  <h1>Your links</h1>
-  <p class="muted">{{ rows|length }} link{{ '' if rows|length == 1 else 's' }} · {{ total_clicks }} total click{{ '' if total_clicks == 1 else 's' }}</p>
+  <h1>{{ _("Your links") }}</h1>
+  <p class="muted">{{ _n("{n} link", "{n} links", rows|length) }} · {{ _n("{n} total click", "{n} total clicks", total_clicks) }}</p>
 
   <form method="post" action="/dashboard/links" class="create">
-    <label class="grow"><span class="lbl">Long URL</span>
+    <label class="grow"><span class="lbl">{{ _("Long URL") }}</span>
       <input name="original_url" placeholder="https://example.com/a/very/long/page" required>
     </label>
-    <label><span class="lbl">Custom alias <small>(optional)</small></span>
+    <label><span class="lbl">{{ _("Custom alias") }} <small>{{ _("(optional)") }}</small></span>
       <input name="slug" placeholder="my-portfolio" maxlength="32">
     </label>
-    <button class="btn" type="submit">Shorten</button>
+    <button class="btn" type="submit">{{ _("Shorten") }}</button>
     <details class="more">
-      <summary>More options: schedule and password</summary>
+      <summary>{{ _("More options: schedule and password") }}</summary>
       <div class="more-grid">
-        {{ datetime_picker("Starts at", "starts_at", "start") }}
-        {{ datetime_picker("Ends at", "expires_at", "end") }}
+        {{ datetime_picker(_("Starts at"), "starts_at", "start") }}
+        {{ datetime_picker(_("Ends at"), "expires_at", "end") }}
         <div class="field">
-          <label for="link_password">Password <small>(optional)</small></label>
+          <label for="link_password">{{ _("Password") }} <small>{{ _("(optional)") }}</small></label>
           <input type="password" id="link_password" name="link_password" maxlength="72"
-                 autocomplete="new-password" placeholder="Visitors must enter it">
+                 autocomplete="new-password" placeholder="{{ _('Visitors must enter it') }}">
         </div>
       </div>
-      <p class="field-note">Times use your local time. Leave a box empty for no limit.</p>
+      <p class="field-note">{{ _("Times use your local time. Leave a box empty for no limit.") }}</p>
     </details>
   </form>
 </section>
@@ -34,52 +34,54 @@
   {% if rows %}
   <form method="post" id="bulk" class="toolbar">
     <button class="btn small danger" type="submit" formaction="/dashboard/links/bulk-delete"
-            onclick="return confirm('Delete the selected links? This cannot be undone.')">Delete selected</button>
-    <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip">Download QR codes</button>
-    <a class="btn small ghost" href="/dashboard/links/export.csv">Export CSV</a>
-    <small class="muted">QR download uses the selected links, or all links if none are selected.</small>
+            onclick='return confirm({{ _("Delete the selected links? This cannot be undone.")|tojson }})'>{{ _("Delete selected") }}</button>
+    <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip">{{ _("Download QR codes") }}</button>
+    <a class="btn small ghost" href="/dashboard/links/export.csv">{{ _("Export CSV") }}</a>
+    <small class="muted">{{ _("QR download uses the selected links, or all links if none are selected.") }}</small>
   </form>
 
   <div class="tablewrap">
   <table>
     <thead><tr>
-      <th><input type="checkbox" id="all" aria-label="Select all links"></th>
-      <th>Short link</th><th>Destination</th><th class="num">Clicks</th><th>QR</th><th>Status</th><th></th>
+      <th><input type="checkbox" id="all" aria-label="{{ _('Select all links') }}"></th>
+      <th>{{ _("Short link") }}</th><th>{{ _("Destination") }}</th><th class="num">{{ _("Clicks") }}</th><th>{{ _("QR") }}</th><th>{{ _("Status") }}</th><th></th>
     </tr></thead>
     <tbody>
     {% for row in rows %}
       {% set link = row.link %}
       <tr>
-        <td><input type="checkbox" name="ids" value="{{ link.id }}" form="bulk" class="pick" aria-label="Select {{ link.slug }}"></td>
+        <td><input type="checkbox" name="ids" value="{{ link.id }}" form="bulk" class="pick" aria-label="{{ _('Select {slug}', slug=link.slug) }}"></td>
         <td>
           <a class="mono" href="{{ row.short_url }}" target="_blank" rel="noopener">{{ row.short_url|replace('https://','')|replace('http://','') }}</a>
-          {% if row.locked %}<span class="tag lock" title="Visitors need a password">Password</span>{% endif %}
+          {% if row.locked %}<span class="tag lock" title="{{ _('Visitors need a password') }}">{{ _("Password") }}</span>{% endif %}
         </td>
         <td class="dest" title="{{ link.original_url }}">{{ link.original_url }}</td>
         <td class="num">{{ link.click_count }}</td>
         <td>
           <a class="btn small ghost qr-btn" href="/dashboard/links/{{ link.id }}/qr.png?download=1"
-             download="{{ link.slug }}-qr.png" title="Download QR code" aria-label="Download QR code for {{ link.slug }}">
+             download="{{ link.slug }}-qr.png" title="{{ _('Download QR code') }}" aria-label="{{ _('Download QR code for {slug}', slug=link.slug) }}">
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
               <path d="M1 1h6v6H1zM3 3v2h2V3zM9 1h6v6H9zM11 3v2h2V3zM1 9h6v6H1zM3 11v2h2v-2zM9 9h2v2H9zM12 9h3v2h-3zM9 12h3v3H9zM13 12h2v3h-2z"/>
             </svg>QR
           </a>
         </td>
         <td>
-          {% if row.status == 'expired' %}<span class="tag bad">Expired</span>
-          {% elif row.status == 'scheduled' %}<span class="tag warn">Scheduled</span>
-          {% else %}<span class="tag ok">Active</span>{% endif %}
+          {% if row.status == 'expired' %}<span class="tag bad">{{ _("Expired") }}</span>
+          {% elif row.status == 'scheduled' %}<span class="tag warn">{{ _("Scheduled") }}</span>
+          {% else %}<span class="tag ok">{{ _("Active") }}</span>{% endif %}
           {% if link.starts_at and row.status == 'scheduled' %}
-            <small class="block">starts <time data-utc="{{ link.starts_at|utc_iso }}">{{ link.starts_at|utc_text }}</time></small>
+            {% set starts_t %}<time data-utc="{{ link.starts_at|utc_iso }}">{{ link.starts_at|utc_text }}</time>{% endset %}
+            <small class="block">{{ _h("starts {time}", time=starts_t) }}</small>
           {% endif %}
           {% if link.expires_at %}
-            <small class="block">{{ 'ended' if row.status == 'expired' else 'ends' }} <time data-utc="{{ link.expires_at|utc_iso }}">{{ link.expires_at|utc_text }}</time></small>
+            {% set ends_t %}<time data-utc="{{ link.expires_at|utc_iso }}">{{ link.expires_at|utc_text }}</time>{% endset %}
+            <small class="block">{% if row.status == 'expired' %}{{ _h("ended {time}", time=ends_t) }}{% else %}{{ _h("ends {time}", time=ends_t) }}{% endif %}</small>
           {% endif %}
         </td>
         <td>
           <div class="btn-row">
-            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}/edit">Edit</a>
-            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}">Stats</a>
+            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}/edit">{{ _("Edit") }}</a>
+            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}">{{ _("Stats") }}</a>
           </div>
         </td>
       </tr>
@@ -93,7 +95,7 @@
     });
   </script>
   {% else %}
-    <div class="empty"><h3>No links yet</h3><p>Paste a long URL above to create your first short link.</p></div>
+    <div class="empty"><h3>{{ _("No links yet") }}</h3><p>{{ _("Paste a long URL above to create your first short link.") }}</p></div>
   {% endif %}
 </section>
 {% endblock %}

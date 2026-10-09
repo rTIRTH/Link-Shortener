@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+{% set example %}<code>/you/portfolio</code>{% endset %}
+{% set word %}<code>portfolio</code>{% endset %}
 <section class="hero">
-  <h1>Short links with your name on them.</h1>
-  <p class="lede">Every account gets its own namespace, so <code>/you/portfolio</code> is always yours,
-  even if someone else also picks <code>portfolio</code>. Track clicks, expire links, export everything.</p>
-  <p><a class="btn" href="/register">Create a free account</a>
-     <a class="btn ghost" href="/login">Log in</a></p>
+  <h1>{{ _("Short links with your name on them.") }}</h1>
+  <p class="lede">{{ _h("Every account gets its own namespace, so {example} is always yours, even if someone else also picks {word}. Track clicks, expire links, export everything.", example=example, word=word) }}</p>
+  <p><a class="btn" href="/register">{{ _("Create a free account") }}</a>
+     <a class="btn ghost" href="/login">{{ _("Log in") }}</a></p>
 </section>
 <section class="facts">
-  <div><h3>Click analytics</h3><p>Daily clicks, devices and referrers for every link.</p></div>
-  <div><h3>QR codes</h3><p>Download one QR code or a zip of all of them.</p></div>
-  <div><h3>Your data</h3><p>Export to CSV and delete links in bulk.</p></div>
+  <div><h3>{{ _("Click analytics") }}</h3><p>{{ _("Daily clicks, devices and referrers for every link.") }}</p></div>
+  <div><h3>{{ _("QR codes") }}</h3><p>{{ _("Download one QR code or a zip of all of them.") }}</p></div>
+  <div><h3>{{ _("Your data") }}</h3><p>{{ _("Export to CSV and delete links in bulk.") }}</p></div>
 </section>
 {% endblock %}

@@ -1,9 +1,11 @@
 // Times are stored in UTC on the server. Here we show and send them in the visitor's local time.
 (function () {
+  var locale = { hi: 'hi-IN', gu: 'gu-IN' }[document.documentElement.lang]; // others: browser default
+
   // 1) <time data-utc="..."> elements: show local time
   document.querySelectorAll('time[data-utc]').forEach(function (el) {
     var d = new Date(el.getAttribute('data-utc'));
-    if (!isNaN(d)) el.textContent = d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    if (!isNaN(d)) el.textContent = d.toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
   });
 
   // 2) edit page: only show the "new password" box when "set/change" is selected

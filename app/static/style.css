@@ -5,7 +5,7 @@
   --danger: #b42318; --ok-bg: #e8f5ec; --ok: #1d6b3a; --err-bg: #fdecea;
   --shadow: 0 8px 24px rgba(23, 32, 51, .12);
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Nirmala UI", "Noto Sans Devanagari", "Noto Sans Gujarati", sans-serif;
 }
 /* Dark theme: used when chosen explicitly, or when "system" and the device is dark */
 :root[data-theme="dark"] {
@@ -245,3 +245,28 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 /* the schedule/password boxes line up on one row */
 .more-grid { align-items: start; }
 .dest { max-width: 240px; }
+
+/* ---- top bar: Dashboard next to the logo, language button next to the profile icon ---- */
+.topbar { flex-wrap: wrap; gap: 10px 16px; }
+.topbar-left { display: flex; align-items: center; gap: 22px; }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.topbar-left .navlink { text-decoration: none; font-weight: 600; }
+
+.langmenu summary.lang-btn { display: inline-flex; align-items: center; gap: 9px; padding: 4px 5px 4px 12px;
+  line-height: 1.2; border: 2px solid transparent; border-radius: 999px; color: var(--ink);
+  font-weight: 600; font-size: .92rem; white-space: nowrap;
+  background: linear-gradient(var(--card), var(--card)) padding-box,
+              linear-gradient(100deg, var(--accent), #b66dff) border-box; }
+.langmenu summary.lang-btn:hover { filter: brightness(1.06); }
+.lang-icon { position: relative; flex: none; width: 24px; height: 22px; }
+.lang-icon .la { position: absolute; left: 0; top: 0; font-size: 15px; font-weight: 800; line-height: 1; }
+.lang-icon .lb { position: absolute; right: 0; bottom: 0; font-size: 12px; font-weight: 700; line-height: 1; color: var(--accent); }
+.lang-chev { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+             background: var(--ink); color: var(--card); }
+.lang-chev svg { transition: transform .15s; }
+.langmenu[open] .lang-chev svg { transform: rotate(180deg); }
+.lang-panel { min-width: 180px; }
+.lang-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lang-option[aria-current="true"] { font-weight: 700; }
+.lang-option .tick { color: var(--accent); }
+@media (max-width: 520px) { .lang-name { display: none; } .langmenu summary.lang-btn { padding-left: 10px; } }

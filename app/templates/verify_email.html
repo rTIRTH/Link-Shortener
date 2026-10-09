@@ -1,20 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Verify email · Link Shortener{% endblock %}
+{% block title %}{{ _("Verify email") }} · Link Shortener{% endblock %}
 {% block content %}
+{% set email %}<b>{{ pending.new_email }}</b>{% endset %}
 <section class="narrow">
-  <h1>Check your inbox</h1>
-  <p class="muted">We sent a 6-digit code to <b>{{ pending.new_email }}</b>. It expires in 10 minutes.</p>
+  <h1>{{ _("Check your inbox") }}</h1>
+  <p class="muted">{{ _h("We sent a 6-digit code to {email}. It expires in 10 minutes.", email=email) }}</p>
   {% if error %}<div class="flash error" role="alert">{{ error }}</div>{% endif %}
   <form method="post" action="/account/email/verify" class="stack">
-    <label>Verification code
+    <label>{{ _("Verification code") }}
       <input class="otp" name="code" inputmode="numeric" autocomplete="one-time-code"
              pattern="[0-9]{6}" maxlength="6" required autofocus>
     </label>
-    <button class="btn" type="submit">Verify and change email</button>
+    <button class="btn" type="submit">{{ _("Verify and change email") }}</button>
   </form>
   <div class="row">
-    <form method="post" action="/account/email/resend"><button class="btn ghost small" type="submit">Send a new code</button></form>
-    <form method="post" action="/account/email/cancel"><button class="btn ghost small" type="submit">Cancel</button></form>
+    <form method="post" action="/account/email/resend"><button class="btn ghost small" type="submit">{{ _("Send a new code") }}</button></form>
+    <form method="post" action="/account/email/cancel"><button class="btn ghost small" type="submit">{{ _("Cancel") }}</button></form>
   </div>
 </section>
 {% endblock %}
