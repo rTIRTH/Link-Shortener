@@ -46,7 +46,7 @@ def test_old_thick_or_plain_borders_are_gone():
 def test_delete_buttons_keep_a_red_outline():
     for selector in (".btn.danger", ".btn.danger-solid"):
         assert "--edge: var(--edge-danger)" in rule_for(selector)
-    assert "var(--danger)" in CSS and re.search(r"--edge-danger:\s*linear-gradient", CSS)
+    assert "var(--danger)" in CSS
 
 
 def test_outline_colours_exist_in_every_theme():
@@ -59,13 +59,16 @@ def test_profile_icon_uses_the_outline(alice):
     assert 'class="avatar-btn"' in page
 
 
-def test_filled_buttons_float_the_outline_outside_the_fill():
-    """On a filled button an outline touching the fill is the same colour as it and vanishes."""
-    for selector in (".btn.danger-solid::before", '.dtp-period[aria-pressed="true"]::before'):
-        declarations = rule_for(selector)
-        inset = int(re.search(r"inset:\s*-(\d+)px", declarations).group(1))
-        assert inset >= 4, selector                      # clear of the 1px border plus the ring
-        assert "border-radius" in declarations, selector  # a bigger curve to match
-    assert "border-radius: 10px" in rule_for(".btn.danger-solid::before")
-    # outlined buttons keep the tight ring
+def test_outline_is_one_solid_purple_all_the_way_round():
+    root = rule_for(":root")
+    assert re.search(r"--edge:\s*var\(--accent2\)\s*;", root)          # no gradient
+    assert "gradient" not in re.search(r"--edge:[^;]*;", root).group(0)
+    assert re.search(r"--accent2:\s*#9333ea", root)                      # purple on light
+    assert CSS.count("#b66dff") >= 2                                       # brighter purple on dark
+    # filled buttons use the same tight ring, so it shows against the blue fill
     assert "inset: -1px" in rule_for(".btn::before")
+    assert "inset: -5px" not in CSS and "floats" not in CSS
+
+
+def test_delete_buttons_have_a_solid_red_outline():
+    assert re.search(r"--edge-danger:\s*var\(--danger\)\s*;", rule_for(":root"))

@@ -6,9 +6,9 @@
   --shadow: 0 8px 24px rgba(23, 32, 51, .12);
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Nirmala UI", "Noto Sans Devanagari", "Noto Sans Gujarati", sans-serif;
-  --accent2: #8b5cf6;
-  --edge: linear-gradient(100deg, var(--accent), var(--accent2));   /* the outline every button gets */
-  --edge-danger: linear-gradient(100deg, var(--danger), #ff9a62);
+  --accent2: #9333ea;                  /* purple */
+  --edge: var(--accent2);              /* the solid outline every button gets */
+  --edge-danger: var(--danger);        /* delete buttons keep a red one */
   --ring: 1.5px;                                                    /* thickness of that outline */
 }
 /* Dark theme: used when chosen explicitly, or when "system" and the device is dark */
@@ -277,7 +277,7 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 .lang-option .tick { color: var(--accent); }
 @media (max-width: 520px) { .lang-name { display: none; } .langmenu summary.lang-btn { padding-left: 10px; } }
 
-/* ---- one thin gradient outline for every button ---- */
+/* ---- one thin purple outline for every button ---- */
 .btn::before, .lang-btn::before, .dtp-nav::before, .dtp-period::before, .avatar-btn::before {
   content: ""; position: absolute; inset: -1px; padding: var(--ring); border-radius: inherit;
   background: var(--edge); pointer-events: none;
@@ -287,9 +287,3 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
 }
-
-/* Filled buttons: the outline floats just outside the fill, with a small gap, so it never blends into it */
-.btn:not(.ghost):not(.danger)::before, .btn.danger-solid::before {
-  inset: -5px; border-radius: 10px;
-}
-.dtp-period[aria-pressed="true"]::before { inset: -5px; border-radius: 12px; }
