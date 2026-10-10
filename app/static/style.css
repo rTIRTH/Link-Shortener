@@ -9,6 +9,7 @@
   --accent2: #8b5cf6;
   --edge: linear-gradient(100deg, var(--accent), var(--accent2));   /* the outline every button gets */
   --edge-danger: linear-gradient(100deg, var(--danger), #ff9a62);
+  --ring: 1.5px;                                                    /* thickness of that outline */
 }
 /* Dark theme: used when chosen explicitly, or when "system" and the device is dark */
 :root[data-theme="dark"] {
@@ -278,7 +279,7 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 
 /* ---- one thin gradient outline for every button ---- */
 .btn::before, .lang-btn::before, .dtp-nav::before, .dtp-period::before, .avatar-btn::before {
-  content: ""; position: absolute; inset: -1px; padding: 1px; border-radius: inherit;
+  content: ""; position: absolute; inset: -1px; padding: var(--ring); border-radius: inherit;
   background: var(--edge); pointer-events: none;
   /* cut out the middle so only a 1px ring is left, whatever the button is filled with */
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);

@@ -28,7 +28,8 @@ def test_every_kind_of_button_gets_the_same_thin_outline():
     for selector in (".lang-btn::before", ".dtp-nav::before", ".dtp-period::before",
                      ".avatar-btn::before"):
         assert rule_for(selector) == ring  # one shared rule
-    assert "padding: 1px" in ring and "var(--edge)" in ring       # 1px thick, gradient colour
+    assert "padding: var(--ring)" in ring and "var(--edge)" in ring   # thickness + gradient colour
+    assert re.search(r"--ring:\s*1\.5px", rule_for(":root"))          # a little thicker than 1px
     assert "mask-composite" in ring                                # only the ring, not the fill
 
 
