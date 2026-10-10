@@ -287,3 +287,9 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
 }
+
+/* Filled buttons: the outline floats just outside the fill, with a small gap, so it never blends into it */
+.btn:not(.ghost):not(.danger)::before, .btn.danger-solid::before {
+  inset: -5px; border-radius: 10px;
+}
+.dtp-period[aria-pressed="true"]::before { inset: -5px; border-radius: 12px; }

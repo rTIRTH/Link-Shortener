@@ -57,3 +57,15 @@ def test_outline_colours_exist_in_every_theme():
 def test_profile_icon_uses_the_outline(alice):
     page = alice.get("/dashboard").text
     assert 'class="avatar-btn"' in page
+
+
+def test_filled_buttons_float_the_outline_outside_the_fill():
+    """On a filled button an outline touching the fill is the same colour as it and vanishes."""
+    for selector in (".btn.danger-solid::before", '.dtp-period[aria-pressed="true"]::before'):
+        declarations = rule_for(selector)
+        inset = int(re.search(r"inset:\s*-(\d+)px", declarations).group(1))
+        assert inset >= 4, selector                      # clear of the 1px border plus the ring
+        assert "border-radius" in declarations, selector  # a bigger curve to match
+    assert "border-radius: 10px" in rule_for(".btn.danger-solid::before")
+    # outlined buttons keep the tight ring
+    assert "inset: -1px" in rule_for(".btn::before")
