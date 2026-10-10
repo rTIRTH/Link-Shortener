@@ -6,16 +6,17 @@
   --shadow: 0 8px 24px rgba(23, 32, 51, .12);
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Nirmala UI", "Noto Sans Devanagari", "Noto Sans Gujarati", sans-serif;
-  --accent2: #9333ea;                  /* purple */
-  --edge: var(--accent2);              /* the solid outline every button gets */
-  --edge-danger: var(--danger);        /* delete buttons keep a red one */
+  --accent2: #8b5cf6;
+  --purple: #9333ea;   /* a solid purple, for the one button whose blue fill hides a blue outline */
+  --edge: linear-gradient(100deg, var(--accent), var(--accent2));   /* the outline every button gets */
+  --edge-danger: linear-gradient(100deg, var(--danger), #ff9a62);
   --ring: 1.5px;                                                    /* thickness of that outline */
 }
 /* Dark theme: used when chosen explicitly, or when "system" and the device is dark */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --paper: #0f1420; --card: #171e2e; --ink: #e8ecf5; --muted: #98a2bd;
-  --line: #2a3350; --accent: #6b8cff; --accent-ink: #0f1420; --accent2: #b66dff;
+  --line: #2a3350; --accent: #6b8cff; --accent-ink: #0f1420; --accent2: #b66dff; --purple: #b66dff;
   --danger: #ff8a80; --ok-bg: #12301f; --ok: #7ddc9d; --err-bg: #3a1a18;
   --shadow: 0 8px 24px rgba(0, 0, 0, .5);
 }
@@ -23,7 +24,7 @@
   :root[data-theme="system"] {
     color-scheme: dark;
     --paper: #0f1420; --card: #171e2e; --ink: #e8ecf5; --muted: #98a2bd;
-    --line: #2a3350; --accent: #6b8cff; --accent-ink: #0f1420; --accent2: #b66dff;
+    --line: #2a3350; --accent: #6b8cff; --accent-ink: #0f1420; --accent2: #b66dff; --purple: #b66dff;
     --danger: #ff8a80; --ok-bg: #12301f; --ok: #7ddc9d; --err-bg: #3a1a18;
     --shadow: 0 8px 24px rgba(0, 0, 0, .5);
   }
@@ -277,7 +278,7 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 .lang-option .tick { color: var(--accent); }
 @media (max-width: 520px) { .lang-name { display: none; } .langmenu summary.lang-btn { padding-left: 10px; } }
 
-/* ---- one thin purple outline for every button ---- */
+/* ---- one thin gradient outline for every button ---- */
 .btn::before, .lang-btn::before, .dtp-nav::before, .dtp-period::before, .avatar-btn::before {
   content: ""; position: absolute; inset: -1px; padding: var(--ring); border-radius: inherit;
   background: var(--edge); pointer-events: none;
@@ -287,3 +288,6 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
 }
+
+/* The Shorten button: its blue fill hides the blue half of the outline, so it gets a solid purple one */
+.btn-purple { --edge: var(--purple); }

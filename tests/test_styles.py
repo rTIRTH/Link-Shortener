@@ -59,16 +59,20 @@ def test_profile_icon_uses_the_outline(alice):
     assert 'class="avatar-btn"' in page
 
 
-def test_outline_is_one_solid_purple_all_the_way_round():
+def test_ordinary_buttons_keep_the_blue_to_purple_gradient_outline():
     root = rule_for(":root")
-    assert re.search(r"--edge:\s*var\(--accent2\)\s*;", root)          # no gradient
-    assert "gradient" not in re.search(r"--edge:[^;]*;", root).group(0)
-    assert re.search(r"--accent2:\s*#9333ea", root)                      # purple on light
-    assert CSS.count("#b66dff") >= 2                                       # brighter purple on dark
-    # filled buttons use the same tight ring, so it shows against the blue fill
-    assert "inset: -1px" in rule_for(".btn::before")
-    assert "inset: -5px" not in CSS and "floats" not in CSS
+    assert re.search(r"--edge:\s*linear-gradient", root)
+    assert re.search(r"--edge-danger:\s*linear-gradient", root)
+    assert "inset: -1px" in rule_for(".btn::before")     # tight ring, no floating halo
+    assert "inset: -5px" not in CSS
 
 
-def test_delete_buttons_have_a_solid_red_outline():
-    assert re.search(r"--edge-danger:\s*var\(--danger\)\s*;", rule_for(":root"))
+def test_only_the_shorten_button_gets_a_solid_purple_outline(alice):
+    assert re.search(r"--edge:\s*var\(--purple\)", rule_for(".btn-purple"))
+    assert re.search(r"--purple:\s*#9333ea", rule_for(":root"))
+    assert CSS.count("--purple:") == 3  # light, dark, and "system" in a dark browser
+    page = alice.get("/dashboard").text
+    assert page.count("btn-purple") == 1
+    assert re.search(r'<button class="btn btn-purple" type="submit">\s*Shorten\s*</button>', page)
+    for other in ("/login", "/register", "/account"):     # no other button is touched
+        assert "btn-purple" not in alice.get(other).text
