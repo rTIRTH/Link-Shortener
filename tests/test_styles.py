@@ -67,12 +67,11 @@ def test_ordinary_buttons_keep_the_blue_to_purple_gradient_outline():
     assert "inset: -5px" not in CSS
 
 
-def test_only_the_shorten_button_gets_a_solid_purple_outline(alice):
-    assert re.search(r"--edge:\s*var\(--purple\)", rule_for(".btn-purple"))
-    assert re.search(r"--purple:\s*#9333ea", rule_for(":root"))
-    assert CSS.count("--purple:") == 3  # light, dark, and "system" in a dark browser
+def test_only_the_shorten_button_has_no_outline(alice):
+    assert "display: none" in rule_for(".btn-plain::before")
+    assert "--purple" not in CSS and "btn-purple" not in CSS      # the purple experiment is gone
     page = alice.get("/dashboard").text
-    assert page.count("btn-purple") == 1
-    assert re.search(r'<button class="btn btn-purple" type="submit">\s*Shorten\s*</button>', page)
-    for other in ("/login", "/register", "/account"):     # no other button is touched
-        assert "btn-purple" not in alice.get(other).text
+    assert page.count("btn-plain") == 1
+    assert re.search(r'<button class="btn btn-plain" type="submit">\s*Shorten\s*</button>', page)
+    for other in ("/login", "/register", "/account"):  # other buttons keep their outline
+        assert "btn-plain" not in alice.get(other).text
