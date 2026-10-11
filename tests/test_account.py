@@ -39,11 +39,36 @@ def get_user(app, username):
 
 # ---------- avatars ----------
 
-def test_all_twenty_avatar_files_exist():
-    assert len(AVATARS) == 20
-    folder = Path(__file__).resolve().parent.parent / "app" / "static" / "avatars"
+AVATAR_DIR = Path(__file__).resolve().parent.parent / "app" / "static" / "avatars"
+
+
+def test_there_are_thirty_avatars_and_every_file_exists():
+    assert len(AVATARS) == 30 and len(set(AVATARS)) == 30
     for key in AVATARS:
-        assert (folder / f"{key}.svg").is_file(), key
+        assert (AVATAR_DIR / f"{key}.svg").is_file(), key
+    on_disk = {p.stem for p in AVATAR_DIR.glob("*.svg")}
+    assert on_disk == set(AVATARS)  # no stray or forgotten files
+
+
+def test_every_avatar_is_a_different_picture():
+    pictures = {key: (AVATAR_DIR / f"{key}.svg").read_text(encoding="utf-8") for key in AVATARS}
+    assert len(set(pictures.values())) == len(AVATARS)
+    for key, svg in pictures.items():
+        assert 'viewBox="0 0 16 16"' in svg and svg.startswith("<svg"), key
+
+
+def test_avatar_files_match_the_generator_script():
+    """If someone edits scripts/make_avatars.py, the committed SVGs must be regenerated."""
+    import importlib.util
+
+    path = Path(__file__).resolve().parent.parent / "scripts" / "make_avatars.py"
+    spec = importlib.util.spec_from_file_location("make_avatars", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert list(module.ANIMALS) == AVATARS
+    for key, build in module.ANIMALS.items():
+        committed = (AVATAR_DIR / f"{key}.svg").read_text(encoding="utf-8")
+        assert committed == module.to_svg(build()), key
 
 
 def test_set_avatar_and_navbar_shows_it(alice):
@@ -65,7 +90,7 @@ def test_account_page_needs_login(client):
 def test_account_page_renders(alice):
     page = alice.get("/account")
     assert page.status_code == 200
-    assert page.text.count('type="radio" name="avatar"') == 20
+    assert page.text.count('type="radio" name="avatar"') == len(AVATARS) == 30
     assert "Delete account" in page.text
 
 

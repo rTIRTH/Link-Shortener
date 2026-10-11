@@ -146,6 +146,22 @@ def test_both_catalogs_have_the_same_sentences():
     assert set(CATALOGS["hi"]) == set(CATALOGS["gu"])
 
 
+def test_every_avatar_has_a_translated_name():
+    from app.profile import AVATARS
+
+    for key in AVATARS:
+        name = key.capitalize()
+        assert name in EXTRA_KEYS, f"add {name!r} to EXTRA_KEYS and both catalogs"
+        assert CATALOGS["hi"][name] and CATALOGS["gu"][name]
+
+
+def test_avatar_count_in_the_account_page_text_follows_the_list(alice):
+    alice.post("/language", data={"lang": "hi", "next": "/"})
+    assert "30 पिक्सेल जानवरों में से एक चुनें।" in alice.get("/account").text
+    alice.post("/language", data={"lang": "gu", "next": "/"})
+    assert "30 પિક્સેલ પ્રાણીઓમાંથી એક પસંદ કરો." in alice.get("/account").text
+
+
 def test_calendar_names_are_complete():
     for lang in LANGUAGES:
         assert len(i18n.MONTHS[lang]) == 12 and len(set(i18n.MONTHS[lang])) == 12

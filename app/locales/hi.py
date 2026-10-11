@@ -142,7 +142,7 @@ MESSAGES = {
     "Appearance": "रूप-रंग",
     "Delete account": "खाता हटाएँ",
     "Avatar": "अवतार",
-    "Pick one of the 20 pixel animals.": "20 पिक्सेल जानवरों में से एक चुनें।",
+    "Pick one of the {n} pixel animals.": "{n} पिक्सेल जानवरों में से एक चुनें।",
     "Choose your avatar": "अपना अवतार चुनें",
     "Save avatar": "अवतार सहेजें",
     "Your short links look like {example}. If you change your username, your old links keep working, and your previous names stay reserved for you ({used} of {max} used).":
@@ -292,4 +292,6 @@ MESSAGES = {
     "Bear": "भालू", "Frog": "मेंढक", "Owl": "उल्लू", "Penguin": "पेंगुइन", "Pig": "सूअर",
     "Lion": "शेर", "Tiger": "बाघ", "Monkey": "बंदर", "Koala": "कोआला", "Mouse": "चूहा",
     "Chicken": "मुर्गी", "Duck": "बत्तख", "Elephant": "हाथी", "Wolf": "भेड़िया", "Raccoon": "रैकून",
+    "Hamster": "हैम्स्टर", "Deer": "हिरण", "Giraffe": "जिराफ़", "Zebra": "ज़ेबरा", "Cow": "गाय",
+    "Sheep": "भेड़", "Hedgehog": "हेजहॉग", "Turtle": "कछुआ", "Bat": "चमगादड़", "Octopus": "ऑक्टोपस",
 }

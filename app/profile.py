@@ -2,7 +2,8 @@
 AVATARS = [
     "cat", "dog", "fox", "panda", "rabbit", "bear", "frog", "owl", "penguin", "pig",
     "lion", "tiger", "monkey", "koala", "mouse", "chicken", "duck", "elephant", "wolf",
-    "raccoon",
+    "raccoon", "hamster", "deer", "giraffe", "zebra", "cow", "sheep", "hedgehog", "turtle", "bat",
+    "octopus",
 ]
 DEFAULT_AVATAR = "cat"
 THEMES = ("system", "light", "dark")

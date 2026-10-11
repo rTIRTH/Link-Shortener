@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the 20 pixel-art animal avatars (16x16 SVG) into app/static/avatars/.
+"""Generate the pixel-art animal avatars (16x16 SVG) into app/static/avatars/.
 
 Run:  python scripts/make_avatars.py            (writes the SVG files)
       python scripts/make_avatars.py --preview  (also writes /tmp/avatars.png, needs Pillow)
@@ -311,12 +311,172 @@ def raccoon():
     return c
 
 
+def hamster():
+    c = Canvas("#ffe0ec")
+    fur, light, pink = "#e7a85c", "#fff1dc", "#ffb3c1"
+    round_ears(c, fur, pink, x=3, y=3, size=3)
+    c.rows({5: 4, 6: 3, 7: 2, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1, 13: 2, 14: 3}, fur)
+    c.rows({10: 2, 11: 2, 12: 2, 13: 3, 14: 4}, light)  # big round cheeks
+    c.rect(7, 5, 2, 3, "#c98840")
+    c.eyes()
+    c.srect(7, 10, 1, 1, "#ff8fa3")
+    c.srect(8, 10, 1, 1, "#ff8fa3")
+    c.rect(7, 12, 2, 1, EYE)
+    c.sput(3, 11, pink)
+    return c
+
+
+def deer():
+    c = Canvas("#d9f2d9")
+    antler, fur, light = "#8a5a2b", "#d29a5f", "#fff1dc"
+    c.srect(4, 1, 1, 4, antler)
+    c.sput(3, 2, antler)
+    c.sput(2, 1, antler)
+    c.sput(5, 2, antler)
+    c.sput(6, 1, antler)
+    c.srect(1, 5, 2, 2, fur)
+    c.sput(2, 6, "#ffb3c1")
+    c.rows(HEAD, fur)
+    c.sput(4, 6, light)
+    c.sput(3, 9, light)
+    c.srect(5, 10, 6, 4, light)
+    c.eyes()
+    c.rect(7, 11, 2, 1, EYE)
+    return c
+
+
+def giraffe():
+    c = Canvas("#cfe8ff")
+    skin, spot, muzzle = "#f2c04c", "#b8742a", "#f7dfa5"
+    c.srect(5, 2, 1, 3, skin)
+    c.sput(5, 1, spot)
+    c.srect(1, 5, 2, 2, skin)
+    c.rows(HEAD, skin)
+    c.srect(3, 7, 2, 2, spot)
+    c.rect(7, 5, 2, 2, spot)
+    c.srect(3, 12, 1, 1, spot)
+    c.srect(5, 10, 6, 4, muzzle)
+    c.eyes()
+    c.srect(6, 11, 1, 2, EYE)
+    return c
+
+
+def zebra():
+    c = Canvas("#ffe9b8")
+    white, muzzle = "#f7f7f7", "#b9bec6"
+    pointy_ears(c, white, EYE, x=3, y=2, h=3)
+    c.rect(7, 2, 2, 4, EYE)
+    c.rows(HEAD, white)
+    c.srect(3, 7, 1, 4, EYE)
+    c.srect(5, 5, 1, 3, EYE)
+    c.rect(7, 5, 2, 2, EYE)
+    c.srect(5, 10, 6, 4, muzzle)
+    c.eyes()
+    c.srect(6, 11, 1, 2, EYE)
+    return c
+
+
+def cow():
+    c = Canvas("#d9f2d9")
+    horn, white = "#efe3c2", "#f5f5f5"
+    c.srect(3, 3, 1, 2, horn)
+    c.srect(0, 5, 3, 2, white)
+    c.sput(1, 6, "#ffb3c1")
+    c.rows(HEAD, white)
+    c.rect(3, 6, 2, 3, EYE)
+    c.rect(9, 5, 3, 2, EYE)
+    c.rect(4, 10, 8, 4, "#ffb3c1")
+    c.eyes()
+    c.srect(6, 11, 1, 2, EYE)
+    return c
+
+
+def sheep():
+    c = Canvas("#cfe8ff")
+    wool, face = "#f4f1f6", "#3d3340"
+    c.srect(0, 9, 3, 2, face)
+    c.rows({2: 6, 3: 4, 4: 3, 5: 2, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 2, 12: 3, 13: 4}, wool)
+    c.sput(4, 2, wool)
+    c.sput(3, 3, wool)
+    c.rows({6: 5, 7: 4, 8: 4, 9: 4, 10: 4, 11: 4, 12: 5, 13: 6}, face)
+    c.srect(5, 8, 1, 2, WHITE)
+    c.rect(7, 11, 2, 1, "#ff8fa3")
+    return c
+
+
+def hedgehog():
+    c = Canvas("#d9f2d9")
+    spike, tip, skin = "#7a5a3a", "#4a3626", "#f2cfa5"
+    c.rows({3: 5, 4: 3, 5: 2, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 2, 12: 3, 13: 4}, spike)
+    for x in (5, 7, 8, 10):
+        c.put(x, 2, tip)
+    for x, y in ((3, 3), (12, 3), (1, 5), (14, 5), (0, 7), (15, 7), (0, 10), (15, 10),
+                 (1, 11), (14, 11)):
+        c.put(x, y, tip)
+    c.sput(4, 5, "#9a7a52")
+    c.sput(2, 8, "#9a7a52")
+    c.rows({7: 5, 8: 4, 9: 4, 10: 4, 11: 4, 12: 5, 13: 6}, skin)
+    c.srect(5, 9, 1, 2, EYE)
+    c.rect(7, 11, 2, 1, EYE)
+    return c
+
+
+def turtle():
+    c = Canvas("#cfe8ff")
+    shell, plate, skin = "#3f7d3a", "#5aa24a", "#8bd45a"
+    c.rows({2: 5, 3: 3, 4: 2, 5: 2, 6: 2}, shell)
+    c.rect(7, 3, 2, 3, plate)
+    c.srect(4, 4, 2, 2, plate)
+    c.rows({7: 4, 8: 3, 9: 3, 10: 3, 11: 3, 12: 4, 13: 5}, skin)
+    c.srect(5, 9, 1, 2, EYE)
+    c.rect(6, 12, 4, 1, EYE)
+    c.sput(4, 11, "#ffb3c1")
+    return c
+
+
+def bat():
+    c = Canvas("#e8d9ff")
+    body, wing = "#5b4b8a", "#4a3c73"
+    pointy_ears(c, body, "#ffb3c1", x=2, y=1, h=4)
+    c.srect(0, 9, 2, 3, wing)
+    c.sput(1, 12, wing)
+    c.rows(HEAD, body)
+    c.srect(5, 8, 2, 2, WHITE)
+    c.srect(6, 9, 1, 1, EYE)
+    c.rect(6, 11, 4, 1, "#3b2f63")
+    c.srect(6, 12, 1, 1, WHITE)
+    return c
+
+
+def octopus():
+    c = Canvas("#d9f2ef")
+    body, spot, light = "#d86fb0", "#b8508f", "#f6b6dc"
+    c.rows({1: 5, 2: 3, 3: 2, 4: 2, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 2, 12: 3}, body)
+    c.rect(7, 2, 2, 1, light)
+    c.sput(4, 3, light)
+    c.sput(3, 5, spot)
+    c.sput(5, 4, spot)
+    c.srect(4, 6, 3, 3, WHITE)
+    c.srect(5, 7, 1, 2, EYE)
+    c.sput(3, 10, "#ff9bc9")
+    c.rect(7, 10, 2, 1, EYE)
+    for x in (2, 5, 9, 12):
+        c.rect(x, 13, 2, 3, body)
+    c.put(1, 15, body)
+    c.put(14, 15, body)
+    c.put(7, 15, body)
+    c.put(8, 15, body)
+    return c
+
+
 ANIMALS = {
     "cat": cat, "dog": dog, "fox": fox, "panda": panda, "rabbit": rabbit,
     "bear": bear, "frog": frog, "owl": owl, "penguin": penguin, "pig": pig,
     "lion": lion, "tiger": tiger, "monkey": monkey, "koala": koala, "mouse": mouse,
     "chicken": chicken, "duck": duck, "elephant": elephant, "wolf": wolf,
     "raccoon": raccoon,
+    "hamster": hamster, "deer": deer, "giraffe": giraffe, "zebra": zebra, "cow": cow,
+    "sheep": sheep, "hedgehog": hedgehog, "turtle": turtle, "bat": bat, "octopus": octopus,
 }
 
 
@@ -359,7 +519,7 @@ def main():
 
     if "--preview" in sys.argv:
         from PIL import Image, ImageDraw
-        scale, cols = 10, 5
+        scale, cols = 10, 6
         rows = (len(ANIMALS) + cols - 1) // cols
         cell = SIZE * scale
         sheet = Image.new("RGB", (cols * (cell + 12) + 12, rows * (cell + 28) + 12), "white")
