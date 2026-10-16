@@ -288,5 +288,6 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
   mask-composite: exclude;
 }
 
-/* The Shorten button is a plain filled button: no outline */
-.btn-plain::before { display: none; }
+/* Filled buttons (blue, or solid red) have no outline: it would just blend into the fill */
+.btn:not(.ghost):not(.danger)::before { display: none; }
+.dtp-period[aria-pressed="true"]::before { display: none; }

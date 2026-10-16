@@ -67,11 +67,17 @@ def test_ordinary_buttons_keep_the_blue_to_purple_gradient_outline():
     assert "inset: -5px" not in CSS
 
 
-def test_only_the_shorten_button_has_no_outline(alice):
-    assert "display: none" in rule_for(".btn-plain::before")
-    assert "--purple" not in CSS and "btn-purple" not in CSS      # the purple experiment is gone
-    page = alice.get("/dashboard").text
-    assert page.count("btn-plain") == 1
-    assert re.search(r'<button class="btn btn-plain" type="submit">\s*Shorten\s*</button>', page)
-    for other in ("/login", "/register", "/account"):  # other buttons keep their outline
-        assert "btn-plain" not in alice.get(other).text
+def test_filled_buttons_have_no_outline_but_outlined_ones_do(alice):
+    filled = rule_for(".btn:not(.ghost):not(.danger)::before")
+    assert "display: none" in filled
+    assert "display: none" in rule_for('.dtp-period[aria-pressed="true"]::before')
+    assert "display: none" not in rule_for(".btn::before")      # the shared outline stays on
+    assert "btn-plain" not in CSS and "btn-purple" not in CSS    # one-off experiments are gone
+    # the buttons from the settings page are plain "btn" buttons, so the rule above covers them
+    account = alice.get("/account").text
+    for label in ("Save avatar", "Change username", "Change password", "Save appearance"):
+        pattern = rf'<button class="btn" type="submit">\s*{label}\s*</button>'
+        assert re.search(pattern, account), label
+    assert 'class="btn danger-solid"' in account  # Delete my account: filled too
+    assert "btn ghost small" in account  # Log out: outlined, keeps its ring
+    assert "btn-plain" not in alice.get("/dashboard").text
