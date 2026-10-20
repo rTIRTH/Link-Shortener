@@ -57,6 +57,7 @@ EXTRA_KEYS = [
     "Cat", "Dog", "Fox", "Panda", "Rabbit", "Bear", "Frog", "Owl", "Penguin", "Pig", "Lion",
     "Tiger", "Monkey", "Koala", "Mouse", "Chicken", "Duck", "Elephant", "Wolf", "Raccoon",
     "Hamster", "Deer", "Giraffe", "Zebra", "Cow", "Sheep", "Hedgehog", "Turtle", "Bat", "Octopus",
+    "Ladybug", "Bee", "Parrot", "Crocodile", "Whale", "Sloth",
     "Your Link Shortener verification code",
     "Your Link Shortener verification code is {code}.\n\nIt expires in 10 minutes. "
     "If you did not ask to change your email, you can ignore this message.",

@@ -469,6 +469,98 @@ def octopus():
     return c
 
 
+def ladybug():
+    c = Canvas("#d9f2d9")
+    red = "#e53935"
+    c.sput(6, 3, EYE)
+    c.sput(5, 2, EYE)
+    c.sput(4, 1, EYE)
+    c.rows({3: 5, 4: 4, 5: 3, 6: 3}, EYE)
+    c.srect(5, 4, 1, 2, WHITE)
+    c.rows({7: 3, 8: 2, 9: 2, 10: 2, 11: 2, 12: 2, 13: 3, 14: 4}, red)
+    c.rect(7, 7, 2, 8, EYE)
+    c.srect(3, 9, 2, 2, EYE)
+    c.srect(4, 12, 2, 2, EYE)
+    return c
+
+
+def bee():
+    c = Canvas("#cfe8ff")
+    yellow, wing = "#f7d24a", "#dff1ff"
+    c.sput(6, 4, EYE)
+    c.sput(5, 3, EYE)
+    c.sput(4, 2, EYE)
+    c.sput(3, 2, EYE)
+    c.srect(0, 6, 2, 3, wing)
+    c.rows(HEAD, yellow)
+    c.rect(3, 6, 10, 1, EYE)
+    c.rect(3, 13, 10, 1, EYE)
+    c.eyes()
+    c.sput(4, 10, "#ff9bc9")
+    c.rect(7, 11, 2, 1, EYE)
+    return c
+
+
+def parrot():
+    c = Canvas("#d9f2ef")
+    red, blue = "#e53935", "#2f7fd1"
+    c.rect(6, 3, 4, 2, red)
+    c.rect(7, 2, 2, 1, red)
+    c.rows(HEAD, red)
+    c.srect(2, 10, 2, 3, blue)
+    c.srect(4, 7, 3, 4, WHITE)
+    c.srect(5, 8, 1, 2, EYE)
+    c.rect(6, 9, 4, 3, "#f5c542")
+    c.rect(7, 12, 2, 2, "#d9822b")
+    return c
+
+
+def crocodile():
+    c = Canvas("#ffe9b8")
+    green, dark, belly = "#4f8a3c", "#356a2a", "#cfe9a8"
+    c.srect(4, 3, 2, 3, green)               # eyes sit close together on top of the head
+    c.sput(5, 4, "#f5c542")
+    c.rows({6: 3, 7: 3, 8: 2, 9: 2, 10: 2, 11: 2, 12: 2, 13: 3}, green)
+    c.rect(7, 5, 2, 2, dark)                 # ridge between the eyes
+    c.rows({8: 3, 9: 3, 10: 3, 11: 3, 12: 3}, belly)   # long pale snout
+    c.srect(6, 9, 1, 1, dark)                # nostrils
+    c.rect(3, 12, 10, 1, dark)               # mouth line
+    c.sput(4, 11, WHITE)                     # upper teeth
+    c.sput(6, 11, WHITE)
+    c.sput(5, 13, WHITE)                     # lower teeth, in between
+    c.rect(7, 13, 2, 1, WHITE)
+    return c
+
+
+def whale():
+    c = Canvas("#d9f2ef")
+    blue, belly, water = "#4a8fe0", "#cfe8ff", "#9fd0ff"
+    c.rect(7, 2, 2, 2, water)
+    c.sput(6, 2, water)
+    c.sput(5, 1, water)
+    c.srect(0, 9, 2, 2, blue)
+    c.rows({4: 4, 5: 3, 6: 2, 7: 2, 8: 2, 9: 2, 10: 2, 11: 2, 12: 3, 13: 4}, blue)
+    c.rows({10: 3, 11: 3, 12: 4, 13: 5}, belly)
+    c.eyes()
+    c.sput(3, 10, "#ff9bc9")
+    c.rect(6, 11, 4, 1, EYE)
+    return c
+
+
+def sloth():
+    c = Canvas("#d9f2d9")
+    fur, face = "#9b7b5a", "#e8d6b0"
+    c.srect(3, 4, 2, 2, fur)
+    c.rows(HEAD, fur)
+    c.rows({7: 3, 8: 3, 9: 3, 10: 3, 11: 3, 12: 4, 13: 5}, face)
+    c.srect(3, 8, 4, 2, "#4a3626")
+    c.srect(5, 8, 1, 2, WHITE)
+    c.rect(7, 10, 2, 1, "#4a3626")
+    c.srect(6, 12, 1, 1, "#4a3626")
+    c.rect(7, 13, 2, 1, "#4a3626")
+    return c
+
+
 ANIMALS = {
     "cat": cat, "dog": dog, "fox": fox, "panda": panda, "rabbit": rabbit,
     "bear": bear, "frog": frog, "owl": owl, "penguin": penguin, "pig": pig,
@@ -477,6 +569,8 @@ ANIMALS = {
     "raccoon": raccoon,
     "hamster": hamster, "deer": deer, "giraffe": giraffe, "zebra": zebra, "cow": cow,
     "sheep": sheep, "hedgehog": hedgehog, "turtle": turtle, "bat": bat, "octopus": octopus,
+    "ladybug": ladybug, "bee": bee, "parrot": parrot, "crocodile": crocodile, "whale": whale,
+    "sloth": sloth,
 }
 
 
@@ -519,7 +613,7 @@ def main():
 
     if "--preview" in sys.argv:
         from PIL import Image, ImageDraw
-        scale, cols = 10, 6
+        scale, cols = 10, 9
         rows = (len(ANIMALS) + cols - 1) // cols
         cell = SIZE * scale
         sheet = Image.new("RGB", (cols * (cell + 12) + 12, rows * (cell + 28) + 12), "white")

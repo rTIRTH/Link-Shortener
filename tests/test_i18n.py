@@ -155,11 +155,11 @@ def test_every_avatar_has_a_translated_name():
         assert CATALOGS["hi"][name] and CATALOGS["gu"][name]
 
 
-def test_avatar_count_in_the_account_page_text_follows_the_list(alice):
-    alice.post("/language", data={"lang": "hi", "next": "/"})
-    assert "30 पिक्सेल जानवरों में से एक चुनें।" in alice.get("/account").text
-    alice.post("/language", data={"lang": "gu", "next": "/"})
-    assert "30 પિક્સેલ પ્રાણીઓમાંથી એક પસંદ કરો." in alice.get("/account").text
+def test_account_page_has_no_avatar_count_sentence(alice):
+    for lang in ("en", "hi", "gu"):
+        alice.post("/language", data={"lang": lang, "next": "/"})
+        page = alice.get("/account").text
+        assert "pixel animals" not in page and "पिक्सेल" not in page and "પિક્સેલ" not in page
 
 
 def test_calendar_names_are_complete():

@@ -81,3 +81,14 @@ def test_filled_buttons_have_no_outline_but_outlined_ones_do(alice):
     assert 'class="btn danger-solid"' in account  # Delete my account: filled too
     assert "btn ghost small" in account  # Log out: outlined, keeps its ring
     assert "btn-plain" not in alice.get("/dashboard").text
+
+
+def test_avatar_grid_always_ends_on_a_full_row():
+    """The picker is 9, 6 or 4 columns wide; the avatar count must divide by each."""
+    from app.profile import AVATARS
+
+    assert "repeat(9, 1fr)" in rule_for(".avatar-grid")
+    assert "repeat(6, 1fr)" in CSS and "repeat(4, 1fr)" in CSS
+    for columns in (9, 6, 4):
+        gap = f"{len(AVATARS)} avatars leave a gap with {columns} columns"
+        assert len(AVATARS) % columns == 0, gap

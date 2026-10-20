@@ -42,8 +42,8 @@ def get_user(app, username):
 AVATAR_DIR = Path(__file__).resolve().parent.parent / "app" / "static" / "avatars"
 
 
-def test_there_are_thirty_avatars_and_every_file_exists():
-    assert len(AVATARS) == 30 and len(set(AVATARS)) == 30
+def test_there_are_36_avatars_and_every_file_exists():
+    assert len(AVATARS) == 36 and len(set(AVATARS)) == 36
     for key in AVATARS:
         assert (AVATAR_DIR / f"{key}.svg").is_file(), key
     on_disk = {p.stem for p in AVATAR_DIR.glob("*.svg")}
@@ -90,7 +90,7 @@ def test_account_page_needs_login(client):
 def test_account_page_renders(alice):
     page = alice.get("/account")
     assert page.status_code == 200
-    assert page.text.count('type="radio" name="avatar"') == len(AVATARS) == 30
+    assert page.text.count('type="radio" name="avatar"') == len(AVATARS) == 36
     assert "Delete account" in page.text
 
 
