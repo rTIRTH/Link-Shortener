@@ -11,6 +11,7 @@ from app.i18n import (
     CATALOGS,
     EXTRA_KEYS,
     JS_STRINGS,
+    LANGUAGE_ICONS,
     LANGUAGES,
     detect_language,
     js_data,
@@ -406,3 +407,25 @@ def test_logo_and_dashboard_link_share_a_text_baseline():
     css = (APP / "static" / "style.css").read_text(encoding="utf-8")
     rule = re.search(r"\.topbar-left\s*\{([^}]*)\}", css).group(1)
     assert "align-items: baseline" in rule  # centring the boxes left the smaller text sitting high
+
+
+def test_language_button_icon_has_a_letter_for_each_language():
+    assert set(LANGUAGE_ICONS) == set(LANGUAGES)
+    assert LANGUAGE_ICONS["en"] == ("A", "अ")    # English: big A, small Hindi letter
+    assert LANGUAGE_ICONS["hi"] == ("अ", "A")    # Hindi: big Hindi letter, small English A
+    assert LANGUAGE_ICONS["gu"] == ("અ", "A")    # Gujarati: big Gujarati letter, small English A
+    for big, small in LANGUAGE_ICONS.values():
+        assert big != small
+
+
+@pytest.mark.parametrize("lang,big,small", [("en", "A", "अ"), ("hi", "अ", "A"), ("gu", "અ", "A")])
+def test_language_button_shows_the_matching_letters(client, lang, big, small):
+    client.cookies.set("lang", lang)
+    page = client.get("/login").text
+    assert f'<span class="la">{big}</span><span class="lb">{small}</span>' in page
+
+
+def test_the_icon_follows_the_language_after_switching(alice):
+    for lang, big in (("hi", "अ"), ("gu", "અ"), ("en", "A")):
+        alice.post("/language", data={"lang": lang, "next": "/"})
+        assert f'<span class="la">{big}</span>' in alice.get("/dashboard").text

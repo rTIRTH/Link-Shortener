@@ -8,6 +8,8 @@ from markupsafe import Markup
 from .locales import gu, hi
 
 LANGUAGES = {"en": "English", "hi": "हिन्दी", "gu": "ગુજરાતી"}  # each in its own script
+# Letters on the language button: (big = the language you are using, small = the other one).
+LANGUAGE_ICONS = {"en": ("A", "अ"), "hi": ("अ", "A"), "gu": ("અ", "A")}
 DEFAULT_LANGUAGE = "en"
 CATALOGS = {"hi": hi.MESSAGES, "gu": gu.MESSAGES}
 
