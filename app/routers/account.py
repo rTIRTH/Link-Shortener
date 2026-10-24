@@ -1,7 +1,3 @@
-import hashlib
-import hmac
-import secrets
-from datetime import timedelta
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
@@ -16,6 +12,14 @@ from ..deps import require_user
 from ..i18n import EMAIL_BODY, EMAIL_SUBJECT, get_lang, translate
 from ..mailer import email_enabled, send_email
 from ..models import Click, EmailChange, Link, User, UsernameAlias, as_utc, utcnow
+from ..otp import (
+    CODE_LIFETIME,
+    MAX_CODE_ATTEMPTS,
+    RESEND_AFTER_SECONDS,
+    codes_match,
+    hash_code,
+    new_code,
+)
 from ..profile import AVATARS, MAX_OLD_USERNAMES, THEMES
 from ..security import hash_password, verify_password
 from ..templating import flash, render
@@ -24,9 +28,6 @@ from .dashboard import cache_key
 
 router = APIRouter(prefix="/account")
 
-CODE_LIFETIME = timedelta(minutes=10)
-RESEND_AFTER_SECONDS = 60
-MAX_CODE_ATTEMPTS = 5
 
 
 def back(request: Request, message: str, category: str = "error", anchor: str = "", **params):
@@ -44,8 +45,7 @@ def password_error(request: Request, user: User, password: str) -> str | None:
 
 
 def code_hash(user_id: int, new_email: str, code: str) -> str:
-    message = f"{user_id}:{new_email}:{code}".encode()
-    return hmac.new(settings.secret_key.encode(), message, hashlib.sha256).hexdigest()
+    return hash_code(str(user_id), new_email, code)
 
 
 def live_pending(db: Session, user: User) -> EmailChange | None:
@@ -154,7 +154,7 @@ def change_password(request: Request, current_password: str = Form(...),
 
 def issue_code(db: Session, user: User, new_email: str, lang: str = "en") -> bool:
     """Create (or replace) the pending change and email the code. True if it was sent."""
-    code = f"{secrets.randbelow(1_000_000):06d}"
+    code = new_code()
     pending = db.get(EmailChange, user.id)
     if pending is None:
         pending = EmailChange(user_id=user.id)
@@ -230,7 +230,7 @@ def verify_code(request: Request, code: str = Form(...), user: User = Depends(re
 
     expected = pending.code_hash
     given = code_hash(user.id, pending.new_email, code.strip())
-    if not hmac.compare_digest(expected, given):
+    if not codes_match(expected, given):
         pending.attempts += 1
         too_many = pending.attempts >= MAX_CODE_ATTEMPTS
         if too_many:
@@ -246,6 +246,7 @@ def verify_code(request: Request, code: str = Form(...), user: User = Depends(re
         db.commit()
         return back(request, "That email was just taken by another account.", anchor="#email")
     user.email = pending.new_email
+    user.email_verified_at = utcnow()  # the code proved they can read this address
     db.delete(pending)
     db.commit()
     return back(request, "Email changed to {email}.", "success", "#email", email=user.email)

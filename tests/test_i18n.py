@@ -81,6 +81,10 @@ def python_strings() -> tuple[set[str], list[str]]:
                             break
                 elif name == "HTTPException" and len(node.args) > 1:
                     take(node.args[1], where)
+                elif name == "translate" and len(node.args) > 1:
+                    take(node.args[1], where)
+                elif name == "start_over" and len(node.args) > 1:
+                    take(node.args[1], where)
                 elif name == "ValueError" and node.args:
                     take(node.args[0], where)
                 for kw in node.keywords:

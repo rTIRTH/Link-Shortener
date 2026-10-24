@@ -286,6 +286,19 @@ MESSAGES = {
     "Your Link Shortener verification code": "તમારો Link Shortener ચકાસણી કોડ",
     "Your Link Shortener verification code is {code}.\n\nIt expires in 10 minutes. If you did not ask to change your email, you can ignore this message.":
         "તમારો Link Shortener ચકાસણી કોડ {code} છે.\n\nતે 10 મિનિટમાં સમાપ્ત થઈ જશે. જો તમે ઇમેઇલ બદલવા માટે કહ્યું ન હોય, તો તમે આ સંદેશને અવગણી શકો છો.",
+    # ---- email check at sign-up ----
+    "Verify and create account": "ચકાસો અને એકાઉન્ટ બનાવો",
+    "Use a different email": "બીજો ઇમેઇલ વાપરો",
+    "That sign-up has expired. Please start again.": "આ સાઇન-અપની સમયમર્યાદા પૂરી થઈ ગઈ છે. કૃપા કરીને ફરી શરૂ કરો.",
+    "Too many codes were requested for this email. Try again in an hour.":
+        "આ ઇમેઇલ માટે ઘણા બધા કોડ માંગવામાં આવ્યા. એક કલાક પછી ફરી પ્રયત્ન કરો.",
+    "Sign-ups are very busy right now. Please try again later.":
+        "હમણાં સાઇન-અપ પર બહુ ભીડ છે. કૃપા કરીને પછી ફરી પ્રયત્ન કરો.",
+    "That username or email was just taken. Please start again.":
+        "આ યુઝરનેમ અથવા ઇમેઇલ હમણાં જ લેવાઈ ગયું. કૃપા કરીને ફરી શરૂ કરો.",
+    "Your Link Shortener sign-up code": "તમારો Link Shortener સાઇન-અપ કોડ",
+    "Your Link Shortener sign-up code is {code}.\n\nIt expires in 10 minutes. If you did not try to sign up, you can ignore this message.":
+        "તમારો Link Shortener સાઇન-અપ કોડ {code} છે.\n\nતે 10 મિનિટમાં સમાપ્ત થઈ જશે. જો તમે સાઇન અપ કરવાનો પ્રયાસ ન કર્યો હોય, તો તમે આ સંદેશને અવગણી શકો છો.",
     # ---- avatar names ----
     "Cat": "બિલાડી", "Dog": "કૂતરો", "Fox": "શિયાળ", "Panda": "પાન્ડા", "Rabbit": "સસલું",
     "Bear": "રીંછ", "Frog": "દેડકો", "Owl": "ઘુવડ", "Penguin": "પેંગ્વિન", "Pig": "ડુક્કર",

@@ -234,9 +234,13 @@ def test_expired_code_rejected(alice, app, sent):
     assert get_user(app, "alice").email == "alice@example.com"
 
 
-def test_email_request_needs_password_and_unique_email(alice, make_client, sent):
+def test_email_request_needs_password_and_unique_email(alice, make_client, sent, monkeypatch):
     bob = make_client()
+    # Bob needs a real account for his email to count as taken. With email switched on, signing
+    # up would only leave him waiting for a code, so create him with email switched off.
+    monkeypatch.setattr(settings, "email_backend", "none")
     register(bob, "bob")
+    monkeypatch.setattr(settings, "email_backend", "console")
     wrong_pw = {"new_email": "x@example.com", "password": "wrong-pass"}
     alice.post("/account/email/request", data=wrong_pw)
     alice.post("/account/email/request", data={"new_email": "bob@example.com", "password": PW})

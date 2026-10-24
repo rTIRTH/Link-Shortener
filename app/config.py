@@ -22,6 +22,8 @@ class Settings:
         self.base_url = os.getenv("BASE_URL", "").rstrip("/")
         self.https_only = os.getenv("HTTPS_ONLY", "false").lower() == "true"
         self.cache_ttl = int(os.getenv("CACHE_TTL", "3600"))
+        # Most sign-up codes the site will email per day (Brevo's free plan allows about 300 emails)
+        self.signup_code_daily_limit = int(os.getenv("SIGNUP_CODES_PER_DAY", "200"))
         # Email (for OTP codes). Render's free tier blocks SMTP, so we use HTTPS email APIs.
         self.brevo_api_key = os.getenv("BREVO_API_KEY", "")
         self.resend_api_key = os.getenv("RESEND_API_KEY", "")

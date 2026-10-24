@@ -286,6 +286,19 @@ MESSAGES = {
     "Your Link Shortener verification code": "आपका Link Shortener सत्यापन कोड",
     "Your Link Shortener verification code is {code}.\n\nIt expires in 10 minutes. If you did not ask to change your email, you can ignore this message.":
         "आपका Link Shortener सत्यापन कोड {code} है।\n\nयह 10 मिनट में समाप्त हो जाएगा। अगर आपने ईमेल बदलने के लिए नहीं कहा था, तो आप इस संदेश को अनदेखा कर सकते हैं।",
+    # ---- email check at sign-up ----
+    "Verify and create account": "सत्यापित करें और खाता बनाएँ",
+    "Use a different email": "दूसरा ईमेल इस्तेमाल करें",
+    "That sign-up has expired. Please start again.": "यह साइन-अप समाप्त हो गया है। कृपया फिर से शुरू करें।",
+    "Too many codes were requested for this email. Try again in an hour.":
+        "इस ईमेल के लिए बहुत ज़्यादा कोड माँगे गए। एक घंटे बाद फिर कोशिश करें।",
+    "Sign-ups are very busy right now. Please try again later.":
+        "अभी साइन-अप पर बहुत भीड़ है। कृपया बाद में फिर कोशिश करें।",
+    "That username or email was just taken. Please start again.":
+        "यह यूज़रनेम या ईमेल अभी-अभी किसी ने ले लिया। कृपया फिर से शुरू करें।",
+    "Your Link Shortener sign-up code": "आपका Link Shortener साइन-अप कोड",
+    "Your Link Shortener sign-up code is {code}.\n\nIt expires in 10 minutes. If you did not try to sign up, you can ignore this message.":
+        "आपका Link Shortener साइन-अप कोड {code} है।\n\nयह 10 मिनट में समाप्त हो जाएगा। अगर आपने साइन अप करने की कोशिश नहीं की थी, तो आप इस संदेश को अनदेखा कर सकते हैं।",
     # ---- avatar names ----
     "Cat": "बिल्ली", "Dog": "कुत्ता", "Fox": "लोमड़ी", "Panda": "पांडा", "Rabbit": "खरगोश",
     "Bear": "भालू", "Frog": "मेंढक", "Owl": "उल्लू", "Penguin": "पेंगुइन", "Pig": "सूअर",

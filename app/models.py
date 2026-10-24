@@ -29,6 +29,10 @@ class User(Base):
     avatar: Mapped[str] = mapped_column(String(32), default="cat", server_default="cat")
     theme: Mapped[str] = mapped_column(String(8), default="system", server_default="system")
     language: Mapped[str] = mapped_column(String(5), default="en", server_default="en")
+    # When the email address was confirmed with a code (None = never confirmed)
+    email_verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     links: Mapped[list["Link"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"
@@ -99,3 +103,19 @@ class EmailChange(Base):
     attempts: Mapped[int] = mapped_column(Integer, default=0)
 
     user: Mapped[User] = relationship(back_populates="email_change")
+
+
+class PendingSignup(Base):
+    """A sign-up waiting for its emailed code. No account (and no username) exists until then."""
+
+    __tablename__ = "pending_signups"
+
+    email: Mapped[str] = mapped_column(String(255), primary_key=True)
+    username: Mapped[str] = mapped_column(String(20))
+    password_hash: Mapped[str] = mapped_column(String(255))
+    language: Mapped[str] = mapped_column(String(5), default="en")
+    code_hash: Mapped[str] = mapped_column(String(64))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

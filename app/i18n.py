@@ -52,6 +52,18 @@ JS_STRINGS = {
     "example": "e.g. {example}",
 }
 
+# Texts of the emails we send.
+EMAIL_SUBJECT = "Your Link Shortener verification code"
+EMAIL_BODY = (
+    "Your Link Shortener verification code is {code}.\n\nIt expires in 10 minutes. "
+    "If you did not ask to change your email, you can ignore this message."
+)
+SIGNUP_EMAIL_SUBJECT = "Your Link Shortener sign-up code"
+SIGNUP_EMAIL_BODY = (
+    "Your Link Shortener sign-up code is {code}.\n\nIt expires in 10 minutes. "
+    "If you did not try to sign up, you can ignore this message."
+)
+
 # Sentences that are looked up dynamically (so a text scan cannot find them).
 EXTRA_KEYS = [
     "desktop", "mobile", "tablet", "bot", "Direct",
@@ -60,13 +72,8 @@ EXTRA_KEYS = [
     "Tiger", "Monkey", "Koala", "Mouse", "Chicken", "Duck", "Elephant", "Wolf", "Raccoon",
     "Hamster", "Deer", "Giraffe", "Zebra", "Cow", "Sheep", "Hedgehog", "Turtle", "Bat", "Octopus",
     "Ladybug", "Bee", "Parrot", "Crocodile", "Whale", "Sloth",
-    "Your Link Shortener verification code",
-    "Your Link Shortener verification code is {code}.\n\nIt expires in 10 minutes. "
-    "If you did not ask to change your email, you can ignore this message.",
+    EMAIL_SUBJECT, EMAIL_BODY, SIGNUP_EMAIL_SUBJECT, SIGNUP_EMAIL_BODY,
 ]
-
-EMAIL_SUBJECT = EXTRA_KEYS[-2]
-EMAIL_BODY = EXTRA_KEYS[-1]
 
 
 def detect_language(accept_language: str) -> str:
