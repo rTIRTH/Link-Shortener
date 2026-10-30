@@ -295,3 +295,34 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 /* Filled buttons (blue, or solid red) have no outline: it would just blend into the fill */
 .btn:not(.ghost):not(.danger)::before { display: none; }
 .dtp-period[aria-pressed="true"]::before { display: none; }
+
+/* ---- profile photo: pencil on the avatar, and the editor pop-up ---- */
+.avatar-edit { position: relative; width: 72px; height: 72px; flex: none; }
+.avatar-edit-btn { position: absolute; inset: 0; border: 0; border-radius: 50%; display: grid; place-items: center;
+                   background: rgba(10, 14, 25, .6); color: #fff; cursor: pointer; opacity: 0; transition: opacity .15s; }
+.avatar-edit:hover .avatar-edit-btn, .avatar-edit-btn:focus-visible { opacity: 1; }
+@media (hover: none) {  /* touch screens have no hover: show a small pencil badge instead */
+  .avatar-edit-btn { inset: auto -4px -4px auto; width: 28px; height: 28px; opacity: 1;
+                     background: var(--accent); color: var(--accent-ink); }
+  .avatar-edit-btn svg { width: 15px; height: 15px; }
+}
+img.avatar[src^="/account/photo"] { image-rendering: auto; }  /* real photos must stay smooth */
+
+.photo-dialog { width: min(92vw, 380px); padding: 20px; border: 1px solid var(--line); border-radius: 14px;
+                background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+.photo-dialog::backdrop { background: rgba(8, 12, 22, .6); backdrop-filter: blur(2px); }
+.pd-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pd-head h2 { margin: 0; font-size: 1.1rem; }
+.pd-close { border: 0; background: none; color: var(--muted); font-size: 1.6rem; line-height: 1; cursor: pointer; }
+.pd-step[hidden], .pd-error[hidden] { display: none; }
+.pd-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 0; }
+.pd-remove { margin: 14px 0 0; }
+.pd-stage { display: flex; justify-content: center; }
+.pd-stage canvas { width: 100%; max-width: 280px; aspect-ratio: 1; border-radius: 12px; background: #111;
+                   touch-action: none; cursor: grab; }
+.pd-stage canvas:active { cursor: grabbing; }
+.pd-hint { margin: 8px 0 4px; font-size: .85rem; text-align: center; }
+.pd-controls { display: grid; gap: 8px; }
+.pd-controls input[type="range"] { padding: 0; border: 0; background: none; accent-color: var(--accent); }
+#pd-video { width: 100%; border-radius: 12px; background: #000; transform: scaleX(-1); }  /* mirror, like a selfie */
+.pd-error { margin: 12px 0 0; color: var(--danger); font-size: .9rem; }

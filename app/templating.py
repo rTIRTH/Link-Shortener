@@ -29,7 +29,18 @@ def _version(*names: str) -> str:
 
 
 templates.env.globals["css_version"] = _version("style.css")
-templates.env.globals["js_version"] = _version("app.js", "datetime-picker.js")
+templates.env.globals["js_version"] = _version("app.js", "datetime-picker.js", "photo-editor.js")
+
+
+def avatar_src(user) -> str:
+    """The person's own photo if they have one, otherwise their animal avatar."""
+    if user.photo_updated_at:
+        stamp = int(_utc(user.photo_updated_at).timestamp() * 1000)  # new photo = new URL
+        return f"/account/photo?v={stamp}"
+    return f"/static/avatars/{user.avatar}.svg"
+
+
+templates.env.globals["avatar_src"] = avatar_src
 
 
 def _utc(dt):

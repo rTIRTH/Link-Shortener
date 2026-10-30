@@ -299,6 +299,34 @@ MESSAGES = {
     "Your Link Shortener sign-up code": "आपका Link Shortener साइन-अप कोड",
     "Your Link Shortener sign-up code is {code}.\n\nIt expires in 10 minutes. If you did not try to sign up, you can ignore this message.":
         "आपका Link Shortener साइन-अप कोड {code} है।\n\nयह 10 मिनट में समाप्त हो जाएगा। अगर आपने साइन अप करने की कोशिश नहीं की थी, तो आप इस संदेश को अनदेखा कर सकते हैं।",
+    # ---- own profile photo ----
+    "Change profile photo": "प्रोफ़ाइल फ़ोटो बदलें",
+    "Profile photo": "प्रोफ़ाइल फ़ोटो",
+    "Close": "बंद करें",
+    "Upload from gallery": "गैलरी से अपलोड करें",
+    "Take a photo": "फ़ोटो खींचें",
+    "Capture": "फ़ोटो लें",
+    "Remove photo": "फ़ोटो हटाएँ",
+    "Zoom": "ज़ूम",
+    "Rotate": "घुमाएँ",
+    "Rotate left": "बाएँ घुमाएँ",
+    "Rotate right": "दाएँ घुमाएँ",
+    "Save photo": "फ़ोटो सहेजें",
+    "Choose another photo": "दूसरी फ़ोटो चुनें",
+    "Drag the photo to move it. Use the slider to zoom.": "फ़ोटो को खींचकर हिलाएँ। ज़ूम के लिए स्लाइडर इस्तेमाल करें।",
+    "Profile photo updated.": "प्रोफ़ाइल फ़ोटो अपडेट हो गई।",
+    "Profile photo removed.": "प्रोफ़ाइल फ़ोटो हटा दी गई।",
+    "That file is not a valid photo. Please use a JPEG, PNG or WebP image.":
+        "यह फ़ाइल सही फ़ोटो नहीं है। कृपया JPEG, PNG या WebP चित्र इस्तेमाल करें।",
+    "The photo is too large. Please choose one under 2 MB.": "फ़ोटो बहुत बड़ी है। कृपया 2 MB से छोटी फ़ोटो चुनें।",
+    "That photo's dimensions are too large. Please choose a smaller one.":
+        "इस फ़ोटो का आकार बहुत बड़ा है। कृपया छोटी फ़ोटो चुनें।",
+    "Too many photo uploads. Try again in an hour.": "बहुत ज़्यादा फ़ोटो अपलोड हो गईं। एक घंटे बाद फिर कोशिश करें।",
+    "Please choose a photo first.": "कृपया पहले एक फ़ोटो चुनें।",
+    "We could not open the camera. You can upload a photo instead.":
+        "हम कैमरा नहीं खोल सके। आप इसकी जगह फ़ोटो अपलोड कर सकते हैं।",
+    "Saving…": "सहेजा जा रहा है…",
+    "The photo could not be saved. Please try again.": "फ़ोटो सहेजी नहीं जा सकी। कृपया फिर कोशिश करें।",
     # ---- avatar names ----
     "Cat": "बिल्ली", "Dog": "कुत्ता", "Fox": "लोमड़ी", "Panda": "पांडा", "Rabbit": "खरगोश",
     "Bear": "भालू", "Frog": "मेंढक", "Owl": "उल्लू", "Penguin": "पेंगुइन", "Pig": "सूअर",

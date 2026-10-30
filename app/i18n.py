@@ -50,6 +50,11 @@ JS_STRINGS = {
     "choose_end": "Choose end date and time",
     "bad_date": "Use a date like {example}, optionally with a time like 09:30 PM.",
     "example": "e.g. {example}",
+    "photo_choose": "Please choose a photo first.",
+    "photo_invalid": "That file is not a valid photo. Please use a JPEG, PNG or WebP image.",
+    "photo_camera_failed": "We could not open the camera. You can upload a photo instead.",
+    "photo_saving": "Saving…",
+    "photo_failed": "The photo could not be saved. Please try again.",
 }
 
 # Texts of the emails we send.

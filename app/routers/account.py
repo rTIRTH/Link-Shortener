@@ -1,6 +1,6 @@
 
-from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -11,7 +11,7 @@ from ..database import get_db
 from ..deps import require_user
 from ..i18n import EMAIL_BODY, EMAIL_SUBJECT, get_lang, translate
 from ..mailer import email_enabled, send_email
-from ..models import Click, EmailChange, Link, User, UsernameAlias, as_utc, utcnow
+from ..models import Click, EmailChange, Link, ProfilePhoto, User, UsernameAlias, as_utc, utcnow
 from ..otp import (
     CODE_LIFETIME,
     MAX_CODE_ATTEMPTS,
@@ -20,6 +20,7 @@ from ..otp import (
     hash_code,
     new_code,
 )
+from ..photos import MAX_UPLOAD_BYTES, PhotoError, normalise
 from ..profile import AVATARS, MAX_OLD_USERNAMES, THEMES
 from ..security import hash_password, verify_password
 from ..templating import flash, render
@@ -79,8 +80,67 @@ def set_avatar(request: Request, avatar: str = Form(...), user: User = Depends(r
     if avatar not in AVATARS:
         return back(request, "Please pick one of the avatars shown.", anchor="#profile")
     user.avatar = avatar
+    drop_photo(db, user)  # picking an animal replaces the person's own photo
     db.commit()
     return back(request, "Avatar updated.", "success", "#profile")
+
+
+# ---------- own profile photo ----------
+
+def drop_photo(db: Session, user: User) -> None:
+    row = db.get(ProfilePhoto, user.id)
+    if row is not None:
+        db.delete(row)
+    user.photo_updated_at = None
+
+
+@router.get("/photo")
+def get_photo(user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Only the owner can fetch their photo: there is no id in the address to guess."""
+    photo = db.get(ProfilePhoto, user.id)
+    if photo is None:
+        raise HTTPException(404, "Page not found.")
+    return Response(
+        photo.data,
+        media_type="image/jpeg",
+        headers={
+            "Cache-Control": "private, max-age=31536000, immutable",  # the ?v= in the URL changes
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
+
+
+@router.post("/photo")
+def upload_photo(request: Request, photo: UploadFile = File(...),
+                 user: User = Depends(require_user), db: Session = Depends(get_db)):
+    lang = get_lang(request)
+    if not rate_limit(f"rl:photo:{user.id}", 10, 3600, local_fallback=True):
+        text = translate(lang, "Too many photo uploads. Try again in an hour.")
+        return JSONResponse({"error": text}, status_code=429)
+    data = photo.file.read(MAX_UPLOAD_BYTES + 1)
+    try:
+        image = normalise(data)
+    except PhotoError as e:
+        return JSONResponse({"error": translate(lang, str(e))}, status_code=400)
+    row = db.get(ProfilePhoto, user.id)
+    if row is None:
+        row = ProfilePhoto(user_id=user.id)
+        db.add(row)
+    row.data = image
+    row.updated_at = utcnow()
+    user.photo_updated_at = row.updated_at
+    db.commit()
+    flash(request, "Profile photo updated.", "success")
+    return JSONResponse({"ok": True})
+
+
+@router.post("/photo/remove")
+def remove_photo(request: Request, user: User = Depends(require_user),
+                 db: Session = Depends(get_db)):
+    drop_photo(db, user)
+    db.commit()
+    flash(request, "Profile photo removed.", "success")
+    return RedirectResponse("/account", status_code=303)
 
 
 @router.post("/theme")

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, LargeBinary, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -29,6 +29,10 @@ class User(Base):
     avatar: Mapped[str] = mapped_column(String(32), default="cat", server_default="cat")
     theme: Mapped[str] = mapped_column(String(8), default="system", server_default="system")
     language: Mapped[str] = mapped_column(String(5), default="en", server_default="en")
+    # When the profile photo was last set (None = using one of the animal avatars)
+    photo_updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     # When the email address was confirmed with a code (None = never confirmed)
     email_verified_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
@@ -39,6 +43,9 @@ class User(Base):
     )
     old_usernames: Mapped[list["UsernameAlias"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
+    )
+    photo: Mapped["ProfilePhoto | None"] = relationship(
+        back_populates="user", cascade="all, delete-orphan", uselist=False
     )
     email_change: Mapped["EmailChange | None"] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False
@@ -119,3 +126,15 @@ class PendingSignup(Base):
     sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ProfilePhoto(Base):
+    """A person's own profile picture (256x256 JPEG), kept in the database."""
+
+    __tablename__ = "profile_photos"
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    data: Mapped[bytes] = mapped_column(LargeBinary)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    user: Mapped[User] = relationship(back_populates="photo")

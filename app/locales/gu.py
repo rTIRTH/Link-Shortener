@@ -299,6 +299,34 @@ MESSAGES = {
     "Your Link Shortener sign-up code": "તમારો Link Shortener સાઇન-અપ કોડ",
     "Your Link Shortener sign-up code is {code}.\n\nIt expires in 10 minutes. If you did not try to sign up, you can ignore this message.":
         "તમારો Link Shortener સાઇન-અપ કોડ {code} છે.\n\nતે 10 મિનિટમાં સમાપ્ત થઈ જશે. જો તમે સાઇન અપ કરવાનો પ્રયાસ ન કર્યો હોય, તો તમે આ સંદેશને અવગણી શકો છો.",
+    # ---- own profile photo ----
+    "Change profile photo": "પ્રોફાઇલ ફોટો બદલો",
+    "Profile photo": "પ્રોફાઇલ ફોટો",
+    "Close": "બંધ કરો",
+    "Upload from gallery": "ગૅલેરીમાંથી અપલોડ કરો",
+    "Take a photo": "ફોટો પાડો",
+    "Capture": "ફોટો લો",
+    "Remove photo": "ફોટો કાઢી નાખો",
+    "Zoom": "ઝૂમ",
+    "Rotate": "ફેરવો",
+    "Rotate left": "ડાબે ફેરવો",
+    "Rotate right": "જમણે ફેરવો",
+    "Save photo": "ફોટો સાચવો",
+    "Choose another photo": "બીજો ફોટો પસંદ કરો",
+    "Drag the photo to move it. Use the slider to zoom.": "ફોટાને ખેંચીને હલાવો. ઝૂમ કરવા માટે સ્લાઇડરનો ઉપયોગ કરો.",
+    "Profile photo updated.": "પ્રોફાઇલ ફોટો અપડેટ થઈ ગયો.",
+    "Profile photo removed.": "પ્રોફાઇલ ફોટો કાઢી નાખવામાં આવ્યો.",
+    "That file is not a valid photo. Please use a JPEG, PNG or WebP image.":
+        "આ ફાઇલ માન્ય ફોટો નથી. કૃપા કરીને JPEG, PNG અથવા WebP ચિત્ર વાપરો.",
+    "The photo is too large. Please choose one under 2 MB.": "ફોટો ઘણો મોટો છે. કૃપા કરીને 2 MB થી નાનો ફોટો પસંદ કરો.",
+    "That photo's dimensions are too large. Please choose a smaller one.":
+        "આ ફોટોનું કદ ઘણું મોટું છે. કૃપા કરીને નાનો ફોટો પસંદ કરો.",
+    "Too many photo uploads. Try again in an hour.": "ઘણા બધા ફોટો અપલોડ થઈ ગયા. એક કલાક પછી ફરી પ્રયત્ન કરો.",
+    "Please choose a photo first.": "કૃપા કરીને પહેલાં એક ફોટો પસંદ કરો.",
+    "We could not open the camera. You can upload a photo instead.":
+        "અમે કૅમેરા ખોલી શક્યા નહીં. તેના બદલે તમે ફોટો અપલોડ કરી શકો છો.",
+    "Saving…": "સાચવી રહ્યા છીએ…",
+    "The photo could not be saved. Please try again.": "ફોટો સાચવી શકાયો નહીં. કૃપા કરીને ફરી પ્રયત્ન કરો.",
     # ---- avatar names ----
     "Cat": "બિલાડી", "Dog": "કૂતરો", "Fox": "શિયાળ", "Panda": "પાન્ડા", "Rabbit": "સસલું",
     "Bear": "રીંછ", "Frog": "દેડકો", "Owl": "ઘુવડ", "Penguin": "પેંગ્વિન", "Pig": "ડુક્કર",

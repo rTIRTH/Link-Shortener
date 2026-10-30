@@ -85,7 +85,7 @@ def python_strings() -> tuple[set[str], list[str]]:
                     take(node.args[1], where)
                 elif name == "start_over" and len(node.args) > 1:
                     take(node.args[1], where)
-                elif name == "ValueError" and node.args:
+                elif name in ("ValueError", "PhotoError") and node.args:
                     take(node.args[0], where)
                 for kw in node.keywords:
                     if kw.arg == "error":

@@ -5,7 +5,12 @@
 {% set current_email %}<b>{{ user.email }}</b>{% endset %}
 <div class="account">
   <header class="account-head">
-    <img class="avatar big" id="head-avatar" src="/static/avatars/{{ user.avatar }}.svg" alt="" width="72" height="72">
+    <div class="avatar-edit">
+      <img class="avatar big" id="head-avatar" src="{{ avatar_src(user) }}" alt="" width="72" height="72">
+      <button type="button" class="avatar-edit-btn" id="photo-open" title="{{ _('Change profile photo') }}" aria-label="{{ _('Change profile photo') }}">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
+    </div>
     <div>
       <h1>{{ user.username }}</h1>
       <p class="muted">{{ user.email }}</p>
@@ -119,8 +124,60 @@
     </form>
   </section>
 </div>
+
+<dialog id="photo-dialog" class="photo-dialog" aria-labelledby="photo-title">
+  <div class="pd-head">
+    <h2 id="photo-title">{{ _("Profile photo") }}</h2>
+    <button type="button" class="pd-close" data-pd-close aria-label="{{ _('Close') }}">&times;</button>
+  </div>
+
+  <div class="pd-step" id="pd-choose">
+    <div class="pd-actions">
+      <button type="button" class="btn" id="pd-upload">{{ _("Upload from gallery") }}</button>
+      <button type="button" class="btn ghost" id="pd-camera">{{ _("Take a photo") }}</button>
+    </div>
+    <input type="file" id="pd-file" accept="image/*" hidden>
+    {% if user.photo_updated_at %}
+    <form method="post" action="/account/photo/remove" class="pd-remove">
+      <button type="submit" class="btn danger small">{{ _("Remove photo") }}</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="pd-step" id="pd-camera-view" hidden>
+    <video id="pd-video" autoplay playsinline muted></video>
+    <div class="pd-actions">
+      <button type="button" class="btn" id="pd-capture">{{ _("Capture") }}</button>
+      <button type="button" class="btn ghost" id="pd-camera-back">{{ _("Cancel") }}</button>
+    </div>
+  </div>
+
+  <div class="pd-step" id="pd-edit" hidden>
+    <div class="pd-stage"><canvas id="pd-canvas" width="280" height="280"></canvas></div>
+    <p class="muted pd-hint">{{ _("Drag the photo to move it. Use the slider to zoom.") }}</p>
+    <div class="pd-controls">
+      <label>{{ _("Zoom") }}
+        <input type="range" id="pd-zoom" min="100" max="400" value="100">
+      </label>
+      <label>{{ _("Rotate") }}
+        <input type="range" id="pd-angle" min="-180" max="180" value="0">
+      </label>
+      <div class="pd-actions">
+        <button type="button" class="btn ghost small" id="pd-left">&#8630; {{ _("Rotate left") }}</button>
+        <button type="button" class="btn ghost small" id="pd-right">{{ _("Rotate right") }} &#8631;</button>
+      </div>
+    </div>
+    <div class="pd-actions">
+      <button type="button" class="btn" id="pd-save">{{ _("Save photo") }}</button>
+      <button type="button" class="btn ghost" id="pd-another">{{ _("Choose another photo") }}</button>
+    </div>
+  </div>
+
+  <p class="pd-error" id="pd-error" role="alert" hidden></p>
+</dialog>
 {% endblock %}
 {% block scripts %}
+<script src="/static/photo-editor.js?v={{ js_version }}" defer></script>
 <script>
   document.querySelectorAll('input[name="avatar"]').forEach(function (r) {
     r.addEventListener('change', function () {
