@@ -132,10 +132,18 @@
   </div>
 
   <div class="pd-step" id="pd-choose">
-    <div class="pd-actions">
-      <button type="button" class="btn" id="pd-upload">{{ _("Upload from gallery") }}</button>
-      <button type="button" class="btn ghost" id="pd-camera">{{ _("Take a photo") }}</button>
+    <div class="pd-current"><img class="avatar big" src="{{ avatar_src(user) }}" alt="" width="96" height="96"></div>
+    <div class="pd-options">
+      <button type="button" class="pd-option" id="pd-upload">
+        <span class="pd-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></span>
+        <span><b>{{ _("Upload from gallery") }}</b><small>{{ _("Choose a picture from your device") }}</small></span>
+      </button>
+      <button type="button" class="pd-option" id="pd-camera">
+        <span class="pd-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></span>
+        <span><b>{{ _("Take a photo") }}</b><small>{{ _("Use your camera") }}</small></span>
+      </button>
     </div>
+    <p class="pd-drop muted">{{ _("Drop your photo here") }}</p>
     <input type="file" id="pd-file" accept="image/*" hidden>
     {% if user.photo_updated_at %}
     <form method="post" action="/account/photo/remove" class="pd-remove">
@@ -145,7 +153,11 @@
   </div>
 
   <div class="pd-step" id="pd-camera-view" hidden>
-    <video id="pd-video" autoplay playsinline muted></video>
+    <div class="pd-camera-stage">
+      <video id="pd-video" autoplay playsinline muted></video>
+      <div class="pd-guide" aria-hidden="true"></div>
+      <p class="pd-status" id="pd-camera-status">{{ _("Starting camera…") }}</p>
+    </div>
     <div class="pd-actions">
       <button type="button" class="btn" id="pd-capture">{{ _("Capture") }}</button>
       <button type="button" class="btn ghost" id="pd-camera-back">{{ _("Cancel") }}</button>
@@ -153,22 +165,28 @@
   </div>
 
   <div class="pd-step" id="pd-edit" hidden>
-    <div class="pd-stage"><canvas id="pd-canvas" width="280" height="280"></canvas></div>
-    <p class="muted pd-hint">{{ _("Drag the photo to move it. Use the slider to zoom.") }}</p>
-    <div class="pd-controls">
-      <label>{{ _("Zoom") }}
-        <input type="range" id="pd-zoom" min="100" max="400" value="100">
-      </label>
-      <label>{{ _("Rotate") }}
-        <input type="range" id="pd-angle" min="-180" max="180" value="0">
-      </label>
-      <div class="pd-actions">
-        <button type="button" class="btn ghost small" id="pd-left">&#8630; {{ _("Rotate left") }}</button>
-        <button type="button" class="btn ghost small" id="pd-right">{{ _("Rotate right") }} &#8631;</button>
-      </div>
+    <div class="pd-stage"><canvas id="pd-canvas" width="320" height="320"></canvas></div>
+    <div class="pd-previewrow">
+      <canvas id="pd-preview" width="56" height="56" aria-label="{{ _('Preview') }}"></canvas>
+      <p class="muted pd-hint">{{ _("Drag the photo to move it. Use the slider to zoom.") }}</p>
     </div>
-    <div class="pd-actions">
-      <button type="button" class="btn" id="pd-save">{{ _("Save photo") }}</button>
+    <div class="pd-controls">
+      <div class="pd-row">
+        <button type="button" class="pd-icon" id="pd-zoom-out" aria-label="{{ _('Zoom out') }}">&minus;</button>
+        <input type="range" id="pd-zoom" min="100" max="400" value="100" aria-label="{{ _('Zoom') }}">
+        <button type="button" class="pd-icon" id="pd-zoom-in" aria-label="{{ _('Zoom in') }}">+</button>
+        <span class="pd-val" id="pd-zoom-val">100%</span>
+      </div>
+      <div class="pd-row">
+        <button type="button" class="pd-icon" id="pd-left" aria-label="{{ _('Rotate left') }}" title="{{ _('Rotate left') }}">&#8630;</button>
+        <input type="range" id="pd-angle" min="-180" max="180" value="0" aria-label="{{ _('Rotate') }}">
+        <button type="button" class="pd-icon" id="pd-right" aria-label="{{ _('Rotate right') }}" title="{{ _('Rotate right') }}">&#8631;</button>
+        <span class="pd-val" id="pd-angle-val">0&deg;</span>
+      </div>
+      <button type="button" class="pd-reset" id="pd-reset">{{ _("Reset") }}</button>
+    </div>
+    <div class="pd-actions pd-final">
+      <button type="button" class="btn pd-save" id="pd-save">{{ _("Save photo") }}</button>
       <button type="button" class="btn ghost" id="pd-another">{{ _("Choose another photo") }}</button>
     </div>
   </div>

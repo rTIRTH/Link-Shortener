@@ -55,6 +55,10 @@ JS_STRINGS = {
     "photo_camera_failed": "We could not open the camera. You can upload a photo instead.",
     "photo_saving": "Saving…",
     "photo_failed": "The photo could not be saved. Please try again.",
+    "camera_blocked": "Camera access is blocked. Click the camera icon in the address bar, "
+                      "choose Allow, then try again.",
+    "camera_missing": "No camera was found on this device.",
+    "camera_busy": "Your camera is being used by another app. Close it and try again.",
 }
 
 # Texts of the emails we send.

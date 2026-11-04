@@ -327,6 +327,19 @@ MESSAGES = {
         "અમે કૅમેરા ખોલી શક્યા નહીં. તેના બદલે તમે ફોટો અપલોડ કરી શકો છો.",
     "Saving…": "સાચવી રહ્યા છીએ…",
     "The photo could not be saved. Please try again.": "ફોટો સાચવી શકાયો નહીં. કૃપા કરીને ફરી પ્રયત્ન કરો.",
+    "Choose a picture from your device": "તમારા ડિવાઇસમાંથી ચિત્ર પસંદ કરો",
+    "Use your camera": "તમારો કૅમેરા વાપરો",
+    "Starting camera…": "કૅમેરા ચાલુ થઈ રહ્યો છે…",
+    "Reset": "રીસેટ કરો",
+    "Preview": "પૂર્વાવલોકન",
+    "Drop your photo here": "તમારો ફોટો અહીં છોડો",
+    "Zoom out": "ઝૂમ ઘટાડો",
+    "Zoom in": "ઝૂમ વધારો",
+    "Camera access is blocked. Click the camera icon in the address bar, choose Allow, then try again.":
+        "કૅમેરાની પરવાનગી બ્લૉક છે. એડ્રેસ બારમાં કૅમેરા આઇકન પર ક્લિક કરો, Allow પસંદ કરો, પછી ફરી પ્રયત્ન કરો.",
+    "No camera was found on this device.": "આ ડિવાઇસ પર કોઈ કૅમેરા મળ્યો નથી.",
+    "Your camera is being used by another app. Close it and try again.":
+        "તમારો કૅમેરા બીજી ઍપમાં વપરાઈ રહ્યો છે. તેને બંધ કરો અને ફરી પ્રયત્ન કરો.",
     # ---- avatar names ----
     "Cat": "બિલાડી", "Dog": "કૂતરો", "Fox": "શિયાળ", "Panda": "પાન્ડા", "Rabbit": "સસલું",
     "Bear": "રીંછ", "Frog": "દેડકો", "Owl": "ઘુવડ", "Penguin": "પેંગ્વિન", "Pig": "ડુક્કર",

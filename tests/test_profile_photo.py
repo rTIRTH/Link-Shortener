@@ -193,7 +193,9 @@ def test_deleting_the_account_deletes_the_photo(alice, app):
 def test_account_page_has_the_pencil_and_the_editor(alice):
     page = alice.get("/account").text
     for needle in ('id="photo-open"', 'id="photo-dialog"', 'id="pd-canvas"', 'id="pd-zoom"',
-                   'id="pd-angle"', 'id="pd-save"', 'id="pd-camera"', 'id="pd-upload"'):
+                   'id="pd-angle"', 'id="pd-save"', 'id="pd-camera"', 'id="pd-upload"',
+                   'id="pd-preview"', 'id="pd-zoom-in"', 'id="pd-zoom-out"', 'id="pd-reset"',
+                   'id="pd-camera-status"', 'id="pd-zoom-val"', 'id="pd-angle-val"'):
         assert needle in page, needle
     assert "/static/photo-editor.js?v=" in page
     assert "Remove photo" not in page                          # nothing to remove yet
@@ -227,3 +229,30 @@ def test_the_browser_gets_its_photo_messages(alice):
     blob = re.search(r'id="i18n-data">(.*?)</script>', alice.get("/account").text, re.S).group(1)
     ui = json.loads(blob)["ui"]
     assert ui["photo_saving"] == "સાચવી રહ્યા છીએ…" and ui["photo_choose"]
+
+
+def test_the_pop_up_shows_the_current_picture_and_two_clear_choices(alice):
+    page = alice.get("/account").text
+    assert 'class="pd-current"' in page and page.count('class="pd-option"') == 2
+    assert "Choose a picture from your device" in page and "Use your camera" in page
+    assert "Drop your photo here" in page
+
+
+STARTING = [("hi", "कैमरा चालू हो रहा है…"), ("gu", "કૅમેરા ચાલુ થઈ રહ્યો છે…")]
+
+
+@pytest.mark.parametrize("lang,sample", STARTING)
+def test_new_pop_up_text_is_translated(alice, lang, sample):
+    alice.post("/language", data={"lang": lang, "next": "/"})
+    assert sample in alice.get("/account").text
+
+
+def test_the_browser_gets_a_reason_for_each_camera_problem(alice):
+    import json
+    import re
+
+    alice.post("/language", data={"lang": "hi", "next": "/"})
+    blob = re.search(r'id="i18n-data">(.*?)</script>', alice.get("/account").text, re.S).group(1)
+    ui = json.loads(blob)["ui"]
+    assert {"camera_blocked", "camera_missing", "camera_busy"} <= set(ui)
+    assert "Allow" in ui["camera_blocked"] and "कैमरा" in ui["camera_blocked"]

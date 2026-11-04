@@ -308,21 +308,68 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 }
 img.avatar[src^="/account/photo"] { image-rendering: auto; }  /* real photos must stay smooth */
 
-.photo-dialog { width: min(92vw, 380px); padding: 20px; border: 1px solid var(--line); border-radius: 14px;
-                background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
-.photo-dialog::backdrop { background: rgba(8, 12, 22, .6); backdrop-filter: blur(2px); }
-.pd-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.photo-dialog { width: min(94vw, 420px); max-height: 94vh; padding: 0; overflow: auto; border: 1px solid var(--line);
+                border-radius: 18px; background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+.photo-dialog[open] { animation: pd-in .18s ease-out; }
+.photo-dialog::backdrop { background: rgba(8, 12, 22, .62); backdrop-filter: blur(3px); }
+.photo-dialog.is-dragging { outline: 2px dashed var(--accent); outline-offset: -8px; }
+@keyframes pd-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes pd-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .photo-dialog[open] { animation: none; } }
+
+.pd-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 14px 22px;
+           border-bottom: 1px solid var(--line); }
 .pd-head h2 { margin: 0; font-size: 1.1rem; }
-.pd-close { border: 0; background: none; color: var(--muted); font-size: 1.6rem; line-height: 1; cursor: pointer; }
+.pd-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: none; color: var(--muted);
+            font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.pd-close:hover { background: var(--paper); color: var(--ink); }
+.pd-step { padding: 20px 22px 22px; }
 .pd-step[hidden], .pd-error[hidden] { display: none; }
-.pd-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 0; }
-.pd-remove { margin: 14px 0 0; }
+
+.pd-current { display: flex; justify-content: center; margin-bottom: 18px; }
+.pd-current .avatar { width: 96px; height: 96px; box-shadow: 0 0 0 4px var(--card), 0 0 0 5px var(--line); }
+.pd-options { display: grid; gap: 10px; }
+.pd-option { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 14px; text-align: left;
+             border: 1px solid var(--line); border-radius: 14px; background: var(--paper); color: var(--ink);
+             font: inherit; cursor: pointer; transition: border-color .15s, transform .1s; }
+.pd-option:hover { border-color: var(--accent); }
+.pd-option:active { transform: scale(.99); }
+.pd-option:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.pd-option span:last-child { display: grid; gap: 1px; }
+.pd-option small { color: var(--muted); }
+.pd-ico { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+          background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.pd-drop { margin: 14px 0 0; text-align: center; font-size: .85rem; }
+.pd-remove { margin: 12px 0 0; text-align: center; }
+
 .pd-stage { display: flex; justify-content: center; }
-.pd-stage canvas { width: 100%; max-width: 280px; aspect-ratio: 1; border-radius: 12px; background: #111;
+.pd-stage canvas { width: 100%; max-width: 320px; aspect-ratio: 1; border-radius: 16px; background: #0b0f1a;
                    touch-action: none; cursor: grab; }
 .pd-stage canvas:active { cursor: grabbing; }
-.pd-hint { margin: 8px 0 4px; font-size: .85rem; text-align: center; }
-.pd-controls { display: grid; gap: 8px; }
-.pd-controls input[type="range"] { padding: 0; border: 0; background: none; accent-color: var(--accent); }
-#pd-video { width: 100%; border-radius: 12px; background: #000; transform: scaleX(-1); }  /* mirror, like a selfie */
-.pd-error { margin: 12px 0 0; color: var(--danger); font-size: .9rem; }
+.pd-previewrow { display: flex; align-items: center; gap: 12px; margin: 14px 0 6px; }
+#pd-preview { flex: none; width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--line); background: #fff; }
+.pd-hint { margin: 0; font-size: .85rem; }
+.pd-controls { display: grid; gap: 10px; }
+.pd-row { display: grid; grid-template-columns: auto 1fr auto 46px; gap: 10px; align-items: center; }
+.pd-row input[type="range"] { padding: 0; border: 0; background: none; accent-color: var(--accent); }
+.pd-icon { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: var(--card);
+           color: var(--ink); font-size: 1.15rem; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.pd-icon:hover { border-color: var(--accent); color: var(--accent); }
+.pd-val { text-align: right; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pd-reset { justify-self: start; border: 0; background: none; color: var(--accent); font: inherit; font-size: .9rem; cursor: pointer; padding: 2px 0; }
+.pd-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.pd-final { flex-direction: column; }
+.pd-final .btn { width: 100%; text-align: center; }
+.btn.is-busy { pointer-events: none; opacity: .85; }
+.btn.is-busy::after { content: ""; display: inline-block; width: 14px; height: 14px; margin-left: 8px; vertical-align: -2px;
+                      border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+                      animation: pd-spin .7s linear infinite; }
+
+.pd-camera-stage { position: relative; overflow: hidden; border-radius: 16px; background: #000; aspect-ratio: 4 / 3; }
+#pd-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }  /* mirrored, like a selfie */
+.pd-guide { position: absolute; inset: 0; margin: auto; width: 68%; aspect-ratio: 1; border-radius: 50%; pointer-events: none;
+            border: 2px solid rgba(255, 255, 255, .9); box-shadow: 0 0 0 999px rgba(0, 0, 0, .45); }
+.pd-status { position: absolute; inset: auto 0 12px 0; margin: 0; text-align: center; color: #fff; font-size: .9rem; }
+.pd-status[hidden] { display: none; }
+.pd-error { margin: 0 22px 22px; padding: 10px 12px; border-radius: 10px; background: var(--err-bg);
+            color: var(--danger); font-size: .9rem; }
