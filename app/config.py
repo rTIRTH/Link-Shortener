@@ -3,12 +3,17 @@ import os
 
 
 def _normalize_db_url(url: str) -> str:
-    # Render/Heroku give "postgres://..." or "postgresql://...".
+    # Hosts give "postgres://..." or "postgresql://...".
     # SQLAlchemy needs to know which driver to use.
     if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql+psycopg2://", 1)
-    if url.startswith("postgresql://"):
-        return url.replace("postgresql://", "postgresql+psycopg2://", 1)
+        url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    # Neon only accepts secure connections. Add that if the pasted address left it out.
+    host_part = url.split("@")[-1].split("/")[0]
+    is_neon = host_part.endswith((".neon.tech", ".neon.com"))
+    if is_neon and "sslmode=" not in url:
+        url += ("&" if "?" in url else "?") + "sslmode=require"
     return url
 
 

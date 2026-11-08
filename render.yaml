@@ -1,4 +1,6 @@
-# Render "Blueprint": creates the web service, Postgres and Redis (Key Value) together.
+# Render "Blueprint": creates the web service and Redis (Key Value).
+# The database is NOT created here any more: Render's free Postgres expires after 30 days.
+# Use a permanent free Postgres (for example Neon) and paste its address when Render asks.
 services:
   - type: web
     name: link-shortener
@@ -12,9 +14,7 @@ services:
       - key: HTTPS_ONLY
         value: "true"
       - key: DATABASE_URL
-        fromDatabase:
-          name: link-shortener-db
-          property: connectionString
+        sync: false             # you paste the Postgres address (a postgresql://... link)
       - key: REDIS_URL
         fromService:
           type: keyvalue
@@ -26,7 +26,3 @@ services:
     plan: free
     maxmemoryPolicy: allkeys-lru
     ipAllowList: []             # only your own services can connect
-
-databases:
-  - name: link-shortener-db
-    plan: free

@@ -15,7 +15,9 @@ def make_session_factory(url: str) -> sessionmaker:
         if url in ("sqlite://", "sqlite:///:memory:"):
             kwargs["poolclass"] = StaticPool  # keep one in-memory DB for tests
     else:
-        kwargs["pool_pre_ping"] = True
+        kwargs["pool_pre_ping"] = True  # test a connection before using it
+        kwargs["pool_recycle"] = 300  # hosts like Neon close idle connections after a while
+        kwargs["connect_args"] = {"connect_timeout": 15}  # a sleeping database needs a few seconds
     engine = create_engine(url, **kwargs)
     return sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
