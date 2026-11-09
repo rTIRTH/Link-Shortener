@@ -49,7 +49,7 @@
   <table>
     <thead><tr>
       <th><input type="checkbox" id="all" aria-label="{{ _('Select all links') }}"></th>
-      <th>{{ _("Short link") }}</th><th>{{ _("Destination") }}</th><th class="num">{{ _("Clicks") }}</th><th>{{ _("QR") }}</th><th>{{ _("Status") }}</th>
+      <th>{{ _("Short link") }}</th><th>{{ _("Destination") }}</th><th class="num">{{ _("Clicks") }}</th><th>{{ _("Status") }}</th><th>{{ _("QR") }}</th>
     </tr></thead>
     <tbody>
     {% for row in rows %}
@@ -63,14 +63,6 @@
         <td class="dest" title="{{ link.original_url }}">{{ link.original_url }}</td>
         <td class="num">{{ link.click_count }}</td>
         <td>
-          <a class="btn small ghost qr-btn" href="/dashboard/links/{{ link.id }}/qr.png?download=1"
-             download="{{ link.slug }}-qr.png" title="{{ _('Download QR code') }}" aria-label="{{ _('Download QR code for {slug}', slug=link.slug) }}">
-            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
-              <path d="M1 1h6v6H1zM3 3v2h2V3zM9 1h6v6H9zM11 3v2h2V3zM1 9h6v6H1zM3 11v2h2v-2zM9 9h2v2H9zM12 9h3v2h-3zM9 12h3v3H9zM13 12h2v3h-2z"/>
-            </svg>QR
-          </a>
-        </td>
-        <td>
           {% if row.status == 'expired' %}<span class="tag bad">{{ _("Expired") }}</span>
           {% elif row.status == 'scheduled' %}<span class="tag warn">{{ _("Scheduled") }}</span>
           {% else %}<span class="tag ok">{{ _("Active") }}</span>{% endif %}
@@ -82,6 +74,14 @@
             {% set ends_t %}<time data-utc="{{ link.expires_at|utc_iso }}">{{ link.expires_at|utc_text }}</time>{% endset %}
             <small class="block">{% if row.status == 'expired' %}{{ _h("ended {time}", time=ends_t) }}{% else %}{{ _h("ends {time}", time=ends_t) }}{% endif %}</small>
           {% endif %}
+        </td>
+        <td>
+          <a class="btn small ghost qr-btn" href="/dashboard/links/{{ link.id }}/qr.png?download=1"
+             download="{{ link.slug }}-qr.png" title="{{ _('Download QR code') }}" aria-label="{{ _('Download QR code for {slug}', slug=link.slug) }}">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
+              <path d="M1 1h6v6H1zM3 3v2h2V3zM9 1h6v6H9zM11 3v2h2V3zM1 9h6v6H1zM3 11v2h2v-2zM9 9h2v2H9zM12 9h3v2h-3zM9 12h3v3H9zM13 12h2v3h-2z"/>
+            </svg>QR
+          </a>
         </td>
       </tr>
     {% endfor %}

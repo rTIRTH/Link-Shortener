@@ -443,11 +443,11 @@ def test_table_columns_are_in_the_requested_order(alice):
     make(alice, "one1")
     page = alice.get("/dashboard").text
     head = page[page.index("<thead>"):page.index("</thead>")]
-    order = ["Short link", "Destination", "Clicks", "QR", "Status"]
+    order = ["Short link", "Destination", "Clicks", "Status", "QR"]
     positions = [head.index(f">{name}<") for name in order]
     assert positions == sorted(positions)
     row = page[page.index("<tbody>"):]
-    assert row.index("qr-btn") < row.index("tag ok")
+    assert row.index("tag ok") < row.index("qr-btn")
 
 
 def test_qr_button_downloads_the_png(alice):
