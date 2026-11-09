@@ -327,11 +327,11 @@ def test_edit_and_stats_live_in_the_toolbar_not_in_the_rows(alice):
     page = alice.get("/dashboard").text
     first = page.index('<form method="post" id="bulk"')
     bar = page[first:page.index("</form>", first)]
-    # same look as Download QR codes / Export CSV, and before the hint text
-    look = 'class="btn small ghost" type="submit" formmethod="get" formaction='
+    # same look as Download QR codes / Export CSV, placed after the hint text
+    look = 'class="btn small ghost fill" type="submit" formmethod="get" formaction='
     assert f'{look}"/dashboard/links/edit"' in bar
     assert f'{look}"/dashboard/links/compare"' in bar
-    order = ["Export CSV", ">Edit<", ">Stats<", "QR download uses"]
+    order = ["Export CSV", "QR download uses", ">Edit<", ">Stats<"]
     positions = [bar.index(text) for text in order]
     assert positions == sorted(positions)
     # disabled until links are ticked (script turns them on)

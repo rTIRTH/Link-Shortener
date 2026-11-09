@@ -37,12 +37,12 @@
             onclick='return confirm({{ _("Delete the selected links? This cannot be undone.")|tojson }})'>{{ _("Delete selected") }}</button>
     <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip">{{ _("Download QR codes") }}</button>
     <a class="btn small ghost" href="/dashboard/links/export.csv">{{ _("Export CSV") }}</a>
-    <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/edit"
+    <small class="muted">{{ _("QR download uses the selected links, or all links if none are selected.") }}</small>
+    <button class="btn small ghost fill" type="submit" formmethod="get" formaction="/dashboard/links/edit"
             id="edit-selected" disabled title="{{ _('Select one link to edit it.') }}">{{ _("Edit") }}</button>
-    <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/compare"
+    <button class="btn small ghost fill" type="submit" formmethod="get" formaction="/dashboard/links/compare"
             id="stats-selected" data-max="{{ max_compare }}" disabled
             title="{{ _('Select one or more links to see their stats. Pick several to compare them in one graph.') }}">{{ _("Stats") }}</button>
-    <small class="muted">{{ _("QR download uses the selected links, or all links if none are selected.") }}</small>
   </form>
 
   <div class="tablewrap">
