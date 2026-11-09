@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Compare links") }} · Link Shortener{% endblock %}
+{% block content %}
+<p><a href="/dashboard">{{ _("← All links") }}</a></p>
+<section>
+  <h1>{{ _("Compare links") }}</h1>
+  <p class="muted">{{ _n("{n} link", "{n} links", entries|length) }}</p>
+</section>
+
+<section>
+  <h2>{{ _("Clicks per day") }}</h2>
+  <div class="chart compare" role="img" aria-label="{{ _('Clicks per day for the last 14 days') }}">
+    {% for day in series %}
+      <div class="col">
+        <div class="group">
+          {% for b in day.bars %}
+            <div class="bar" style="height: {{ b.pct }}%; background: {{ b.color }}"
+                 title="{{ b.slug }} · {{ day.label }}: {{ b.count }}"></div>
+          {% endfor %}
+        </div>
+        <span class="lbl">{{ day.label[:2] }}</span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <div class="tablewrap">
+  <table>
+    <thead><tr>
+      <th>{{ _("Short link") }}</th><th class="num">{{ _("Last 14 days") }}</th><th class="num">{{ _("All time") }}</th>
+    </tr></thead>
+    <tbody>
+    {% for e in entries %}
+      <tr>
+        <td>
+          <span class="swatch" style="background: {{ e.color }}" aria-hidden="true"></span>
+          <a class="mono" href="/dashboard/links/{{ e.link.id }}">{{ e.short_url|replace('https://','')|replace('http://','') }}</a>
+        </td>
+        <td class="num">{{ e.recent }}</td>
+        <td class="num">{{ e.link.click_count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

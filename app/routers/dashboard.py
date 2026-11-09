@@ -29,6 +29,12 @@ from ..utils import (
 
 router = APIRouter(prefix="/dashboard")
 
+MAX_COMPARE = 8  # how many links can share one graph
+# Colour-blind-friendly palette (Okabe-Ito); one colour per compared link.
+COMPARE_COLORS = [
+    "#0072B2", "#E69F00", "#009E73", "#D55E00", "#CC79A7", "#56B4E9", "#F0E442", "#999999",
+]
+
 
 def cache_key(username: str, slug: str) -> str:
     return f"link:{username}:{slug}"
@@ -108,7 +114,10 @@ def dashboard(request: Request, user: User = Depends(require_user), db: Session 
         for link in links
     ]
     total_clicks = sum(link.click_count for link in links)
-    return render(request, "dashboard.html", user, rows=rows, total_clicks=total_clicks)
+    return render(
+        request, "dashboard.html", user,
+        rows=rows, total_clicks=total_clicks, max_compare=MAX_COMPARE,
+    )
 
 
 @router.post("/links")
@@ -266,6 +275,74 @@ def qr_single(
     return Response(
         qr_png_bytes(short_url(request, user, link)), media_type="image/png", headers=headers
     )
+
+
+@router.get("/links/edit")
+def edit_selected(
+    request: Request,
+    ids: list[int] = Query(default=[]),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Toolbar "Edit" button: only works when exactly one link is selected."""
+    unique = list(dict.fromkeys(ids))
+    if len(unique) != 1:
+        flash(request, "Select exactly one link to edit.", "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    link = get_owned_link(db, user, unique[0])
+    return RedirectResponse(f"/dashboard/links/{link.id}/edit", status_code=303)
+
+
+@router.get("/links/compare")
+def compare_links(
+    request: Request,
+    ids: list[int] = Query(default=[]),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Toolbar "Stats" button: one link -> its stats page, several -> one shared graph."""
+    unique = list(dict.fromkeys(ids))
+    if not unique:
+        flash(request, "Select at least one link first.", "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    if len(unique) > MAX_COMPARE:
+        flash(request, "You can compare up to {n} links at a time.", "error", n=MAX_COMPARE)
+        return RedirectResponse("/dashboard", status_code=303)
+    links = user_links(db, user, unique)  # only the user's own links can match
+    if not links:
+        raise HTTPException(404, "Link not found.")
+    if len(links) == 1:
+        return RedirectResponse(f"/dashboard/links/{links[0].id}", status_code=303)
+
+    today = utcnow().date()
+    since = datetime.combine(today - timedelta(days=13), time.min, tzinfo=timezone.utc)
+    link_ids = [link.id for link in links]
+    clicks = db.scalars(select(Click).where(Click.link_id.in_(link_ids), Click.clicked_at >= since))
+    per_link_day: dict[int, Counter] = {link.id: Counter() for link in links}
+    for c in clicks:
+        per_link_day[c.link_id][as_utc(c.clicked_at).date()] += 1
+
+    days = [today - timedelta(days=i) for i in range(13, -1, -1)]
+    peak = max((n for counts in per_link_day.values() for n in counts.values()), default=0) or 1
+    entries = [
+        {
+            "link": link,
+            "short_url": short_url(request, user, link),
+            "color": COMPARE_COLORS[i],
+            "recent": sum(per_link_day[link.id].values()),
+        }
+        for i, link in enumerate(links)
+    ]
+    series = []
+    for d in days:
+        bars = []
+        for e in entries:
+            count = per_link_day[e["link"].id].get(d, 0)
+            pct = max(1, round(count / peak * 100)) if count else 0  # same scale for every link
+            bars.append({"count": count, "pct": pct, "color": e["color"], "slug": e["link"].slug})
+        series.append({"label": d.strftime("%d %b"), "bars": bars})
+
+    return render(request, "compare_links.html", user, entries=entries, series=series)
 
 
 @router.get("/links/{link_id}")

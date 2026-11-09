@@ -37,6 +37,11 @@
             onclick='return confirm({{ _("Delete the selected links? This cannot be undone.")|tojson }})'>{{ _("Delete selected") }}</button>
     <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip">{{ _("Download QR codes") }}</button>
     <a class="btn small ghost" href="/dashboard/links/export.csv">{{ _("Export CSV") }}</a>
+    <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/edit"
+            id="edit-selected" disabled title="{{ _('Select one link to edit it.') }}">{{ _("Edit") }}</button>
+    <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/compare"
+            id="stats-selected" data-max="{{ max_compare }}" disabled
+            title="{{ _('Select one or more links to see their stats. Pick several to compare them in one graph.') }}">{{ _("Stats") }}</button>
     <small class="muted">{{ _("QR download uses the selected links, or all links if none are selected.") }}</small>
   </form>
 
@@ -44,7 +49,7 @@
   <table>
     <thead><tr>
       <th><input type="checkbox" id="all" aria-label="{{ _('Select all links') }}"></th>
-      <th>{{ _("Short link") }}</th><th>{{ _("Destination") }}</th><th class="num">{{ _("Clicks") }}</th><th>{{ _("QR") }}</th><th>{{ _("Status") }}</th><th></th>
+      <th>{{ _("Short link") }}</th><th>{{ _("Destination") }}</th><th class="num">{{ _("Clicks") }}</th><th>{{ _("QR") }}</th><th>{{ _("Status") }}</th>
     </tr></thead>
     <tbody>
     {% for row in rows %}
@@ -78,21 +83,30 @@
             <small class="block">{% if row.status == 'expired' %}{{ _h("ended {time}", time=ends_t) }}{% else %}{{ _h("ends {time}", time=ends_t) }}{% endif %}</small>
           {% endif %}
         </td>
-        <td>
-          <div class="btn-row">
-            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}/edit">{{ _("Edit") }}</a>
-            <a class="btn small ghost" href="/dashboard/links/{{ link.id }}">{{ _("Stats") }}</a>
-          </div>
-        </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
   </div>
   <script>
-    document.getElementById('all').addEventListener('change', function (e) {
-      document.querySelectorAll('.pick').forEach(function (c) { c.checked = e.target.checked; });
-    });
+    (function () {
+      var all = document.getElementById('all');
+      var picks = Array.prototype.slice.call(document.querySelectorAll('.pick'));
+      var edit = document.getElementById('edit-selected');
+      var stats = document.getElementById('stats-selected');
+      var max = parseInt(stats.getAttribute('data-max'), 10);
+      function sync() {
+        var n = picks.filter(function (c) { return c.checked; }).length;
+        edit.disabled = n !== 1;           // Edit works on exactly one link
+        stats.disabled = n < 1 || n > max; // Stats works on one link, or several to compare
+      }
+      all.addEventListener('change', function (e) {
+        picks.forEach(function (c) { c.checked = e.target.checked; });
+        sync();
+      });
+      picks.forEach(function (c) { c.addEventListener('change', sync); });
+      sync();
+    })();
   </script>
   {% else %}
     <div class="empty"><h3>{{ _("No links yet") }}</h3><p>{{ _("Paste a long URL above to create your first short link.") }}</p></div>

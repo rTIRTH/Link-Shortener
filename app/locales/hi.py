@@ -349,4 +349,19 @@ MESSAGES = {
     "Sheep": "भेड़", "Hedgehog": "हेजहॉग", "Turtle": "कछुआ", "Bat": "चमगादड़", "Octopus": "ऑक्टोपस",
     "Ladybug": "लेडीबग", "Bee": "मधुमक्खी", "Parrot": "तोता", "Crocodile": "मगरमच्छ", "Whale": "व्हेल",
     "Sloth": "स्लॉथ",
+    # ---- selection toolbar: edit / compare stats ----
+    "Select one link to edit it.":
+        "संपादित करने के लिए एक लिंक चुनें।",
+    "Select one or more links to see their stats. Pick several to compare them in one graph.":
+        "आँकड़े देखने के लिए एक या अधिक लिंक चुनें। एक ही ग्राफ़ में तुलना करने के लिए कई लिंक चुनें।",
+    "Select exactly one link to edit.":
+        "संपादित करने के लिए ठीक एक लिंक चुनें।",
+    "You can compare up to {n} links at a time.":
+        "आप एक बार में अधिकतम {n} लिंक की तुलना कर सकते हैं।",
+    "Compare links":
+        "लिंक की तुलना करें",
+    "Last 14 days":
+        "पिछले 14 दिन",
+    "All time":
+        "अब तक के कुल",
 }

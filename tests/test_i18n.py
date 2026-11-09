@@ -318,6 +318,7 @@ def test_counts_use_singular_and_plural(alice):
 
 
 PAGES = ["/dashboard", "/dashboard/links/1/edit", "/dashboard/links/1", "/account"]
+# (the compare page needs two links, so it is checked in test_compare_page_is_translated)
 
 
 @pytest.mark.parametrize("url", PAGES)
@@ -433,3 +434,14 @@ def test_the_icon_follows_the_language_after_switching(alice):
     for lang, big in (("hi", "अ"), ("gu", "અ"), ("en", "A")):
         alice.post("/language", data={"lang": lang, "next": "/"})
         assert f'<span class="la">{big}</span>' in alice.get("/dashboard").text
+
+
+@pytest.mark.parametrize("lang", ["hi", "gu"])
+def test_compare_page_is_translated(alice, lang):
+    for slug in ("page1", "page2"):
+        alice.post("/dashboard/links", data={"original_url": "https://example.com", "slug": slug})
+    alice.post("/language", data={"lang": lang, "next": "/"})
+    page = alice.get("/dashboard/links/compare?ids=1&ids=2")
+    assert page.status_code == 200
+    assert (DEVANAGARI if lang == "hi" else GUJARATI).search(page.text)
+    assert "Compare links" not in page.text

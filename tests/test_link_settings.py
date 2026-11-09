@@ -322,14 +322,70 @@ def test_script_is_versioned(client):
 
 # ---------- dashboard table ----------
 
-def test_edit_and_stats_are_matching_buttons_on_one_row(alice):
+def test_edit_and_stats_live_in_the_toolbar_not_in_the_rows(alice):
     make(alice, "one1")
     page = alice.get("/dashboard").text
-    row = page[page.index('<div class="btn-row">'):]
-    row = row[:row.index("</div>")]
-    assert 'class="btn small ghost" href="/dashboard/links/1/edit">Edit<' in row
-    assert 'class="btn small ghost" href="/dashboard/links/1">Stats<' in row
-    assert row.index("Edit") < row.index("Stats")
+    first = page.index('<form method="post" id="bulk"')
+    bar = page[first:page.index("</form>", first)]
+    # same look as Download QR codes / Export CSV, and before the hint text
+    look = 'class="btn small ghost" type="submit" formmethod="get" formaction='
+    assert f'{look}"/dashboard/links/edit"' in bar
+    assert f'{look}"/dashboard/links/compare"' in bar
+    order = ["Export CSV", ">Edit<", ">Stats<", "QR download uses"]
+    positions = [bar.index(text) for text in order]
+    assert positions == sorted(positions)
+    # disabled until links are ticked (script turns them on)
+    assert 'id="edit-selected"' in bar and "disabled" in bar
+    # gone from the table rows
+    body = page[page.index("<tbody>"):page.index("</tbody>")]
+    assert ">Edit<" not in body and ">Stats<" not in body and "btn-row" not in page
+
+
+def test_edit_button_needs_exactly_one_link(alice):
+    make(alice, "one1")
+    make(alice, "two2")
+    r = alice.get("/dashboard/links/edit?ids=1")
+    assert r.status_code == 303 and r.headers["location"] == "/dashboard/links/1/edit"
+    for query in ("", "?ids=1&ids=2"):
+        r = alice.get("/dashboard/links/edit" + query)
+        assert r.status_code == 303 and r.headers["location"] == "/dashboard"
+    assert "Select exactly one link to edit." in alice.get("/dashboard").text
+
+
+def test_stats_button_one_link_opens_its_page_several_compare(alice):
+    make(alice, "one1")
+    make(alice, "two2")
+    r = alice.get("/dashboard/links/compare?ids=1")
+    assert r.status_code == 303 and r.headers["location"] == "/dashboard/links/1"
+    page = alice.get("/dashboard/links/compare?ids=1&ids=2")
+    assert page.status_code == 200
+    assert "Compare links" in page.text and "one1" in page.text and "two2" in page.text
+    assert page.text.count('class="bar"') == 14 * 2  # 14 days x 2 links, one shared graph
+    assert alice.get("/dashboard/links/compare").headers["location"] == "/dashboard"
+
+
+def test_compare_counts_clicks_and_ignores_other_peoples_links(alice, make_client):
+    make(alice, "one1")
+    make(alice, "two2")
+    alice.get("/alice/one1")
+    alice.get("/alice/one1")
+    alice.get("/alice/two2")
+    page = alice.get("/dashboard/links/compare?ids=1&ids=2").text
+    assert "one1 · " in page and ": 2\"" in page and ": 1\"" in page
+    bob = make_client()
+    bob.post("/register", data={"username": "bob", "email": "bob@example.com",
+                                "password": "password123"})
+    assert bob.get("/dashboard/links/compare?ids=1&ids=2").status_code == 404
+    assert bob.get("/dashboard/links/edit?ids=1").status_code == 404
+
+
+def test_compare_is_limited(alice):
+    for i in range(9):
+        make(alice, f"link{i}")
+    ids = "&".join(f"ids={i}" for i in range(1, 10))
+    r = alice.get("/dashboard/links/compare?" + ids)
+    assert r.status_code == 303 and r.headers["location"] == "/dashboard"
+    assert "up to 8 links" in alice.get("/dashboard").text
 
 
 def test_dashboard_has_no_inline_settings_panel(alice):
@@ -391,7 +447,7 @@ def test_table_columns_are_in_the_requested_order(alice):
     positions = [head.index(f">{name}<") for name in order]
     assert positions == sorted(positions)
     row = page[page.index("<tbody>"):]
-    assert row.index("qr-btn") < row.index("tag ok") < row.index("/edit") < row.index("Stats")
+    assert row.index("qr-btn") < row.index("tag ok")
 
 
 def test_qr_button_downloads_the_png(alice):
