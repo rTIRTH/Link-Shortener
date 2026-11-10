@@ -16,7 +16,7 @@ from ..cache import cache_delete, rate_limit
 from ..config import settings
 from ..database import get_db
 from ..deps import require_user
-from ..models import Click, Link, User, UsernameAlias, as_utc, utcnow
+from ..models import Click, Link, LinkToggle, User, UsernameAlias, as_utc, utcnow
 from ..security import hash_password
 from ..templating import flash, render
 from ..utils import (
@@ -49,14 +49,21 @@ def forget_link(db: Session, user: User, slug: str) -> None:
         cache_delete(cache_key(name, slug))
 
 
-def link_status(link: Link, now: datetime | None = None) -> str:
-    """'expired', 'scheduled' (not started yet) or 'active'."""
+def schedule_status(link: Link, now: datetime | None = None) -> str:
+    """What the schedule alone says: 'expired', 'scheduled' (not started yet) or 'active'."""
     now = now or utcnow()
     if link.expires_at and as_utc(link.expires_at) <= now:
         return "expired"
     if link.starts_at and as_utc(link.starts_at) > now:
         return "scheduled"
     return "active"
+
+
+def link_status(link: Link, now: datetime | None = None) -> str:
+    """'inactive' (the owner switched it off), else the schedule's: expired/scheduled/active."""
+    if not link.is_active:
+        return "inactive"
+    return schedule_status(link, now)
 
 
 def read_schedule(starts_at: str, starts_at_utc: str, expires_at: str, expires_at_utc: str):
@@ -111,6 +118,7 @@ def dashboard(request: Request, user: User = Depends(require_user), db: Session 
             "link": link,
             "short_url": short_url(request, user, link),
             "status": link_status(link),
+            "schedule": schedule_status(link),
             "locked": bool(link.password_hash),
         }
         for link in links
@@ -217,7 +225,7 @@ def export_csv(request: Request, user: User = Depends(require_user), db: Session
     writer = csv.writer(buf)
     writer.writerow([
         "short_url", "slug", "original_url", "clicks", "created_at",
-        "starts_at", "expires_at", "password_protected",
+        "starts_at", "expires_at", "password_protected", "active",
     ])
     for link in user_links(db, user):
         writer.writerow([
@@ -229,6 +237,7 @@ def export_csv(request: Request, user: User = Depends(require_user), db: Session
             as_utc(link.starts_at).isoformat() if link.starts_at else "",
             as_utc(link.expires_at).isoformat() if link.expires_at else "",
             "yes" if link.password_hash else "no",
+            "yes" if link.is_active else "no",
         ])
     return Response(
         buf.getvalue(),
@@ -377,7 +386,7 @@ def link_detail(
         d = today - timedelta(days=i)
         log.append({
             "iso": d.isoformat(), "label": d.strftime("%d %b %Y"),
-            "state": day_state(link, d, tz, now), "count": per_day.get(d, 0),
+            "state": day_state(link, d, tz, now, link.toggles), "count": per_day.get(d, 0),
         })
 
     recent_start = day_window(today - timedelta(days=13), tz)[0]
@@ -391,7 +400,7 @@ def link_detail(
         recent_total=len(recent),
         devices=Counter(c.device for c in recent).most_common(),
         referrers=Counter(c.referrer or "Direct" for c in recent).most_common(5),
-        events=link_events(link, now),
+        events=link_events(link, now, link.toggles),
         log=log,
         log_cut=created_day < first_log_day,
         log_days=LOG_DAYS,
@@ -443,7 +452,7 @@ def link_day(
         link=link,
         short_url=short_url(request, user, link),
         day_label=d.strftime("%d %b %Y"),
-        state=day_state(link, d, tz, now),
+        state=day_state(link, d, tz, now, link.toggles),
         hours=hours,
         total=len(clicks),
         busiest=None if busiest is None else f"{busiest:02d}:00–{(busiest + 1) % 24:02d}:00",
@@ -478,6 +487,29 @@ def edit_page(
         request, "edit_link.html", user,
         link=link, short_url=short_url(request, user, link), status=link_status(link),
     )
+
+
+@router.post("/links/{link_id}/toggle")
+def toggle_active(
+    request: Request,
+    link_id: int,
+    active: str = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Edit page button: switch a link on ("1") or off ("0"). Repeating it is harmless."""
+    link = get_owned_link(db, user, link_id)
+    want = active == "1"
+    if active in ("0", "1") and link.is_active != want:  # anything else changes nothing
+        link.is_active = want
+        link.toggles.append(LinkToggle(active=want))
+        db.commit()
+        forget_link(db, user, link.slug)  # visitors must see the change straight away
+        if want:
+            flash(request, "Link activated. It works again.", "success")
+        else:
+            flash(request, "Link deactivated. Visitors can no longer open it.", "success")
+    return RedirectResponse(f"/dashboard/links/{link.id}/edit", status_code=303)
 
 
 @router.post("/links/{link_id}/edit")

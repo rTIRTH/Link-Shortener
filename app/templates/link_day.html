@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ _("Activity on {date}", date=day_label) }} · Link Shortener{% endblock %}
 {% block content %}
-{% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')]} %}
+{% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')], 'inactive': ['off', _('Inactive')]} %}
 <p><a href="/dashboard/links/{{ link.id }}">{{ _("← Back to link stats") }}</a></p>
 <section>
   <h1>{{ _("Activity on {date}", date=day_label) }}</h1>

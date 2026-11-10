@@ -63,16 +63,17 @@
         <td class="dest" title="{{ link.original_url }}">{{ link.original_url }}</td>
         <td class="num">{{ link.click_count }}</td>
         <td>
-          {% if row.status == 'expired' %}<span class="tag bad">{{ _("Expired") }}</span>
+          {% if row.status == 'inactive' %}<span class="tag off">{{ _("Inactive") }}</span>
+          {% elif row.status == 'expired' %}<span class="tag bad">{{ _("Expired") }}</span>
           {% elif row.status == 'scheduled' %}<span class="tag warn">{{ _("Scheduled") }}</span>
           {% else %}<span class="tag ok">{{ _("Active") }}</span>{% endif %}
-          {% if link.starts_at and row.status == 'scheduled' %}
+          {% if link.starts_at and row.schedule == 'scheduled' %}
             {% set starts_t %}<time data-utc="{{ link.starts_at|utc_iso }}">{{ link.starts_at|utc_text }}</time>{% endset %}
             <small class="block">{{ _h("starts {time}", time=starts_t) }}</small>
           {% endif %}
           {% if link.expires_at %}
             {% set ends_t %}<time data-utc="{{ link.expires_at|utc_iso }}">{{ link.expires_at|utc_text }}</time>{% endset %}
-            <small class="block">{% if row.status == 'expired' %}{{ _h("ended {time}", time=ends_t) }}{% else %}{{ _h("ends {time}", time=ends_t) }}{% endif %}</small>
+            <small class="block">{% if row.schedule == 'expired' %}{{ _h("ended {time}", time=ends_t) }}{% else %}{{ _h("ends {time}", time=ends_t) }}{% endif %}</small>
           {% endif %}
         </td>
         <td>

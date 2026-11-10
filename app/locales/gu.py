@@ -403,4 +403,25 @@ MESSAGES = {
         "← લિંકના આંકડા પર પાછા",
     "← Previous day":
         "← પાછલો દિવસ",
+    # ---- link on/off switch ----
+    "Inactive":
+        "નિષ્ક્રિય",
+    "Deactivated":
+        "બંધ કર્યું",
+    "Activated":
+        "ચાલુ કર્યું",
+    "Deactivate link":
+        "લિંક બંધ કરો",
+    "Activate link":
+        "લિંક ચાલુ કરો",
+    "This link is on. Turn it off to stop it working right away. You can turn it back on at any time.":
+        "આ લિંક ચાલુ છે. તેને તરત કામ કરતી બંધ કરવા માટે બંધ કરો. તમે તેને ગમે ત્યારે ફરી ચાલુ કરી શકો છો.",
+    "This link is turned off. Visitors see a message instead of being sent to the destination.":
+        "આ લિંક બંધ છે. મુલાકાતીઓને ગંતવ્ય પર મોકલવાને બદલે એક સંદેશ દેખાય છે.",
+    "Link activated. It works again.":
+        "લિંક ચાલુ થઈ ગઈ. તે ફરી કામ કરશે.",
+    "Link deactivated. Visitors can no longer open it.":
+        "લિંક બંધ થઈ ગઈ. મુલાકાતીઓ હવે તેને ખોલી શકશે નહીં.",
+    "This short link is turned off.":
+        "આ ટૂંકી લિંક બંધ છે.",
 }

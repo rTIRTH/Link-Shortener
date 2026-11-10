@@ -63,6 +63,7 @@ def load_link(db: Session, username: str, slug: str) -> dict:
         "exp": expires.isoformat() if expires else None,
         "start": starts.isoformat() if starts else None,
         "locked": bool(link.password_hash),  # the hash itself is never cached
+        "off": not link.is_active,  # the owner switched it off
     }
     ttl = settings.cache_ttl
     if expires:
@@ -72,7 +73,9 @@ def load_link(db: Session, username: str, slug: str) -> dict:
 
 
 def check_window(data: dict) -> None:
-    """Raise if the link has expired or has not started yet."""
+    """Raise if the link is switched off, has expired, or has not started yet."""
+    if data.get("off"):
+        raise HTTPException(403, "This short link is turned off.")
     now = utcnow()
     if data.get("exp") and datetime.fromisoformat(data["exp"]) <= now:
         raise HTTPException(410, "This short link has expired.")

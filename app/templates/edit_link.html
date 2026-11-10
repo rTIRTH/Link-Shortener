@@ -2,12 +2,29 @@
 {% block title %}{{ _("Edit link") }} · Link Shortener{% endblock %}
 {% from "_picker.html" import datetime_picker with context %}
 {% block content %}
-{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired')} %}
-{% set state %}<span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad'}[status] }}">{{ state_names[status] }}</span>{% endset %}
+{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
+{% set state %}<span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad', 'inactive': 'off'}[status] }}">{{ state_names[status] }}</span>{% endset %}
 <div class="account">
   <p><a href="/dashboard">{{ _("← All links") }}</a> · <a href="/dashboard/links/{{ link.id }}">{{ _("Stats") }}</a></p>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
   <p class="muted">{{ _("The short address stays the same. You can change where it goes, when it works, and who can open it.") }}</p>
+
+  <section class="panel">
+    <h2>{{ _("Status") }}</h2>
+    {% if link.is_active %}
+      <p class="muted">{{ _("This link is on. Turn it off to stop it working right away. You can turn it back on at any time.") }}</p>
+      <form method="post" action="/dashboard/links/{{ link.id }}/toggle">
+        <input type="hidden" name="active" value="0">
+        <button class="btn small danger" type="submit">{{ _("Deactivate link") }}</button>
+      </form>
+    {% else %}
+      <p class="muted">{{ _("This link is turned off. Visitors see a message instead of being sent to the destination.") }}</p>
+      <form method="post" action="/dashboard/links/{{ link.id }}/toggle">
+        <input type="hidden" name="active" value="1">
+        <button class="btn small" type="submit">{{ _("Activate link") }}</button>
+      </form>
+    {% endif %}
+  </section>
 
   <form method="post" action="/dashboard/links/{{ link.id }}/edit">
     <section class="panel">

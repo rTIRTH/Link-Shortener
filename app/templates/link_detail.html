@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ link.slug }} · Link Shortener{% endblock %}
 {% block content %}
-{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired')} %}
+{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
 {% set target %}<a href="{{ link.original_url }}" target="_blank" rel="noopener">{{ link.original_url }}</a>{% endset %}
 <p><a href="/dashboard">{{ _("← All links") }}</a></p>
 <section>
@@ -9,7 +9,7 @@
   <p class="dest-full">{{ _h("Redirects to {url}", url=target) }}</p>
   <p class="muted">{{ _n("{n} total click", "{n} total clicks", link.click_count) }} · {{ _("{n} in the last 14 days", n=recent_total) }}</p>
   <p>
-    <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad'}[status] }}">{{ state_names[status] }}</span>
+    <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad', 'inactive': 'off'}[status] }}">{{ state_names[status] }}</span>
     {% if link.password_hash %}<span class="tag lock">{{ _("Password protected") }}</span>{% endif %}
     {% set created_t %}<time data-utc="{{ link.created_at|utc_iso }}">{{ link.created_at|utc_text }}</time>{% endset %}
     <small class="muted">{{ _h("created {time}", time=created_t) }}</small>
@@ -46,7 +46,7 @@
 </section>
 
 <section>
-  {% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')]} %}
+  {% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')], 'inactive': ['off', _('Inactive')]} %}
   <h2>{{ _("Activity log") }} <small class="muted">({{ tz_name }})</small></h2>
   <ul class="plain">
     {% for e in events %}
@@ -54,6 +54,8 @@
         <span>
           {% if e.key == 'created' %}{{ _("Created") }}
           {% elif e.key == 'starts' %}{{ _("Goes live") if e.future else _("Went live") }}
+          {% elif e.key == 'off' %}{{ _("Deactivated") }}
+          {% elif e.key == 'on' %}{{ _("Activated") }}
           {% else %}{{ _("Expires") if e.future else _("Expired") }}{% endif %}
         </span>
         <b><time data-utc="{{ e.at|utc_iso }}">{{ e.at|utc_text }}</time></b>

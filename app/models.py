@@ -1,6 +1,16 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, Integer, LargeBinary, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    String,
+    Text,
+    UniqueConstraint,
+    true,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -66,10 +76,15 @@ class Link(Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     click_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    # The owner's on/off switch. Off = visitors see a message, whatever the schedule says.
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
 
     owner: Mapped[User] = relationship(back_populates="links")
     clicks: Mapped[list["Click"]] = relationship(
         back_populates="link", cascade="all, delete-orphan"
+    )
+    toggles: Mapped[list["LinkToggle"]] = relationship(
+        back_populates="link", cascade="all, delete-orphan", order_by="LinkToggle.at"
     )
 
 
@@ -83,6 +98,19 @@ class Click(Base):
     referrer: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     link: Mapped[Link] = relationship(back_populates="clicks")
+
+
+class LinkToggle(Base):
+    """One time the owner switched a link off or on: the history behind the activity log."""
+
+    __tablename__ = "link_toggles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    link_id: Mapped[int] = mapped_column(ForeignKey("links.id"), index=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    active: Mapped[bool] = mapped_column(Boolean)  # the state it was switched TO
+
+    link: Mapped[Link] = relationship(back_populates="toggles")
 
 
 class UsernameAlias(Base):
