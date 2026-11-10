@@ -92,3 +92,64 @@ def test_avatar_grid_always_ends_on_a_full_row():
     for columns in (9, 6, 4):
         gap = f"{len(AVATARS)} avatars leave a gap with {columns} columns"
         assert len(AVATARS) % columns == 0, gap
+
+
+# ---- colours: both themes must stay easy to read -------------------------------------------
+
+
+def palette(selector: str) -> dict:
+    """The --colour variables of one theme block, e.g. {"ink": "#1b2536", ...}."""
+    start = CSS.index(selector)
+    block = CSS[start:CSS.index("}", start)]
+    return dict(re.findall(r"--([\w-]+):\s*(#[0-9a-fA-F]{6})", block))
+
+
+def contrast(a: str, b: str) -> float:
+    def luminance(colour: str) -> float:
+        r, g, b_ = (int(colour[i:i + 2], 16) / 255 for i in (1, 3, 5))
+        lin = [c / 12.92 if c <= .03928 else ((c + .055) / 1.055) ** 2.4 for c in (r, g, b_)]
+        return .2126 * lin[0] + .7152 * lin[1] + .0722 * lin[2]
+
+    hi, lo = sorted((luminance(a), luminance(b)), reverse=True)
+    return (hi + .05) / (lo + .05)
+
+
+THEMES = {
+    "light": ":root {",
+    "dark": ':root[data-theme="dark"] {',
+    "system in a dark browser": ':root[data-theme="system"] {',
+}
+TEXT_ON = [  # (text colour, background) pairs that must reach 4.5:1 (WCAG AA for normal text)
+    ("ink", "paper"), ("ink", "card"), ("ink", "field"), ("ink", "hover"),
+    ("muted", "paper"), ("muted", "card"), ("muted", "head"), ("muted", "hover"),
+    ("accent", "paper"), ("accent", "card"), ("accent-ink", "accent"),
+    ("danger", "card"), ("ok", "ok-bg"), ("danger", "err-bg"), ("warn", "warn-bg"),
+]
+
+
+def test_text_is_readable_in_every_theme():
+    for name, selector in THEMES.items():
+        colours = palette(selector)
+        for text, background in TEXT_ON:
+            ratio = contrast(colours[text], colours[background])
+            assert ratio >= 4.5, f"{name}: {text} on {background} is only {ratio:.2f}:1"
+
+
+def test_input_boxes_have_a_visible_outline_in_every_theme():
+    for name, selector in THEMES.items():
+        colours = palette(selector)
+        ratio = contrast(colours["field-line"], colours["card"])
+        assert ratio >= 3.0, f"{name}: input outline is only {ratio:.2f}:1 against the card"
+
+
+def test_the_light_theme_is_not_glaring():
+    """No pure white page or card: soft surfaces are easier on the eyes."""
+    light = palette(":root {")
+    for surface in ("paper", "card", "field", "head", "hover"):
+        assert light[surface].lower() != "#ffffff", surface
+    assert max(int(light["card"][i:i + 2], 16) for i in (1, 3, 5)) <= 0xFC  # not near-white
+
+
+def test_dark_theme_and_system_dark_use_the_same_colours():
+    assert palette(THEMES["dark"]) == palette(THEMES["system in a dark browser"])
+    assert set(palette(THEMES["light"])) == set(palette(THEMES["dark"]))  # nothing missing
