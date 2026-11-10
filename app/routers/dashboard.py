@@ -16,6 +16,7 @@ from ..cache import cache_delete, rate_limit
 from ..config import settings
 from ..database import get_db
 from ..deps import require_user
+from ..i18n import format_date, get_lang, native_digits
 from ..models import Click, Link, LinkToggle, User, UsernameAlias, as_utc, utcnow
 from ..security import hash_password
 from ..templating import flash, render
@@ -333,6 +334,7 @@ def compare_links(
     for c in clicks:
         per_link_day[c.link_id][as_utc(c.clicked_at).date()] += 1
 
+    lang = get_lang(request)
     days = [today - timedelta(days=i) for i in range(13, -1, -1)]
     peak = max((n for counts in per_link_day.values() for n in counts.values()), default=0) or 1
     entries = [
@@ -351,7 +353,9 @@ def compare_links(
             count = per_link_day[e["link"].id].get(d, 0)
             pct = max(1, round(count / peak * 100)) if count else 0  # same scale for every link
             bars.append({"count": count, "pct": pct, "color": e["color"], "slug": e["link"].slug})
-        series.append({"label": d.strftime("%d %b"), "bars": bars})
+        series.append({
+            "label": format_date(d, lang), "num": native_digits(lang, f"{d.day:02d}"), "bars": bars,
+        })
 
     return render(request, "compare_links.html", user, entries=entries, series=series)
 
@@ -363,6 +367,7 @@ def link_detail(
 ):
     link = get_owned_link(db, user, link_id)
     tz, tz_name = visitor_timezone(request)  # days are the visitor's own days, not UTC days
+    lang = get_lang(request)
     now = utcnow()
     today = local_date(now, tz)
     created_day = local_date(link.created_at, tz)
@@ -376,7 +381,11 @@ def link_detail(
     per_day = Counter(local_date(c.clicked_at, tz) for c in clicks)
 
     days = [today - timedelta(days=i) for i in range(13, -1, -1)]
-    series = [{"label": d.strftime("%d %b"), "count": per_day.get(d, 0)} for d in days]
+    series = [
+        {"label": format_date(d, lang), "num": native_digits(lang, f"{d.day:02d}"),
+         "count": per_day.get(d, 0)}
+        for d in days
+    ]
     peak = max((x["count"] for x in series), default=0) or 1
     for x in series:
         x["pct"] = round(x["count"] / peak * 100)
@@ -385,7 +394,7 @@ def link_detail(
     for i in range((today - first_log_day).days + 1):
         d = today - timedelta(days=i)
         log.append({
-            "iso": d.isoformat(), "label": d.strftime("%d %b %Y"),
+            "iso": d.isoformat(), "label": format_date(d, lang, year=True),
             "state": day_state(link, d, tz, now, link.toggles), "count": per_day.get(d, 0),
         })
 
@@ -416,6 +425,7 @@ def link_day(
     """One day of a link's life, hour by hour (in the visitor's own time zone)."""
     link = get_owned_link(db, user, link_id)
     tz, tz_name = visitor_timezone(request)
+    lang = get_lang(request)
     now = utcnow()
     try:
         d = date.fromisoformat(day)
@@ -451,11 +461,13 @@ def link_day(
         request, "link_day.html", user,
         link=link,
         short_url=short_url(request, user, link),
-        day_label=d.strftime("%d %b %Y"),
+        day_label=format_date(d, lang, year=True),
         state=day_state(link, d, tz, now, link.toggles),
         hours=hours,
         total=len(clicks),
-        busiest=None if busiest is None else f"{busiest:02d}:00–{(busiest + 1) % 24:02d}:00",
+        busiest=None if busiest is None else native_digits(
+            lang, f"{busiest:02d}:00–{(busiest + 1) % 24:02d}:00"
+        ),
         devices=Counter(c.device for c in clicks).most_common(),
         referrers=Counter(c.referrer or "Direct" for c in clicks).most_common(5),
         prev_url=link_to(d - timedelta(days=1)) if d > first else None,

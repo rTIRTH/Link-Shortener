@@ -30,10 +30,10 @@
     <h2>{{ _("Clicks per day") }}</h2>
     <div class="chart" role="img" aria-label="{{ _('Clicks per day for the last 14 days') }}">
       {% for s in series %}
-        <div class="col" title="{{ s.label }}: {{ s.count }}">
-          <span class="val">{{ s.count if s.count else '' }}</span>
+        <div class="col" title="{{ s.label }}: {{ s.count|num }}">
+          <span class="val">{{ s.count|num if s.count else '' }}</span>
           <div class="bar" style="height: {{ s.pct }}%"></div>
-          <span class="lbl">{{ s.label[:2] }}</span>
+          <span class="lbl">{{ s.num }}</span>
         </div>
       {% endfor %}
     </div>
@@ -72,7 +72,7 @@
       <tr>
         <td><a href="/dashboard/links/{{ link.id }}/day/{{ row.iso }}">{{ row.label }}</a></td>
         <td><span class="tag {{ day_tags[row.state][0] }}">{{ day_tags[row.state][1] }}</span></td>
-        <td class="num">{{ row.count }}</td>
+        <td class="num">{{ row.count|num }}</td>
       </tr>
     {% endfor %}
     </tbody>
@@ -85,12 +85,12 @@
 <section class="grid2">
   <div>
     <h2>{{ _("Devices") }}</h2>
-    {% if devices %}<ul class="plain">{% for name, n in devices %}<li><span>{{ _(name) }}</span><b>{{ n }}</b></li>{% endfor %}</ul>
+    {% if devices %}<ul class="plain">{% for name, n in devices %}<li><span>{{ _(name) }}</span><b>{{ n|num }}</b></li>{% endfor %}</ul>
     {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
   </div>
   <div>
     <h2>{{ _("Top referrers") }}</h2>
-    {% if referrers %}<ul class="plain">{% for name, n in referrers %}<li><span>{{ _(name) }}</span><b>{{ n }}</b></li>{% endfor %}</ul>
+    {% if referrers %}<ul class="plain">{% for name, n in referrers %}<li><span>{{ _(name) }}</span><b>{{ n|num }}</b></li>{% endfor %}</ul>
     {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
   </div>
 </section>

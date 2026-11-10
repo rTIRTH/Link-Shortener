@@ -18,6 +18,19 @@
     'September', 'October', 'November', 'December'];
   var WEEKDAYS = DATA.weekdays || ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var SHORT = DATA.short || ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  // Hindi / Gujarati show their own digits (the page sends the ten digits as "digits"; "" = keep 0-9).
+  var DIGITS = DATA.digits || '';
+  function nd(value) {
+    var text = String(value);
+    return DIGITS ? text.replace(/[0-9]/g, function (c) { return DIGITS.charAt(+c); }) : text;
+  }
+  // Reads digits a person typed in any of those scripts back as 0-9.
+  function ascii(text) {
+    return String(text).replace(/[\u0966-\u096F\u0AE6-\u0AEF]/g, function (c) {
+      var code = c.charCodeAt(0);
+      return String(code >= 0x0AE6 ? code - 0x0AE6 : code - 0x0966);
+    });
+  }
   function tr(key, fallback, params) {
     var text = UI[key] || fallback;
     return text.replace(/\{(\w+)\}/g, function (m, name) { return params && name in params ? params[name] : m; });
@@ -26,7 +39,7 @@
   var CENTER = 3;    // index of the selected (middle) row
   var current = null; // the picker whose popup is open
 
-  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function pad(n) { return nd((n < 10 ? '0' : '') + n); } // for display, so in the page's digits
   function mod(a, n) { return ((a % n) + n) % n; }
   function daysIn(y, m) { return new Date(y, m, 0).getDate(); } // m is 1-12
   function el(tag, cls, text) {
@@ -43,19 +56,20 @@
   }
   function range(from, to, width) {
     var out = [];
-    for (var i = from; i <= to; i++) out.push(width ? pad(i) : String(i));
+    for (var i = from; i <= to; i++) out.push(width ? pad(i) : nd(i));
     return out;
   }
 
   // "Sunday, 11/10/2026, 09:30:15 PM"
   function format(d, t) {
     var dow = new Date(d.y, d.m - 1, d.d).getDay();
-    return WEEKDAYS[dow] + ', ' + pad(d.d) + '/' + pad(d.m) + '/' + d.y + ', ' +
+    return WEEKDAYS[dow] + ', ' + pad(d.d) + '/' + pad(d.m) + '/' + nd(d.y) + ', ' +
       pad(t.h % 12 || 12) + ':' + pad(t.mi) + ':' + pad(t.s) + ' ' + (t.h >= 12 ? 'PM' : 'AM');
   }
 
   // Reads typed text. Returns { date: {y,m,d}, time: {h,mi,s} | null } or null if invalid.
   function parseText(text) {
+    text = ascii(text);
     var m = /(\d{1,2})\s*[\/.\-]\s*(\d{1,2})\s*[\/.\-]\s*(\d{4})/.exec(text);
     if (!m) return null;
     var d = +m[1], mo = +m[2], y = +m[3];
@@ -225,7 +239,7 @@
       if (have.length && +have[0].value <= from && +have[have.length - 1].value >= to) return;
       ui.year.textContent = '';
       for (var i = from; i <= to; i++) {
-        var o = el('option', null, String(i));
+        var o = el('option', null, nd(i));
         o.value = i;
         ui.year.appendChild(o);
       }
@@ -242,10 +256,10 @@
       var count = daysIn(view.y, view.m);
       for (var b = 0; b < first; b++) ui.grid.appendChild(el('span', 'dtp-blank')); // empty: no days of other months
       for (var d = 1; d <= count; d++) {
-        var day = button('dtp-day', String(d));
+        var day = button('dtp-day', nd(d));
         var dow = new Date(view.y, view.m - 1, d).getDay();
         day.setAttribute('data-day', d);
-        day.setAttribute('aria-label', WEEKDAYS[dow] + ' ' + d + ' ' + MONTHS[view.m - 1] + ' ' + view.y);
+        day.setAttribute('aria-label', WEEKDAYS[dow] + ' ' + nd(d) + ' ' + MONTHS[view.m - 1] + ' ' + nd(view.y));
         var isSel = sel && sel.y === view.y && sel.m === view.m && sel.d === d;
         var isToday = t.y === view.y && t.m === view.m && t.d === d;
         if (isSel) day.classList.add('sel');

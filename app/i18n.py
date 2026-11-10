@@ -3,6 +3,8 @@
     translate("hi", "Log in")                      -> "लॉग इन"
     translate("hi", "Created {url}", url="x")      -> "बना दिया: x"
 """
+from datetime import date
+
 from markupsafe import Markup
 
 from .locales import gu, hi
@@ -21,6 +23,16 @@ MONTHS = {
     "gu": ["જાન્યુઆરી", "ફેબ્રુઆરી", "માર્ચ", "એપ્રિલ", "મે", "જૂન", "જુલાઈ", "ઑગસ્ટ",
            "સપ્ટેમ્બર", "ઑક્ટોબર", "નવેમ્બર", "ડિસેમ્બર"],
 }
+MONTHS_SHORT = {  # for chart labels and the day-by-day log
+    "en": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "hi": ["जन॰", "फ़र॰", "मार्च", "अप्रैल", "मई", "जून", "जुल॰", "अग॰", "सित॰", "अक्तू॰", "नव॰", "दिस॰"],
+    "gu": ["જાન્યુ", "ફેબ્રુ", "માર્ચ", "એપ્રિલ", "મે", "જૂન", "જુલાઈ", "ઑગસ્ટ", "સપ્ટે", "ઑક્ટો",
+           "નવે", "ડિસે"],
+}
+# The ten digits 0-9 written in each language's own script (English keeps 0-9).
+DIGITS = {"hi": "०१२३४५६७८९", "gu": "૦૧૨૩૪૫૬૭૮૯"}
+_TO_NATIVE = {lang: str.maketrans("0123456789", digits) for lang, digits in DIGITS.items()}
+_TO_ASCII = {ord(c): str(i) for digits in DIGITS.values() for i, c in enumerate(digits)}
 WEEKDAYS = {  # Sunday first
     "en": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
     "hi": ["रविवार", "सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार"],
@@ -102,9 +114,45 @@ def get_lang(request) -> str:
     return detect_language(request.headers.get("accept-language", ""))
 
 
+def native_digits(lang: str, value) -> str:
+    """Write the digits of `value` in the language's own script: 12 -> '१२' (hi) or '૧૨' (gu)."""
+    table = _TO_NATIVE.get(lang)
+    return str(value).translate(table) if table else str(value)
+
+
+def ascii_digits(text: str) -> str:
+    """The reverse: Hindi/Gujarati digits back to 0-9 (for reading what a person typed)."""
+    return text.translate(_TO_ASCII)
+
+
+def format_date(day: date, lang: str, *, year: bool = False) -> str:
+    """'09 Nov', or '09 Nov 2026' with year=True. Month names and digits follow the language."""
+    months = MONTHS_SHORT.get(lang, MONTHS_SHORT[DEFAULT_LANGUAGE])
+    text = f"{day.day:02d} {months[day.month - 1]}" + (f" {day.year}" if year else "")
+    return native_digits(lang, text)
+
+
+def _translated(lang: str, text: str) -> str:
+    """The sentence in the language, its digits in that language's script. English: unchanged.
+
+    Only real translations are touched; a sentence with no translation is shown as it is.
+    """
+    catalog = CATALOGS.get(lang, {})
+    return native_digits(lang, catalog[text]) if text in catalog else text
+
+
+def _numbers(lang: str, params: dict) -> dict:
+    """Whole numbers fill the sentence in the language's digits. Text (names, codes) is kept."""
+    return {
+        key: native_digits(lang, value) if isinstance(value, int) and not isinstance(value, bool)
+        else value
+        for key, value in params.items()
+    }
+
+
 def translate(lang: str, text: str, **params) -> str:
-    message = CATALOGS.get(lang, {}).get(text, text)
-    return message.format(**params) if params else message
+    message = _translated(lang, text)
+    return message.format(**_numbers(lang, params)) if params else message
 
 
 def translate_plural(lang: str, singular: str, plural: str, n: int) -> str:
@@ -113,14 +161,15 @@ def translate_plural(lang: str, singular: str, plural: str, n: int) -> str:
 
 def translate_html(lang: str, text: str, **params) -> Markup:
     """Like translate(), for sentences that contain trusted HTML. Plain params are escaped."""
-    message = CATALOGS.get(lang, {}).get(text, text)
-    return Markup(message).format(**params) if params else Markup(message)
+    message = _translated(lang, text)
+    return Markup(message).format(**_numbers(lang, params)) if params else Markup(message)
 
 
 def js_data(lang: str) -> dict:
     lang = lang if lang in LANGUAGES else DEFAULT_LANGUAGE
     return {
         "lang": lang,
+        "digits": DIGITS.get(lang, ""),  # "" = keep 0-9
         "months": MONTHS[lang],
         "weekdays": WEEKDAYS[lang],
         "short": WEEKDAYS_SHORT[lang],

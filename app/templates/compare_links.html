@@ -15,10 +15,10 @@
         <div class="group">
           {% for b in day.bars %}
             <div class="bar" style="height: {{ b.pct }}%; background: {{ b.color }}"
-                 title="{{ b.slug }} · {{ day.label }}: {{ b.count }}"></div>
+                 title="{{ b.slug }} · {{ day.label }}: {{ b.count|num }}"></div>
           {% endfor %}
         </div>
-        <span class="lbl">{{ day.label[:2] }}</span>
+        <span class="lbl">{{ day.num }}</span>
       </div>
     {% endfor %}
   </div>
@@ -37,8 +37,8 @@
           <span class="swatch" style="background: {{ e.color }}" aria-hidden="true"></span>
           <a class="mono" href="/dashboard/links/{{ e.link.id }}">{{ e.short_url|replace('https://','')|replace('http://','') }}</a>
         </td>
-        <td class="num">{{ e.recent }}</td>
-        <td class="num">{{ e.link.click_count }}</td>
+        <td class="num">{{ e.recent|num }}</td>
+        <td class="num">{{ e.link.click_count|num }}</td>
       </tr>
     {% endfor %}
     </tbody>

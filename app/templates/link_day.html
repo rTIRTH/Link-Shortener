@@ -22,10 +22,10 @@
   <h2>{{ _("Clicks per hour") }}</h2>
   <div class="chart hours" role="img" aria-label="{{ _('Clicks per hour') }}">
     {% for h in hours %}
-      <div class="col" title="{{ h.label }}:00 · {{ h.count }}">
-        <span class="val">{{ h.count if h.count else '' }}</span>
+      <div class="col" title="{{ (h.label ~ ':00')|num }} · {{ h.count|num }}">
+        <span class="val">{{ h.count|num if h.count else '' }}</span>
         <div class="bar" style="height: {{ h.pct }}%"></div>
-        <span class="lbl">{{ h.label }}</span>
+        <span class="lbl">{{ h.label|num }}</span>
       </div>
     {% endfor %}
   </div>
@@ -34,12 +34,12 @@
 <section class="grid2">
   <div>
     <h2>{{ _("Devices") }}</h2>
-    {% if devices %}<ul class="plain">{% for name, n in devices %}<li><span>{{ _(name) }}</span><b>{{ n }}</b></li>{% endfor %}</ul>
+    {% if devices %}<ul class="plain">{% for name, n in devices %}<li><span>{{ _(name) }}</span><b>{{ n|num }}</b></li>{% endfor %}</ul>
     {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
   </div>
   <div>
     <h2>{{ _("Top referrers") }}</h2>
-    {% if referrers %}<ul class="plain">{% for name, n in referrers %}<li><span>{{ _(name) }}</span><b>{{ n }}</b></li>{% endfor %}</ul>
+    {% if referrers %}<ul class="plain">{% for name, n in referrers %}<li><span>{{ _(name) }}</span><b>{{ n|num }}</b></li>{% endfor %}</ul>
     {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
   </div>
 </section>

@@ -4,13 +4,16 @@ from pathlib import Path
 
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
+from jinja2 import pass_context
 
 from .config import settings
 from .i18n import (
     LANGUAGE_ICONS,
     LANGUAGES,
+    format_date,
     get_lang,
     js_data,
+    native_digits,
     translate,
     translate_html,
     translate_plural,
@@ -49,11 +52,32 @@ def _utc(dt):
 
 # Times are stored in UTC. The page shows the UTC text, then app.js swaps in local time.
 templates.env.filters["utc_iso"] = lambda dt: _utc(dt).isoformat() if dt else ""
-templates.env.filters["utc_text"] = lambda dt: _utc(dt).strftime("%d %b %Y %H:%M UTC") if dt else ""
 templates.env.filters["utc_pretty"] = (
     lambda dt: _utc(dt).strftime("%A, %d/%m/%Y, %I:%M:%S %p") if dt else ""
 )
 templates.env.filters["utc_input"] = lambda dt: _utc(dt).strftime("%Y-%m-%dT%H:%M") if dt else ""
+
+
+@pass_context
+def _utc_text(context, dt) -> str:
+    """'09 Nov 2026 14:30 UTC' in the page language (until app.js shows local time)."""
+    if not dt:
+        return ""
+    lang, moment = context.get("lang", "en"), _utc(dt)
+    clock = native_digits(lang, moment.strftime("%H:%M"))
+    return f"{format_date(moment, lang, year=True)} {clock} UTC"
+
+
+templates.env.filters["utc_text"] = _utc_text
+
+
+@pass_context
+def _num(context, value) -> str:
+    """{{ 12|num }}: a number written in the page language's own digits (Hindi/Gujarati)."""
+    return native_digits(context.get("lang", "en"), value)
+
+
+templates.env.filters["num"] = _num
 
 
 def flash(request: Request, message: str, category: str = "info", **params) -> None:

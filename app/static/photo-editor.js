@@ -9,6 +9,11 @@
 
   var DATA = {};
   try { DATA = JSON.parse(document.getElementById('i18n-data').textContent) || {}; } catch (e) { DATA = {}; }
+  var DIGITS = DATA.digits || ''; // Hindi / Gujarati digits ("" = keep 0-9)
+  function nd(value) {
+    var text = String(value);
+    return DIGITS ? text.replace(/[0-9]/g, function (c) { return DIGITS.charAt(+c); }) : text;
+  }
   var UI = DATA.ui || {};
   function tr(key, fallback) { return UI[key] || fallback; }
   function $(id) { return document.getElementById(id); }
@@ -88,8 +93,8 @@
     refit();
     zoomInput.value = Math.round(zoom * 100);
     angleInput.value = Math.round(angle);
-    if (zoomLabel) zoomLabel.textContent = Math.round(zoom * 100) + '%';
-    if (angleLabel) angleLabel.textContent = Math.round(angle) + '\u00b0';
+    if (zoomLabel) zoomLabel.textContent = nd(Math.round(zoom * 100)) + '%';
+    if (angleLabel) angleLabel.textContent = nd(Math.round(angle)) + '\u00b0';
     draw();
   }
 

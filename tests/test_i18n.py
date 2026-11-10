@@ -188,7 +188,7 @@ def test_translate_and_fallbacks():
 def test_plural_and_html_helpers():
     assert translate_plural("en", "{n} link", "{n} links", 1) == "1 link"
     assert translate_plural("en", "{n} link", "{n} links", 3) == "3 links"
-    assert translate_plural("hi", "{n} link", "{n} links", 3) == "3 लिंक"
+    assert translate_plural("hi", "{n} link", "{n} links", 3) == "३ लिंक"  # Hindi digits
     html = translate_html("en", "Current email: {email}", email="<script>x</script>")
     assert "&lt;script&gt;" in html and "<script>" not in html     # plain params are escaped
 
@@ -314,7 +314,7 @@ def test_counts_use_singular_and_plural(alice):
     alice.post("/dashboard/links", data={"original_url": "https://example.org", "slug": "two2"})
     assert "2 links" in alice.get("/dashboard").text
     alice.post("/language", data={"lang": "hi", "next": "/"})
-    assert "2 लिंक · कुल 0 क्लिक" in alice.get("/dashboard").text
+    assert "२ लिंक · कुल ० क्लिक" in alice.get("/dashboard").text
 
 
 PAGES = ["/dashboard", "/dashboard/links/1/edit", "/dashboard/links/1", "/account"]

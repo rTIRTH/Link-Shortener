@@ -175,13 +175,13 @@
         <button type="button" class="pd-icon" id="pd-zoom-out" aria-label="{{ _('Zoom out') }}">&minus;</button>
         <input type="range" id="pd-zoom" min="100" max="400" value="100" aria-label="{{ _('Zoom') }}">
         <button type="button" class="pd-icon" id="pd-zoom-in" aria-label="{{ _('Zoom in') }}">+</button>
-        <span class="pd-val" id="pd-zoom-val">100%</span>
+        <span class="pd-val" id="pd-zoom-val">{{ 100|num }}%</span>
       </div>
       <div class="pd-row">
         <button type="button" class="pd-icon" id="pd-left" aria-label="{{ _('Rotate left') }}" title="{{ _('Rotate left') }}">&#8630;</button>
         <input type="range" id="pd-angle" min="-180" max="180" value="0" aria-label="{{ _('Rotate') }}">
         <button type="button" class="pd-icon" id="pd-right" aria-label="{{ _('Rotate right') }}" title="{{ _('Rotate right') }}">&#8631;</button>
-        <span class="pd-val" id="pd-angle-val">0&deg;</span>
+        <span class="pd-val" id="pd-angle-val">{{ 0|num }}&deg;</span>
       </div>
       <button type="button" class="pd-reset" id="pd-reset">{{ _("Reset") }}</button>
     </div>

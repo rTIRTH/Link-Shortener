@@ -5,6 +5,8 @@ import string
 from datetime import datetime, time, timezone
 from urllib.parse import urlparse
 
+from .i18n import ascii_digits
+
 BASE62 = string.ascii_letters + string.digits
 RESERVED_USERNAMES = {
     "dashboard", "static", "login", "logout", "register", "docs", "redoc",
@@ -130,7 +132,7 @@ def parse_moment(utc_value: str, visible_value: str, *, end_of_day: bool = False
     (``Sunday, 11/10/2026, 09:30:15 PM``). A bare date means the whole day: the start of it
     for a start time, the end of it for an end time.
     """
-    raw = (utc_value or "").strip() or (visible_value or "").strip()
+    raw = ascii_digits((utc_value or "").strip() or (visible_value or "").strip())
     if not raw:
         return None
     try:

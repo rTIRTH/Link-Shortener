@@ -61,7 +61,7 @@
           {% if row.locked %}<span class="tag lock" title="{{ _('Visitors need a password') }}">{{ _("Password") }}</span>{% endif %}
         </td>
         <td class="dest" title="{{ link.original_url }}">{{ link.original_url }}</td>
-        <td class="num">{{ link.click_count }}</td>
+        <td class="num">{{ link.click_count|num }}</td>
         <td>
           {% if row.status == 'inactive' %}<span class="tag off">{{ _("Inactive") }}</span>
           {% elif row.status == 'expired' %}<span class="tag bad">{{ _("Expired") }}</span>

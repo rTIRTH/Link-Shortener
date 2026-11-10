@@ -1,6 +1,7 @@
 // Times are stored in UTC on the server. Here we show and send them in the visitor's local time.
 (function () {
-  var locale = { hi: 'hi-IN', gu: 'gu-IN' }[document.documentElement.lang]; // others: browser default
+  // hi/gu: the "-u-nu-..." part asks for Hindi / Gujarati digits (browsers use 0-9 by default)
+  var locale = { hi: 'hi-IN-u-nu-deva', gu: 'gu-IN-u-nu-gujr' }[document.documentElement.lang]; // others: browser default
 
   // 1) <time data-utc="..."> elements: show local time
   document.querySelectorAll('time[data-utc]').forEach(function (el) {
