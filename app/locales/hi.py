@@ -424,4 +424,37 @@ MESSAGES = {
         "लिंक बंद हो गया। आने वाले अब इसे नहीं खोल सकते।",
     "This short link is turned off.":
         "यह छोटा लिंक बंद है।",
+    # ---- landing page features ----
+    "Custom aliases":
+        "अपने नाम वाले लिंक",
+    "Pick your own short name or get a random code. Change your username and your old links keep working.":
+        "अपना छोटा नाम चुनें या अपने आप बना कोड पाएँ। यूज़रनेम बदलने पर भी आपके पुराने लिंक चलते रहते हैं।",
+    "See when each link was created, when it was active or inactive, and its clicks day by day.":
+        "देखें कि हर लिंक कब बना, कब चालू या निष्क्रिय रहा, और हर दिन उस पर कितने क्लिक आए।",
+    "Hour by hour":
+        "घंटे-दर-घंटे",
+    "Open any day to see its clicks hour by hour, in your own time zone.":
+        "किसी भी दिन को खोलकर अपने समय क्षेत्र में उसके क्लिक घंटे-दर-घंटे देखें।",
+    "Select several links and compare their clicks in one graph.":
+        "कई लिंक चुनें और उनके क्लिक एक ही ग्राफ़ में देखकर तुलना करें।",
+    "Schedule links":
+        "लिंक का समय तय करें",
+    "Set a start and an end time, and links go live and expire on their own.":
+        "शुरू और समाप्ति का समय तय करें, लिंक अपने आप चालू होंगे और समाप्त हो जाएँगे।",
+    "On and off":
+        "चालू और बंद",
+    "Deactivate a link in one click and activate it again whenever you like.":
+        "एक क्लिक में लिंक बंद करें और जब चाहें उसे फिर से चालू करें।",
+    "Edit any time":
+        "कभी भी बदलें",
+    "Change the destination, schedule or password without changing the short address.":
+        "छोटा पता बदले बिना गंतव्य, समय या पासवर्ड बदलें।",
+    "Password protection":
+        "पासवर्ड सुरक्षा",
+    "Ask visitors for a password before they are sent on.":
+        "आने वालों को आगे भेजने से पहले उनसे पासवर्ड माँगें।",
+    "Your language":
+        "आपकी भाषा",
+    "Use it in English, हिन्दी or ગુજરાતી, with digits in your own script, in a light or dark theme.":
+        "इसे अंग्रेज़ी, हिन्दी या ગુજરાતી में, अपनी लिपि के अंकों के साथ, हल्की या गहरी थीम में इस्तेमाल करें।",
 }

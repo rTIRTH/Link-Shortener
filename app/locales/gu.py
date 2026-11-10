@@ -424,4 +424,37 @@ MESSAGES = {
         "લિંક બંધ થઈ ગઈ. મુલાકાતીઓ હવે તેને ખોલી શકશે નહીં.",
     "This short link is turned off.":
         "આ ટૂંકી લિંક બંધ છે.",
+    # ---- landing page features ----
+    "Custom aliases":
+        "તમારા પોતાના નામની લિંક",
+    "Pick your own short name or get a random code. Change your username and your old links keep working.":
+        "તમારું પોતાનું ટૂંકું નામ પસંદ કરો અથવા આપમેળે બનેલો કોડ મેળવો. યુઝરનેમ બદલો તો પણ તમારી જૂની લિંક ચાલતી રહે છે.",
+    "See when each link was created, when it was active or inactive, and its clicks day by day.":
+        "દરેક લિંક ક્યારે બની, ક્યારે ચાલુ કે નિષ્ક્રિય રહી, અને દરરોજ તેના પર કેટલા ક્લિક આવ્યા તે જુઓ.",
+    "Hour by hour":
+        "કલાકે કલાકે",
+    "Open any day to see its clicks hour by hour, in your own time zone.":
+        "કોઈ પણ દિવસ ખોલીને તમારા સમય ક્ષેત્રમાં તેના ક્લિક કલાકે કલાકે જુઓ.",
+    "Select several links and compare their clicks in one graph.":
+        "ઘણી લિંક પસંદ કરો અને તેમના ક્લિકની એક જ ગ્રાફમાં સરખામણી કરો.",
+    "Schedule links":
+        "લિંકનો સમય નક્કી કરો",
+    "Set a start and an end time, and links go live and expire on their own.":
+        "શરૂઆત અને સમાપ્તિનો સમય નક્કી કરો, લિંક આપમેળે ચાલુ થશે અને સમાપ્ત થઈ જશે.",
+    "On and off":
+        "ચાલુ અને બંધ",
+    "Deactivate a link in one click and activate it again whenever you like.":
+        "એક ક્લિકમાં લિંક બંધ કરો અને જ્યારે ઇચ્છો ત્યારે ફરી ચાલુ કરો.",
+    "Edit any time":
+        "ગમે ત્યારે બદલો",
+    "Change the destination, schedule or password without changing the short address.":
+        "ટૂંકું સરનામું બદલ્યા વિના ગંતવ્ય, સમય કે પાસવર્ડ બદલો.",
+    "Password protection":
+        "પાસવર્ડ સુરક્ષા",
+    "Ask visitors for a password before they are sent on.":
+        "મુલાકાતીઓને આગળ મોકલતા પહેલાં તેમની પાસે પાસવર્ડ માગો.",
+    "Your language":
+        "તમારી ભાષા",
+    "Use it in English, हिन्दी or ગુજરાતી, with digits in your own script, in a light or dark theme.":
+        "તેનો ઉપયોગ અંગ્રેજી, हिन्दी અથવા ગુજરાતીમાં, તમારી પોતાની લિપિના અંકો સાથે, હળવી કે ઘેરી થીમમાં કરો.",
 }

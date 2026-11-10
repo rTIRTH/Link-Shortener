@@ -57,7 +57,7 @@ nav a { text-decoration: none; }
 .hero { padding: 56px 0 28px; max-width: 640px; }
 .hero h1 { font-size: 2.6rem; }
 .lede { font-size: 1.1rem; color: var(--muted); }
-.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px;
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px 24px;
          border-top: 1px solid var(--line); padding-top: 24px; margin-top: 24px; }
 .facts h3 { margin: 0 0 4px; font-size: 1rem; }
 .facts p { margin: 0; color: var(--muted); }
