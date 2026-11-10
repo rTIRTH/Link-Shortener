@@ -364,4 +364,43 @@ MESSAGES = {
         "पिछले 14 दिन",
     "All time":
         "अब तक के कुल",
+    # ---- activity log and hourly view ----
+    "Activity log":
+        "गतिविधि लॉग",
+    "Activity on {date}":
+        "{date} की गतिविधि",
+    "Busiest hour: {time}":
+        "सबसे व्यस्त घंटा: {time}",
+    "Click a day to see its clicks hour by hour.":
+        "किसी दिन पर क्लिक करके उसके क्लिक घंटे-दर-घंटे देखें।",
+    "Clicks per hour":
+        "प्रति घंटा क्लिक",
+    "Created":
+        "बनाया गया",
+    "Date":
+        "तारीख़",
+    "Expires":
+        "समाप्त होगा",
+    "Goes live":
+        "चालू होगा",
+    "Next day →":
+        "अगला दिन →",
+    "No clicks on this day.":
+        "इस दिन कोई क्लिक नहीं हुआ।",
+    "Partly active":
+        "आंशिक रूप से चालू",
+    "Showing the last {n} days.":
+        "पिछले {n} दिन दिखाए जा रहे हैं।",
+    "Went live":
+        "चालू हुआ",
+    "created {time}":
+        "बनाया गया {time}",
+    "{n} click":
+        "{n} क्लिक",
+    "{n} clicks":
+        "{n} क्लिक",
+    "← Back to link stats":
+        "← लिंक के आँकड़ों पर वापस",
+    "← Previous day":
+        "← पिछला दिन",
 }

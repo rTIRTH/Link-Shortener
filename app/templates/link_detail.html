@@ -11,6 +11,8 @@
   <p>
     <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad'}[status] }}">{{ state_names[status] }}</span>
     {% if link.password_hash %}<span class="tag lock">{{ _("Password protected") }}</span>{% endif %}
+    {% set created_t %}<time data-utc="{{ link.created_at|utc_iso }}">{{ link.created_at|utc_text }}</time>{% endset %}
+    <small class="muted">{{ _h("created {time}", time=created_t) }}</small>
     {% if link.starts_at %}
       {% set starts_t %}<time data-utc="{{ link.starts_at|utc_iso }}">{{ link.starts_at|utc_text }}</time>{% endset %}
       <small class="muted">{{ _h("starts {time}", time=starts_t) }}</small>
@@ -41,6 +43,41 @@
     <img class="qr" src="/dashboard/links/{{ link.id }}/qr.png" alt="{{ _('QR code for {url}', url=short_url) }}" width="180" height="180">
     <p><a href="/dashboard/links/{{ link.id }}/qr.png" download="{{ link.slug }}.png">{{ _("Download PNG") }}</a></p>
   </div>
+</section>
+
+<section>
+  {% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')]} %}
+  <h2>{{ _("Activity log") }} <small class="muted">({{ tz_name }})</small></h2>
+  <ul class="plain">
+    {% for e in events %}
+      <li>
+        <span>
+          {% if e.key == 'created' %}{{ _("Created") }}
+          {% elif e.key == 'starts' %}{{ _("Goes live") if e.future else _("Went live") }}
+          {% else %}{{ _("Expires") if e.future else _("Expired") }}{% endif %}
+        </span>
+        <b><time data-utc="{{ e.at|utc_iso }}">{{ e.at|utc_text }}</time></b>
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="tablewrap">
+  <table>
+    <thead><tr>
+      <th>{{ _("Date") }}</th><th>{{ _("Status") }}</th><th class="num">{{ _("Clicks") }}</th>
+    </tr></thead>
+    <tbody>
+    {% for row in log %}
+      <tr>
+        <td><a href="/dashboard/links/{{ link.id }}/day/{{ row.iso }}">{{ row.label }}</a></td>
+        <td><span class="tag {{ day_tags[row.state][0] }}">{{ day_tags[row.state][1] }}</span></td>
+        <td class="num">{{ row.count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="muted"><small>{{ _("Click a day to see its clicks hour by hour.") }}
+    {% if log_cut %}{{ _("Showing the last {n} days.", n=log_days) }}{% endif %}</small></p>
 </section>
 
 <section class="grid2">

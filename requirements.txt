@@ -12,3 +12,4 @@ itsdangerous==2.2.0
 bcrypt==5.0.0
 qrcode[pil]==8.2
 httpx==0.28.1
+tzdata==2025.2

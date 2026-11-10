@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Activity on {date}", date=day_label) }} · Link Shortener{% endblock %}
+{% block content %}
+{% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')]} %}
+<p><a href="/dashboard/links/{{ link.id }}">{{ _("← Back to link stats") }}</a></p>
+<section>
+  <h1>{{ _("Activity on {date}", date=day_label) }}</h1>
+  <p class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</p>
+  <p>
+    <span class="tag {{ day_tags[state][0] }}">{{ day_tags[state][1] }}</span>
+    <small class="muted">{{ _n("{n} click", "{n} clicks", total) }} · {{ tz_name }}</small>
+  </p>
+  {% if busiest %}<p class="muted">{{ _("Busiest hour: {time}", time=busiest) }}</p>
+  {% else %}<p class="muted">{{ _("No clicks on this day.") }}</p>{% endif %}
+  <p>
+    {% if prev_url %}<a class="btn small ghost" href="{{ prev_url }}">{{ _("← Previous day") }}</a>{% endif %}
+    {% if next_url %}<a class="btn small ghost" href="{{ next_url }}">{{ _("Next day →") }}</a>{% endif %}
+  </p>
+</section>
+
+<section>
+  <h2>{{ _("Clicks per hour") }}</h2>
+  <div class="chart hours" role="img" aria-label="{{ _('Clicks per hour') }}">
+    {% for h in hours %}
+      <div class="col" title="{{ h.label }}:00 · {{ h.count }}">
+        <span class="val">{{ h.count if h.count else '' }}</span>
+        <div class="bar" style="height: {{ h.pct }}%"></div>
+        <span class="lbl">{{ h.label }}</span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="grid2">
+  <div>
+    <h2>{{ _("Devices") }}</h2>
+    {% if devices %}<ul class="plain">{% for name, n in devices %}<li><span>{{ _(name) }}</span><b>{{ n }}</b></li>{% endfor %}</ul>
+    {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
+  </div>
+  <div>
+    <h2>{{ _("Top referrers") }}</h2>
+    {% if referrers %}<ul class="plain">{% for name, n in referrers %}<li><span>{{ _(name) }}</span><b>{{ n }}</b></li>{% endfor %}</ul>
+    {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
+  </div>
+</section>
+{% endblock %}

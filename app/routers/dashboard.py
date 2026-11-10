@@ -2,7 +2,7 @@ import csv
 import io
 import zipfile
 from collections import Counter
-from datetime import datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 import qrcode
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from ..activity import day_state, day_window, link_events, local_date, visitor_timezone
 from ..cache import cache_delete, rate_limit
 from ..config import settings
 from ..database import get_db
@@ -30,6 +31,7 @@ from ..utils import (
 router = APIRouter(prefix="/dashboard")
 
 MAX_COMPARE = 8  # how many links can share one graph
+LOG_DAYS = 30  # how many days the activity log shows
 # Colour-blind-friendly palette (Okabe-Ito); one colour per compared link.
 COMPARE_COLORS = [
     "#0072B2", "#E69F00", "#009E73", "#D55E00", "#CC79A7", "#56B4E9", "#F0E442", "#999999",
@@ -351,28 +353,105 @@ def link_detail(
     user: User = Depends(require_user), db: Session = Depends(get_db),
 ):
     link = get_owned_link(db, user, link_id)
-    today = utcnow().date()
-    since = datetime.combine(today - timedelta(days=13), time.min, tzinfo=timezone.utc)
+    tz, tz_name = visitor_timezone(request)  # days are the visitor's own days, not UTC days
+    now = utcnow()
+    today = local_date(now, tz)
+    created_day = local_date(link.created_at, tz)
+
+    # the activity log: newest day first, from today back to the day the link was created
+    first_log_day = max(created_day, today - timedelta(days=LOG_DAYS - 1))
+    since = day_window(min(first_log_day, today - timedelta(days=13)), tz)[0]
     clicks = list(
         db.scalars(select(Click).where(Click.link_id == link.id, Click.clicked_at >= since))
     )
+    per_day = Counter(local_date(c.clicked_at, tz) for c in clicks)
 
-    per_day = Counter(as_utc(c.clicked_at).date() for c in clicks)
     days = [today - timedelta(days=i) for i in range(13, -1, -1)]
     series = [{"label": d.strftime("%d %b"), "count": per_day.get(d, 0)} for d in days]
-    peak = max((s["count"] for s in series), default=0) or 1
-    for s in series:
-        s["pct"] = round(s["count"] / peak * 100)
+    peak = max((x["count"] for x in series), default=0) or 1
+    for x in series:
+        x["pct"] = round(x["count"] / peak * 100)
 
+    log = []
+    for i in range((today - first_log_day).days + 1):
+        d = today - timedelta(days=i)
+        log.append({
+            "iso": d.isoformat(), "label": d.strftime("%d %b %Y"),
+            "state": day_state(link, d, tz, now), "count": per_day.get(d, 0),
+        })
+
+    recent_start = day_window(today - timedelta(days=13), tz)[0]
+    recent = [c for c in clicks if as_utc(c.clicked_at) >= recent_start]
     return render(
         request, "link_detail.html", user,
         link=link,
         short_url=short_url(request, user, link),
         status=link_status(link),
         series=series,
-        recent_total=len(clicks),
+        recent_total=len(recent),
+        devices=Counter(c.device for c in recent).most_common(),
+        referrers=Counter(c.referrer or "Direct" for c in recent).most_common(5),
+        events=link_events(link, now),
+        log=log,
+        log_cut=created_day < first_log_day,
+        log_days=LOG_DAYS,
+        tz_name=tz_name,
+    )
+
+
+@router.get("/links/{link_id}/day/{day}")
+def link_day(
+    request: Request, link_id: int, day: str,
+    user: User = Depends(require_user), db: Session = Depends(get_db),
+):
+    """One day of a link's life, hour by hour (in the visitor's own time zone)."""
+    link = get_owned_link(db, user, link_id)
+    tz, tz_name = visitor_timezone(request)
+    now = utcnow()
+    try:
+        d = date.fromisoformat(day)
+    except ValueError:
+        raise HTTPException(404, "Page not found.") from None
+    first, today = local_date(link.created_at, tz), local_date(now, tz)
+    if not first <= d <= today:  # nothing happened before it was created, or has not happened yet
+        raise HTTPException(404, "Page not found.")
+
+    start, end = day_window(d, tz)
+    clicks = list(
+        db.scalars(
+            select(Click).where(
+                Click.link_id == link.id, Click.clicked_at >= start, Click.clicked_at < end
+            )
+        )
+    )
+    per_hour = Counter(as_utc(c.clicked_at).astimezone(tz).hour for c in clicks)
+    peak = max(per_hour.values(), default=0) or 1
+    hours = [
+        {
+            "label": f"{h:02d}", "count": per_hour.get(h, 0),
+            "pct": max(1, round(per_hour[h] / peak * 100)) if per_hour.get(h) else 0,
+        }
+        for h in range(24)
+    ]
+    busiest = max(range(24), key=lambda h: (per_hour.get(h, 0), -h)) if clicks else None
+
+    def link_to(other: date) -> str:
+        return f"/dashboard/links/{link.id}/day/{other.isoformat()}"
+
+    return render(
+        request, "link_day.html", user,
+        link=link,
+        short_url=short_url(request, user, link),
+        day_label=d.strftime("%d %b %Y"),
+        state=day_state(link, d, tz, now),
+        hours=hours,
+        total=len(clicks),
+        busiest=None if busiest is None else f"{busiest:02d}:00–{(busiest + 1) % 24:02d}:00",
         devices=Counter(c.device for c in clicks).most_common(),
         referrers=Counter(c.referrer or "Direct" for c in clicks).most_common(5),
+        prev_url=link_to(d - timedelta(days=1)) if d > first else None,
+        next_url=link_to(d + timedelta(days=1)) if d < today else None,
+        tz_name=tz_name,
     )
 
 

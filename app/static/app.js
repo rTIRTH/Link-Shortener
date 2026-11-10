@@ -8,7 +8,16 @@
     if (!isNaN(d)) el.textContent = d.toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
   });
 
-  // 2) edit page: only show the "new password" box when "set/change" is selected
+  // 2) remember the visitor's time zone, so day-by-day stats use their own days (not UTC days)
+  try {
+    var zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (zone && document.cookie.indexOf('tz=' + zone) === -1) {
+      document.cookie = 'tz=' + zone + '; path=/; max-age=31536000; SameSite=Lax' +
+        (location.protocol === 'https:' ? '; Secure' : '');
+    }
+  } catch (e) { /* no time zone info: the server falls back to UTC */ }
+
+  // 3) edit page: only show the "new password" box when "set/change" is selected
   document.querySelectorAll('.new-password').forEach(function (box) {
     var form = box.closest('form');
     var radios = form.querySelectorAll('input[name="password_action"]');
