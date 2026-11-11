@@ -204,8 +204,6 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 /* Edit, Stats and Share travel together: equal widths, and when the row is too narrow
    they drop to the next line as one block that still ends flush with the table */
 .selection-actions { display: flex; gap: 10px; flex: 1 1 300px; min-width: 0; }
-/* the hint may wrap onto two lines, so the whole toolbar fits on one row on a normal screen */
-.toolbar > small { flex: 0 1 260px; line-height: 1.35; }
 .selection-actions .btn { flex: 1 1 0; min-width: 0; text-align: center; }
 
 /* ---- choice cards (password options on the edit page) ---- */

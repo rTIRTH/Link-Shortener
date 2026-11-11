@@ -35,9 +35,9 @@
   <form method="post" id="bulk" class="toolbar">
     <button class="btn small danger" type="submit" formaction="/dashboard/links/bulk-delete"
             onclick='return confirm({{ _("Delete the selected links? This cannot be undone.")|tojson }})'>{{ _("Delete selected") }}</button>
-    <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip">{{ _("Download QR codes") }}</button>
+    <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip"
+            title="{{ _('QR download uses the selected links, or all links if none are selected.') }}">{{ _("Download QR codes") }}</button>
     <a class="btn small ghost" href="/dashboard/links/export.csv">{{ _("Export CSV") }}</a>
-    <small class="muted">{{ _("QR download uses the selected links, or all links if none are selected.") }}</small>
     <div class="selection-actions">
       <button class="btn small ghost fill" type="submit" formmethod="get" formaction="/dashboard/links/edit"
               id="edit-selected" disabled title="{{ _('Select one link to edit it.') }}">{{ _("Edit") }}</button>

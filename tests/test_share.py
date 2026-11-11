@@ -36,7 +36,8 @@ def test_share_sits_after_stats_in_one_group_and_starts_disabled(alice):
     assert 'class="btn small ghost fill"' in share  # same look as Edit and Stats
     assert 'type="button"' in share and "disabled" in share  # opens a pop-up; needs a selection
     assert group.index("Edit") < group.index("Stats") < group.index(">Share<")
-    assert bar.index("QR download uses") < bar.index('class="selection-actions"')  # hint first
+    assert "QR download uses" not in bar.replace('title="QR download uses', "")  # no text
+    assert bar.index("Export CSV") < bar.index('class="selection-actions"')  # then the group
 
 
 def test_each_row_carries_what_the_popup_needs(alice, app):
@@ -143,5 +144,12 @@ def test_english_strings_for_the_script():
 def test_layout_rules_keep_the_three_buttons_together():
     css = (APP / "static" / "style.css").read_text(encoding="utf-8")
     assert ".selection-actions {" in css and "flex: 1 1 0" in css  # equal widths
-    assert ".toolbar > small {" in css  # the hint can wrap, so the toolbar stays on one row
     assert ".share-dialog" in css and ".sd-apps" in css and "repeat(4, 1fr)" in css
+
+
+def test_toolbar_has_no_hint_text_but_the_qr_button_explains_itself(alice):
+    make(alice)
+    bar = toolbar(alice.get("/dashboard").text)
+    assert not re.search(r"<small[^>]*>[^<]*QR download uses", bar)  # no line of text on the page
+    qr = re.search(r'<button[^>]*qr\.zip"[^>]*>', bar).group(0)
+    assert 'title="QR download uses the selected links, or all links if none are selected."' in qr
