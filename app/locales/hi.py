@@ -457,4 +457,29 @@ MESSAGES = {
         "आपकी भाषा",
     "Use it in English, हिन्दी or ગુજરાતી, with digits in your own script, in a light or dark theme.":
         "इसे अंग्रेज़ी, हिन्दी या ગુજરાતી में, अपनी लिपि के अंकों के साथ, हल्की या गहरी थीम में इस्तेमाल करें।",
+    # ---- share pop-up ----
+    "Share":
+        "साझा करें",
+    "Share link":
+        "लिंक साझा करें",
+    "Select one link to share it.":
+        "साझा करने के लिए एक लिंक चुनें।",
+    "Copy link":
+        "लिंक कॉपी करें",
+    "Download QR":
+        "QR डाउनलोड करें",
+    "Share via":
+        "इनसे साझा करें",
+    "Share via {app}":
+        "{app} से साझा करें",
+    "More":
+        "और",
+    "Check out this link":
+        "यह लिंक देखें",
+    "This link is not active right now, so visitors will see a message instead.":
+        "यह लिंक अभी चालू नहीं है, इसलिए खोलने वालों को इसके बजाय एक संदेश दिखेगा।",
+    "Copied!":
+        "कॉपी हो गया!",
+    "Could not copy automatically. Select the link and copy it.":
+        "अपने आप कॉपी नहीं हो सका। लिंक चुनकर खुद कॉपी करें।",
 }

@@ -38,11 +38,15 @@
     <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip">{{ _("Download QR codes") }}</button>
     <a class="btn small ghost" href="/dashboard/links/export.csv">{{ _("Export CSV") }}</a>
     <small class="muted">{{ _("QR download uses the selected links, or all links if none are selected.") }}</small>
-    <button class="btn small ghost fill" type="submit" formmethod="get" formaction="/dashboard/links/edit"
-            id="edit-selected" disabled title="{{ _('Select one link to edit it.') }}">{{ _("Edit") }}</button>
-    <button class="btn small ghost fill" type="submit" formmethod="get" formaction="/dashboard/links/compare"
-            id="stats-selected" data-max="{{ max_compare }}" disabled
-            title="{{ _('Select one or more links to see their stats. Pick several to compare them in one graph.') }}">{{ _("Stats") }}</button>
+    <div class="selection-actions">
+      <button class="btn small ghost fill" type="submit" formmethod="get" formaction="/dashboard/links/edit"
+              id="edit-selected" disabled title="{{ _('Select one link to edit it.') }}">{{ _("Edit") }}</button>
+      <button class="btn small ghost fill" type="submit" formmethod="get" formaction="/dashboard/links/compare"
+              id="stats-selected" data-max="{{ max_compare }}" disabled
+              title="{{ _('Select one or more links to see their stats. Pick several to compare them in one graph.') }}">{{ _("Stats") }}</button>
+      <button class="btn small ghost fill" type="button" id="share-selected" disabled
+              title="{{ _('Select one link to share it.') }}">{{ _("Share") }}</button>
+    </div>
   </form>
 
   <div class="tablewrap">
@@ -55,7 +59,8 @@
     {% for row in rows %}
       {% set link = row.link %}
       <tr>
-        <td><input type="checkbox" name="ids" value="{{ link.id }}" form="bulk" class="pick" aria-label="{{ _('Select {slug}', slug=link.slug) }}"></td>
+        <td><input type="checkbox" name="ids" value="{{ link.id }}" form="bulk" class="pick" data-url="{{ row.short_url }}" data-id="{{ link.id }}" data-slug="{{ link.slug }}"
+                 data-status="{{ row.status }}" aria-label="{{ _('Select {slug}', slug=link.slug) }}"></td>
         <td>
           <a class="mono" href="{{ row.short_url }}" target="_blank" rel="noopener">{{ row.short_url|replace('https://','')|replace('http://','') }}</a>
           {% if row.locked %}<span class="tag lock" title="{{ _('Visitors need a password') }}">{{ _("Password") }}</span>{% endif %}
@@ -95,11 +100,13 @@
       var picks = Array.prototype.slice.call(document.querySelectorAll('.pick'));
       var edit = document.getElementById('edit-selected');
       var stats = document.getElementById('stats-selected');
+      var share = document.getElementById('share-selected');
       var max = parseInt(stats.getAttribute('data-max'), 10);
       function sync() {
         var n = picks.filter(function (c) { return c.checked; }).length;
         edit.disabled = n !== 1;           // Edit works on exactly one link
         stats.disabled = n < 1 || n > max; // Stats works on one link, or several to compare
+        share.disabled = n !== 1;          // Share works on exactly one link
       }
       all.addEventListener('change', function (e) {
         picks.forEach(function (c) { c.checked = e.target.checked; });
@@ -109,8 +116,12 @@
       sync();
     })();
   </script>
+  {% include "_share_dialog.html" %}
   {% else %}
     <div class="empty"><h3>{{ _("No links yet") }}</h3><p>{{ _("Paste a long URL above to create your first short link.") }}</p></div>
   {% endif %}
 </section>
+{% endblock %}
+{% block scripts %}
+  <script src="/static/share.js?v={{ js_version }}" defer></script>
 {% endblock %}

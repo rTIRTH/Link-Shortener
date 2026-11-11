@@ -201,7 +201,12 @@ fieldset { border: 0; padding: 0; margin: 0 0 16px; min-width: 0; }
 td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 .toolbar { margin-bottom: 12px; }
 /* Edit and Stats stretch to fill the rest of the row, so it ends flush with the table */
-.toolbar .btn.fill { flex: 1 1 90px; text-align: center; }
+/* Edit, Stats and Share travel together: equal widths, and when the row is too narrow
+   they drop to the next line as one block that still ends flush with the table */
+.selection-actions { display: flex; gap: 10px; flex: 1 1 300px; min-width: 0; }
+/* the hint may wrap onto two lines, so the whole toolbar fits on one row on a normal screen */
+.toolbar > small { flex: 0 1 260px; line-height: 1.35; }
+.selection-actions .btn { flex: 1 1 0; min-width: 0; text-align: center; }
 
 /* ---- choice cards (password options on the edit page) ---- */
 .choices { display: grid; gap: 10px; }
@@ -341,14 +346,14 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 }
 img.avatar[src^="/account/photo"] { image-rendering: auto; }  /* real photos must stay smooth */
 
-.photo-dialog { width: min(94vw, 420px); max-height: 94vh; padding: 0; overflow: auto; border: 1px solid var(--line);
+.photo-dialog, .share-dialog { width: min(94vw, 420px); max-height: 94vh; padding: 0; overflow: auto; border: 1px solid var(--line);
                 border-radius: 18px; background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
-.photo-dialog[open] { animation: pd-in .18s ease-out; }
-.photo-dialog::backdrop { background: rgba(8, 12, 22, .62); backdrop-filter: blur(3px); }
+.photo-dialog[open], .share-dialog[open] { animation: pd-in .18s ease-out; }
+.photo-dialog::backdrop, .share-dialog::backdrop { background: rgba(8, 12, 22, .62); backdrop-filter: blur(3px); }
 .photo-dialog.is-dragging { outline: 2px dashed var(--accent); outline-offset: -8px; }
 @keyframes pd-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes pd-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .photo-dialog[open] { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .photo-dialog[open], .share-dialog[open] { animation: none; } }
 
 .pd-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 14px 22px;
            border-bottom: 1px solid var(--line); }
@@ -406,3 +411,28 @@ img.avatar[src^="/account/photo"] { image-rendering: auto; }  /* real photos mus
 .pd-status[hidden] { display: none; }
 .pd-error { margin: 0 22px 22px; padding: 10px 12px; border-radius: 10px; background: var(--err-bg);
             color: var(--danger); font-size: .9rem; }
+
+/* ---- share pop-up (dashboard: pick one link, press Share) ---- */
+.share-dialog { width: min(94vw, 440px); }
+.sd-body { display: grid; gap: 14px; padding: 18px 22px 22px; }
+.sd-url { width: 100%; font-size: .88rem; text-overflow: ellipsis; }
+.sd-note { margin: 0; padding: 9px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: .88rem; }
+.sd-note[hidden] { display: none; }
+.sd-top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sd-top .btn { text-align: center; padding: 10px 12px; }
+.sd-status { position: absolute; width: 1px; height: 1px; margin: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sd-status.show { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal;
+                  margin: -6px 0 -4px; text-align: center; font-size: .85rem; color: var(--danger); }
+.sd-label { margin: 4px 0 -4px; font-size: .85rem; font-weight: 600; color: var(--muted); }
+.sd-apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 6px; }
+.sd-apps[hidden] { display: none; }
+.sd-app { display: grid; justify-items: center; align-content: start; gap: 7px; min-width: 0; padding: 4px 2px; border: 0;
+          border-radius: 10px; background: none; color: var(--ink); font: inherit; font-size: .78rem; line-height: 1.2;
+          text-align: center; text-decoration: none; cursor: pointer; }
+.sd-app span:last-child { max-width: 100%; overflow-wrap: anywhere; }
+.sd-app:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.sd-ico { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--c);
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), var(--shadow-sm); transition: transform .12s, box-shadow .12s; }
+.sd-ico svg { width: 26px; height: 26px; }
+.sd-app:hover .sd-ico { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), 0 6px 14px rgba(20, 30, 50, .25); }
+@media (prefers-reduced-motion: reduce) { .sd-ico { transition: none; } .sd-app:hover .sd-ico { transform: none; } }

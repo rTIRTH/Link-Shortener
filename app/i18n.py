@@ -62,6 +62,8 @@ JS_STRINGS = {
     "choose_end": "Choose end date and time",
     "bad_date": "Use a date like {example}, optionally with a time like 09:30 PM.",
     "example": "e.g. {example}",
+    "share_copied": "Copied!",
+    "share_copy_failed": "Could not copy automatically. Select the link and copy it.",
     "photo_choose": "Please choose a photo first.",
     "photo_invalid": "That file is not a valid photo. Please use a JPEG, PNG or WebP image.",
     "photo_camera_failed": "We could not open the camera. You can upload a photo instead.",
