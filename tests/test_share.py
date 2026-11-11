@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from app.i18n import js_data, translate
-from app.models import Link
+from app.models import Link, utcnow
 
 APP = Path(__file__).resolve().parent.parent / "app"
 URL = "https://example.com/page"
@@ -31,11 +31,11 @@ def test_share_sits_after_stats_in_one_group_and_starts_disabled(alice):
     bar = toolbar(alice.get("/dashboard").text)
     group = bar[bar.index('class="selection-actions"'):]
     labels = re.findall(r'id="(edit|stats|share)-selected"', group)
-    assert labels == ["edit", "stats", "share"]  # Edit, Stats, Share: left to right
+    assert labels == ["edit", "stats", "share"]  # Edit, Analytics, Share: left to right
     share = re.search(r'<button[^>]*id="share-selected"[^>]*>', group).group(0)
-    assert 'class="btn small ghost fill"' in share  # same look as Edit and Stats
+    assert 'class="btn small ghost"' in share  # same look as the other toolbar buttons
     assert 'type="button"' in share and "disabled" in share  # opens a pop-up; needs a selection
-    assert group.index("Edit") < group.index("Stats") < group.index(">Share<")
+    assert group.index(">Edit<") < group.index(">Analytics<") < group.index(">Share<")
     assert "QR download uses" not in bar.replace('title="QR download uses', "")  # no text
     assert bar.index("Export CSV") < bar.index('class="selection-actions"')  # then the group
 
@@ -127,7 +127,7 @@ def test_popup_is_translated(alice, lang):
                     "not active right now"):
         assert english not in box, english
     assert translate(lang, "Copy link") in box and translate(lang, "Download QR") in box
-    assert f">{translate(lang, 'Share')}</button>" in toolbar(page)
+    assert f">{translate(lang, 'Share')}</span>" in toolbar(page)
     assert translate(lang, "Select one link to share it.") in toolbar(page)
     assert "WhatsApp" in box and "Gmail" in box  # app names are brand names: left as they are
     ui = js_data(lang)["ui"]
@@ -141,9 +141,12 @@ def test_english_strings_for_the_script():
     assert ui["share_copy_failed"].startswith("Could not copy")
 
 
-def test_layout_rules_keep_the_three_buttons_together():
+def test_layout_rules_put_the_three_buttons_compactly_on_the_right():
     css = (APP / "static" / "style.css").read_text(encoding="utf-8")
-    assert ".selection-actions {" in css and "flex: 1 1 0" in css  # equal widths
+    group = css[css.index(".selection-actions {"):css.index("}", css.index(".selection-actions {"))]
+    assert "margin-left: auto" in group  # pushed to the right end of the toolbar
+    assert "flex: 0 0 auto" in group  # natural width: no stretching
+    assert ".btn .ico {" in css and "stroke: currentColor" in css  # icons follow the button colour
     assert ".share-dialog" in css and ".sd-apps" in css and "repeat(4, 1fr)" in css
 
 
@@ -153,3 +156,44 @@ def test_toolbar_has_no_hint_text_but_the_qr_button_explains_itself(alice):
     assert not re.search(r"<small[^>]*>[^<]*QR download uses", bar)  # no line of text on the page
     qr = re.search(r'<button[^>]*qr\.zip"[^>]*>', bar).group(0)
     assert 'title="QR download uses the selected links, or all links if none are selected."' in qr
+
+
+def test_each_toolbar_button_has_an_icon_then_its_word(alice):
+    make(alice)
+    bar = toolbar(alice.get("/dashboard").text)
+    for button_id, word in (("edit", "Edit"), ("stats", "Analytics"), ("share", "Share")):
+        pattern = rf'<button[^>]*id="{button_id}-selected".*?</button>'
+        button = re.search(pattern, bar, re.S).group(0)
+        assert re.search(r'<svg class="ico"[^>]*aria-hidden="true"', button)  # decorative icon
+        assert button.index("<svg") < button.index(f"<span>{word}</span>")  # icon, then word
+    assert ">Stats<" not in bar  # renamed
+
+
+def test_the_three_icons_are_different_drawings(alice):
+    make(alice)
+    bar = toolbar(alice.get("/dashboard").text)
+    icons = re.findall(r'<svg class="ico".*?</svg>', bar, re.S)
+    assert len(icons) == 3 and len(set(icons)) == 3
+    assert "<circle" in icons[1]  # the magnifier of Analytics
+
+
+def test_analytics_wording_is_used_everywhere_the_old_stats_label_was(alice, app):
+    make(alice)
+    bar = toolbar(alice.get("/dashboard").text)
+    assert "see their analytics" in bar
+    with app.state.session_factory() as db:
+        link_id = db.query(Link).one().id
+    assert ">Analytics</a>" in alice.get(f"/dashboard/links/{link_id}/edit").text
+    day = utcnow().date().isoformat()
+    page = alice.get(f"/dashboard/links/{link_id}/day/{day}").text
+    assert "Back to link analytics" in page
+
+
+@pytest.mark.parametrize("lang", ["hi", "gu"])
+def test_analytics_wording_is_translated(alice, lang):
+    make(alice)
+    alice.post("/language", data={"lang": lang, "next": "/"})
+    bar = toolbar(alice.get("/dashboard").text)
+    assert f"<span>{translate(lang, 'Analytics')}</span>" in bar
+    assert translate(lang, "Analytics") != "Analytics"
+    assert "Analytics" not in bar and "analytics" not in bar

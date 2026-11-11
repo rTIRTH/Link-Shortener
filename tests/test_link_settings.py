@@ -327,18 +327,18 @@ def test_edit_and_stats_live_in_the_toolbar_not_in_the_rows(alice):
     page = alice.get("/dashboard").text
     first = page.index('<form method="post" id="bulk"')
     bar = page[first:page.index("</form>", first)]
-    # same look as Download QR codes / Export CSV, placed after the hint text
-    look = 'class="btn small ghost fill" type="submit" formmethod="get" formaction='
+    # same look as Download QR codes / Export CSV, with an icon in front of the word
+    look = 'class="btn small ghost" type="submit" formmethod="get" formaction='
     assert f'{look}"/dashboard/links/edit"' in bar
     assert f'{look}"/dashboard/links/compare"' in bar
-    order = ["Export CSV", ">Edit<", ">Stats<"]
+    order = ["Export CSV", ">Edit<", ">Analytics<"]
     positions = [bar.index(text) for text in order]
     assert positions == sorted(positions)
     # disabled until links are ticked (script turns them on)
     assert 'id="edit-selected"' in bar and "disabled" in bar
     # gone from the table rows
     body = page[page.index("<tbody>"):page.index("</tbody>")]
-    assert ">Edit<" not in body and ">Stats<" not in body and "btn-row" not in page
+    assert ">Edit<" not in body and ">Analytics<" not in body and "btn-row" not in page
 
 
 def test_edit_button_needs_exactly_one_link(alice):

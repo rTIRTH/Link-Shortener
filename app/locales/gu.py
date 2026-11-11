@@ -87,7 +87,6 @@ MESSAGES = {
     "ends {time}": "સમાપ્ત થશે: {time}",
     "ended {time}": "સમાપ્ત થયું: {time}",
     "Edit": "ફેરફાર કરો",
-    "Stats": "આંકડા",
     "No links yet": "હજી કોઈ લિંક નથી",
     "Paste a long URL above to create your first short link.":
         "તમારી પહેલી ટૂંકી લિંક બનાવવા માટે ઉપર લાંબો URL પેસ્ટ કરો.",
@@ -352,8 +351,6 @@ MESSAGES = {
     # ---- selection toolbar: edit / compare stats ----
     "Select one link to edit it.":
         "ફેરફાર કરવા માટે એક લિંક પસંદ કરો.",
-    "Select one or more links to see their stats. Pick several to compare them in one graph.":
-        "આંકડા જોવા માટે એક કે વધુ લિંક પસંદ કરો. એક જ ગ્રાફમાં સરખામણી કરવા માટે ઘણી લિંક પસંદ કરો.",
     "Select exactly one link to edit.":
         "ફેરફાર કરવા માટે બરાબર એક લિંક પસંદ કરો.",
     "You can compare up to {n} links at a time.":
@@ -399,8 +396,6 @@ MESSAGES = {
         "{n} ક્લિક",
     "{n} clicks":
         "{n} ક્લિક",
-    "← Back to link stats":
-        "← લિંકના આંકડા પર પાછા",
     "← Previous day":
         "← પાછલો દિવસ",
     # ---- link on/off switch ----
@@ -482,4 +477,11 @@ MESSAGES = {
         "કૉપી થઈ ગયું!",
     "Could not copy automatically. Select the link and copy it.":
         "આપમેળે કૉપી થઈ શક્યું નહીં. લિંક પસંદ કરીને જાતે કૉપી કરો.",
+    # ---- analytics wording ----
+    "Analytics":
+        "એનાલિટિક્સ",
+    "Select one or more links to see their analytics. Pick several to compare them in one graph.":
+        "એનાલિટિક્સ જોવા માટે એક કે વધુ લિંક પસંદ કરો. એક જ ગ્રાફમાં સરખામણી કરવા માટે ઘણી લિંક પસંદ કરો.",
+    "← Back to link analytics":
+        "← લિંક એનાલિટિક્સ પર પાછા",
 }

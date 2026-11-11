@@ -201,10 +201,12 @@ fieldset { border: 0; padding: 0; margin: 0 0 16px; min-width: 0; }
 td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 .toolbar { margin-bottom: 12px; }
 /* Edit and Stats stretch to fill the rest of the row, so it ends flush with the table */
-/* Edit, Stats and Share travel together: equal widths, and when the row is too narrow
-   they drop to the next line as one block that still ends flush with the table */
-.selection-actions { display: flex; gap: 10px; flex: 1 1 300px; min-width: 0; }
-.selection-actions .btn { flex: 1 1 0; min-width: 0; text-align: center; }
+/* Edit, Analytics and Share: compact buttons (icon + word) on the right of the toolbar, level with the end of the
+   table. When the row is too narrow they drop to the next line, still on the right. */
+.selection-actions { display: flex; gap: 8px; flex: 0 0 auto; margin-left: auto; }
+.selection-actions .btn { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.btn .ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2;
+            stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---- choice cards (password options on the edit page) ---- */
 .choices { display: grid; gap: 10px; }

@@ -5,7 +5,7 @@
 {% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
 {% set state %}<span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad', 'inactive': 'off'}[status] }}">{{ state_names[status] }}</span>{% endset %}
 <div class="account">
-  <p><a href="/dashboard">{{ _("← All links") }}</a> · <a href="/dashboard/links/{{ link.id }}">{{ _("Stats") }}</a></p>
+  <p><a href="/dashboard">{{ _("← All links") }}</a> · <a href="/dashboard/links/{{ link.id }}">{{ _("Analytics") }}</a></p>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
   <p class="muted">{{ _("The short address stays the same. You can change where it goes, when it works, and who can open it.") }}</p>
 
