@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_charts.html" import analytics with context %}
 {% block title %}{{ _("Compare links") }} · Link Shortener{% endblock %}
 {% block content %}
 <p><a href="/dashboard">{{ _("← All links") }}</a></p>
@@ -7,22 +8,13 @@
   <p class="muted">{{ _n("{n} link", "{n} links", entries|length) }}</p>
 </section>
 
-<section>
-  <h2>{{ _("Clicks per day") }}</h2>
-  <div class="chart compare" role="img" aria-label="{{ _('Clicks per day for the last 14 days') }}">
-    {% for day in series %}
-      <div class="col">
-        <div class="group">
-          {% for b in day.bars %}
-            <div class="bar" style="height: {{ b.pct }}%; background: {{ b.color }}"
-                 title="{{ b.slug }} · {{ day.label }}: {{ b.count|num }}"></div>
-          {% endfor %}
-        </div>
-        <span class="lbl">{{ day.num }}</span>
-      </div>
-    {% endfor %}
-  </div>
-</section>
+{% set cards = [
+  {'title': _("Clicks today, hour by hour"),
+   'note': _n("{n} click today", "{n} clicks today", today_total) if today_total else _("No clicks yet today."),
+   'svg': hourly_charts},
+  {'title': _("Clicks per day"), 'note': None, 'svg': daily_charts},
+] %}
+{{ analytics(cards) }}
 
 <section>
   <div class="tablewrap">

@@ -114,17 +114,8 @@ tr:last-child td { border-bottom: 0; }
 .block { display: block; color: var(--muted); }
 .actions { white-space: nowrap; }
 .empty { text-align: center; padding: 48px 16px; border: 1px dashed var(--line); border-radius: 8px; }
+.lbl { font-size: .7rem; color: var(--muted); }  /* the small captions above form fields */
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin: 28px 0; }
-.chart { display: flex; align-items: flex-end; gap: 6px; height: 170px; padding-top: 18px; }
-.col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-width: 0; }
-.bar { width: 100%; background: var(--accent); border-radius: 3px 3px 0 0; min-height: 2px; opacity: .85; }
-.val, .lbl { font-size: .7rem; color: var(--muted); }
-.chart.hours { gap: 3px; }
-.chart.hours .val, .chart.hours .lbl { font-size: .6rem; }
-/* several links on one graph: a group of bars per day, one colour per link */
-.chart.compare .col { justify-content: flex-start; }
-.group { display: flex; align-items: flex-end; gap: 1px; width: 100%; height: calc(100% - 1.1rem); }
-.group .bar { flex: 1; min-width: 0; min-height: 0; border-radius: 2px 2px 0 0; opacity: 1; }
 .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
 .qr { border: 1px solid var(--line); border-radius: 6px; background: #fff; }
 .plain { list-style: none; padding: 0; margin: 0; }
@@ -436,3 +427,36 @@ img.avatar[src^="/account/photo"] { image-rendering: auto; }  /* real photos mus
 .sd-ico svg { width: 26px; height: 26px; }
 .sd-app:hover .sd-ico { transform: translateY(-2px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), 0 6px 14px rgba(20, 30, 50, .25); }
 @media (prefers-reduced-motion: reduce) { .sd-ico { transition: none; } .sd-app:hover .sd-ico { transform: none; } }
+
+/* ---- analytics charts: a type switch (bar / line / area) and the charts it controls ---- */
+.analytics { position: relative; margin: 24px 0; }
+.ct { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ct-tabs { display: inline-flex; gap: 2px; padding: 3px; margin-bottom: 16px; background: var(--head);
+           border: 1px solid var(--line); border-radius: 10px; }
+.ct-tabs label { display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 8px;
+                 font-size: .85rem; font-weight: 600; color: var(--muted); cursor: pointer; user-select: none; }
+.ct-tabs label:hover { color: var(--ink); }
+.ct-tabs .ico { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 2;
+                stroke-linecap: round; stroke-linejoin: round; }
+.ct-bar:checked ~ .ct-tabs .tab-bar, .ct-line:checked ~ .ct-tabs .tab-line, .ct-area:checked ~ .ct-tabs .tab-area {
+  background: var(--card); color: var(--accent); box-shadow: var(--shadow-sm); }
+.ct-bar:focus-visible ~ .ct-tabs .tab-bar, .ct-line:focus-visible ~ .ct-tabs .tab-line,
+.ct-area:focus-visible ~ .ct-tabs .tab-area { outline: 3px solid var(--accent); outline-offset: 1px; }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; }
+.chart-card { min-width: 0; padding: 16px 18px 12px; background: var(--card); border: 1px solid var(--line);
+              border-radius: 12px; box-shadow: var(--shadow-sm); }
+.chart-card h2 { margin: 0 0 2px; font-size: 1.05rem; }
+.chart-note { margin: 0 0 8px; font-size: .88rem; }
+.chart-card figure { display: none; margin: 0; }
+.ct-bar:checked ~ .charts .p-bar, .ct-line:checked ~ .charts .p-line, .ct-area:checked ~ .charts .p-area { display: block; }
+.chart-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.c-grid { stroke: var(--line); stroke-width: 1; }
+.c-text { fill: var(--muted); font: 11px var(--sans); }
+.c-val { fill: var(--muted); font: 10px var(--sans); }
+.c-bar { opacity: .9; }
+.c-line { fill: none; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.c-area { opacity: .16; }
+.c-dot { fill: var(--card); stroke-width: 3; }
+.c-hit { fill: transparent; }
+.c-hit:hover { fill: color-mix(in srgb, var(--accent) 8%, transparent); }
+@media (max-width: 480px) { .charts { grid-template-columns: minmax(0, 1fr); } }

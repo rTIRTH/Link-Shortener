@@ -2,7 +2,7 @@ import csv
 import io
 import zipfile
 from collections import Counter
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, timedelta
 
 import qrcode
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
@@ -13,10 +13,11 @@ from sqlalchemy.orm import Session
 
 from ..activity import day_state, day_window, link_events, local_date, visitor_timezone
 from ..cache import cache_delete, rate_limit
+from ..charts import chart_set
 from ..config import settings
 from ..database import get_db
 from ..deps import require_user
-from ..i18n import format_date, get_lang, native_digits
+from ..i18n import format_date, get_lang, native_digits, translate
 from ..models import Click, Link, LinkToggle, User, UsernameAlias, as_utc, utcnow
 from ..security import hash_password
 from ..templating import flash, render
@@ -30,6 +31,13 @@ from ..utils import (
 )
 
 router = APIRouter(prefix="/dashboard")
+
+def digits_in(lang: str):
+    """A function that writes a number in the page language's digits (for chart labels)."""
+    def write(value) -> str:
+        return native_digits(lang, value)
+    return write
+
 
 MAX_COMPARE = 8  # how many links can share one graph
 LOG_DAYS = 30  # how many days the activity log shows
@@ -326,17 +334,24 @@ def compare_links(
     if len(links) == 1:
         return RedirectResponse(f"/dashboard/links/{links[0].id}", status_code=303)
 
-    today = utcnow().date()
-    since = datetime.combine(today - timedelta(days=13), time.min, tzinfo=timezone.utc)
+    tz, _tz_name = visitor_timezone(request)  # the same local days as the single-link page
+    today = local_date(utcnow(), tz)
+    since = day_window(today - timedelta(days=13), tz)[0]
     link_ids = [link.id for link in links]
-    clicks = db.scalars(select(Click).where(Click.link_id.in_(link_ids), Click.clicked_at >= since))
+    clicks = list(
+        db.scalars(select(Click).where(Click.link_id.in_(link_ids), Click.clicked_at >= since))
+    )
     per_link_day: dict[int, Counter] = {link.id: Counter() for link in links}
+    clicks_today = []
     for c in clicks:
-        per_link_day[c.link_id][as_utc(c.clicked_at).date()] += 1
+        day = local_date(c.clicked_at, tz)
+        per_link_day[c.link_id][day] += 1
+        if day == today:
+            clicks_today.append(c)
 
     lang = get_lang(request)
+    num = digits_in(lang)
     days = [today - timedelta(days=i) for i in range(13, -1, -1)]
-    peak = max((n for counts in per_link_day.values() for n in counts.values()), default=0) or 1
     entries = [
         {
             "link": link,
@@ -346,18 +361,37 @@ def compare_links(
         }
         for i, link in enumerate(links)
     ]
-    series = []
-    for d in days:
-        bars = []
-        for e in entries:
-            count = per_link_day[e["link"].id].get(d, 0)
-            pct = max(1, round(count / peak * 100)) if count else 0  # same scale for every link
-            bars.append({"count": count, "pct": pct, "color": e["color"], "slug": e["link"].slug})
-        series.append({
-            "label": format_date(d, lang), "num": native_digits(lang, f"{d.day:02d}"), "bars": bars,
-        })
+    # one line/bar/area per link, all on the same scale so they can be compared
+    daily = chart_set(
+        [num(f"{d.day:02d}") for d in days],
+        [
+            {"name": e["link"].slug, "color": e["color"],
+             "values": [per_link_day[e["link"].id].get(d, 0) for d in days]}
+            for e in entries
+        ],
+        aria=translate(lang, "Clicks per day for the last 14 days"), num=num,
+        tip_labels=[format_date(d, lang) for d in days],
+    )
+    hour_now = as_utc(utcnow()).astimezone(tz).hour
+    per_link_hour = {link.id: Counter() for link in links}
+    for c in clicks_today:
+        per_link_hour[c.link_id][as_utc(c.clicked_at).astimezone(tz).hour] += 1
+    hourly = chart_set(
+        [num(f"{h:02d}") for h in range(24)],
+        [
+            {"name": e["link"].slug, "color": e["color"],
+             "values": [per_link_hour[e["link"].id].get(h, 0) if h <= hour_now else None
+                        for h in range(24)]}
+            for e in entries
+        ],
+        aria=translate(lang, "Clicks today, hour by hour"), num=num, label_every=3,
+        tip_labels=[num(f"{h:02d}:00") for h in range(24)],
+    )
 
-    return render(request, "compare_links.html", user, entries=entries, series=series)
+    return render(
+        request, "compare_links.html", user, entries=entries, daily_charts=daily,
+        hourly_charts=hourly, today_total=len(clicks_today),
+    )
 
 
 @router.get("/links/{link_id}")
@@ -381,14 +415,28 @@ def link_detail(
     per_day = Counter(local_date(c.clicked_at, tz) for c in clicks)
 
     days = [today - timedelta(days=i) for i in range(13, -1, -1)]
-    series = [
-        {"label": format_date(d, lang), "num": native_digits(lang, f"{d.day:02d}"),
-         "count": per_day.get(d, 0)}
-        for d in days
-    ]
-    peak = max((x["count"] for x in series), default=0) or 1
-    for x in series:
-        x["pct"] = round(x["count"] / peak * 100)
+    num = digits_in(lang)
+    color = {"name": None, "color": "var(--accent)"}
+    daily = chart_set(
+        [num(f"{d.day:02d}") for d in days],
+        [{**color, "values": [per_day.get(d, 0) for d in days]}],
+        aria=translate(lang, "Clicks per day for the last 14 days"), num=num,
+        tip_labels=[format_date(d, lang) for d in days],
+    )
+    now_local = as_utc(now).astimezone(tz)
+    per_hour = Counter(
+        as_utc(c.clicked_at).astimezone(tz).hour
+        for c in clicks
+        if local_date(c.clicked_at, tz) == today
+    )
+    hourly = chart_set(
+        [num(f"{h:02d}") for h in range(24)],
+        [{**color, "values": [
+            per_hour.get(h, 0) if h <= now_local.hour else None for h in range(24)
+        ]}],
+        aria=translate(lang, "Clicks today, hour by hour"), num=num, label_every=3,
+        tip_labels=[num(f"{h:02d}:00") for h in range(24)],
+    )
 
     log = []
     for i in range((today - first_log_day).days + 1):
@@ -405,7 +453,9 @@ def link_detail(
         link=link,
         short_url=short_url(request, user, link),
         status=link_status(link),
-        series=series,
+        daily_charts=daily,
+        hourly_charts=hourly,
+        today_total=sum(per_hour.values()),
         recent_total=len(recent),
         devices=Counter(c.device for c in recent).most_common(),
         referrers=Counter(c.referrer or "Direct" for c in recent).most_common(5),
@@ -444,14 +494,17 @@ def link_day(
         )
     )
     per_hour = Counter(as_utc(c.clicked_at).astimezone(tz).hour for c in clicks)
-    peak = max(per_hour.values(), default=0) or 1
-    hours = [
-        {
-            "label": f"{h:02d}", "count": per_hour.get(h, 0),
-            "pct": max(1, round(per_hour[h] / peak * 100)) if per_hour.get(h) else 0,
-        }
-        for h in range(24)
-    ]
+    num = digits_in(lang)
+    hour_now = as_utc(now).astimezone(tz).hour
+    hours = chart_set(
+        [num(f"{h:02d}") for h in range(24)],
+        [{"name": None, "color": "var(--accent)",
+          "values": [
+              per_hour.get(h, 0) if d < today or h <= hour_now else None for h in range(24)
+          ]}],
+        aria=translate(lang, "Clicks per hour"), num=num, label_every=3,
+        tip_labels=[num(f"{h:02d}:00") for h in range(24)],
+    )
     busiest = max(range(24), key=lambda h: (per_hour.get(h, 0), -h)) if clicks else None
 
     def link_to(other: date) -> str:
@@ -463,7 +516,7 @@ def link_day(
         short_url=short_url(request, user, link),
         day_label=format_date(d, lang, year=True),
         state=day_state(link, d, tz, now, link.toggles),
-        hours=hours,
+        hour_charts=hours,
         total=len(clicks),
         busiest=None if busiest is None else native_digits(
             lang, f"{busiest:02d}:00–{(busiest + 1) % 24:02d}:00"

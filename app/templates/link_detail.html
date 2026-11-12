@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_charts.html" import analytics with context %}
 {% block title %}{{ link.slug }} · Link Shortener{% endblock %}
 {% block content %}
 {% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
@@ -25,25 +26,13 @@
   <p><a class="btn small" href="/dashboard/links/{{ link.id }}/edit">{{ _("Edit link") }}</a></p>
 </section>
 
-<section class="grid2">
-  <div>
-    <h2>{{ _("Clicks per day") }}</h2>
-    <div class="chart" role="img" aria-label="{{ _('Clicks per day for the last 14 days') }}">
-      {% for s in series %}
-        <div class="col" title="{{ s.label }}: {{ s.count|num }}">
-          <span class="val">{{ s.count|num if s.count else '' }}</span>
-          <div class="bar" style="height: {{ s.pct }}%"></div>
-          <span class="lbl">{{ s.num }}</span>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-  <div>
-    <h2>{{ _("QR code") }}</h2>
-    <img class="qr" src="/dashboard/links/{{ link.id }}/qr.png" alt="{{ _('QR code for {url}', url=short_url) }}" width="180" height="180">
-    <p><a href="/dashboard/links/{{ link.id }}/qr.png" download="{{ link.slug }}.png">{{ _("Download PNG") }}</a></p>
-  </div>
-</section>
+{% set cards = [
+  {'title': _("Clicks today, hour by hour"),
+   'note': _n("{n} click today", "{n} clicks today", today_total) if today_total else _("No clicks yet today."),
+   'svg': hourly_charts},
+  {'title': _("Clicks per day"), 'note': _("{n} in the last 14 days", n=recent_total), 'svg': daily_charts},
+] %}
+{{ analytics(cards) }}
 
 <section>
   {% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')], 'inactive': ['off', _('Inactive')]} %}
@@ -92,6 +81,11 @@
     <h2>{{ _("Top referrers") }}</h2>
     {% if referrers %}<ul class="plain">{% for name, n in referrers %}<li><span>{{ _(name) }}</span><b>{{ n|num }}</b></li>{% endfor %}</ul>
     {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
+  </div>
+  <div>
+    <h2>{{ _("QR code") }}</h2>
+    <img class="qr" src="/dashboard/links/{{ link.id }}/qr.png" alt="{{ _('QR code for {url}', url=short_url) }}" width="180" height="180">
+    <p><a href="/dashboard/links/{{ link.id }}/qr.png" download="{{ link.slug }}.png">{{ _("Download PNG") }}</a></p>
   </div>
 </section>
 

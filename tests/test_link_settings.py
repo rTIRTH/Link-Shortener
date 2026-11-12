@@ -360,7 +360,8 @@ def test_stats_button_one_link_opens_its_page_several_compare(alice):
     page = alice.get("/dashboard/links/compare?ids=1&ids=2")
     assert page.status_code == 200
     assert "Compare links" in page.text and "one1" in page.text and "two2" in page.text
-    assert page.text.count('class="bar"') == 14 * 2  # 14 days x 2 links, one shared graph
+    assert page.text.count('<svg class="chart-svg chart-bar"') == 2  # today by hour, and day by day
+    assert "Clicks today, hour by hour" in page.text and "Clicks per day" in page.text
     assert alice.get("/dashboard/links/compare").headers["location"] == "/dashboard"
 
 
@@ -371,7 +372,7 @@ def test_compare_counts_clicks_and_ignores_other_peoples_links(alice, make_clien
     alice.get("/alice/one1")
     alice.get("/alice/two2")
     page = alice.get("/dashboard/links/compare?ids=1&ids=2").text
-    assert "one1 · " in page and ": 2\"" in page and ": 1\"" in page
+    assert "one1: 2" in page and "two2: 1" in page  # both links in one tooltip per slot
     bob = make_client()
     bob.post("/register", data={"username": "bob", "email": "bob@example.com",
                                 "password": "password123"})

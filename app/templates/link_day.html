@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_charts.html" import analytics with context %}
 {% block title %}{{ _("Activity on {date}", date=day_label) }} · Link Shortener{% endblock %}
 {% block content %}
 {% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')], 'inactive': ['off', _('Inactive')]} %}
@@ -18,18 +19,8 @@
   </p>
 </section>
 
-<section>
-  <h2>{{ _("Clicks per hour") }}</h2>
-  <div class="chart hours" role="img" aria-label="{{ _('Clicks per hour') }}">
-    {% for h in hours %}
-      <div class="col" title="{{ (h.label ~ ':00')|num }} · {{ h.count|num }}">
-        <span class="val">{{ h.count|num if h.count else '' }}</span>
-        <div class="bar" style="height: {{ h.pct }}%"></div>
-        <span class="lbl">{{ h.label|num }}</span>
-      </div>
-    {% endfor %}
-  </div>
-</section>
+{% set cards = [{'title': _("Clicks per hour"), 'note': None, 'svg': hour_charts}] %}
+{{ analytics(cards) }}
 
 <section class="grid2">
   <div>

@@ -151,10 +151,10 @@ def test_day_page_hours_and_busiest_hour_are_native(alice, app, lang):
     use(alice, lang)
     day = (utcnow() - timedelta(days=1)).date().isoformat()
     page = alice.get(f"/dashboard/links/{lid}/day/{day}").text
-    assert f'title="{native_digits(lang, "14:00")} · {native_digits(lang, 3)}"' in page
+    assert f"<title>{native_digits(lang, '14:00')}: {native_digits(lang, 3)}</title>" in page
     assert native_digits(lang, "14:00–15:00") in page
-    labels = re.findall(r'<span class="lbl">([^<]*)</span>', page)
-    assert len(labels) == 24 and all(not re.search("[0-9]", x) for x in labels)
+    texts = re.findall(r'<text class="c-(?:text|val)"[^>]*>([^<]*)</text>', page)
+    assert len(texts) > 24 and all(not re.search("[0-9]", x) for x in texts)  # axes and bar values
 
 
 @pytest.mark.parametrize("lang", ["hi", "gu"])
@@ -164,9 +164,10 @@ def test_compare_page_is_native(alice, app, lang):
     stamp_clicks(app, "one1")
     use(alice, lang)
     page = alice.get("/dashboard/links/compare?ids=1&ids=2").text
-    assert f"{format_date(utcnow().date(), lang)}: " in page
-    labels = re.findall(r'<span class="lbl">([^<]*)</span>', page)
-    assert len(labels) == 14 and all(NATIVE[lang].search(x) for x in labels)
+    assert f"<title>{format_date(utcnow().date(), lang)}\n" in page  # the date, then each link
+    texts = re.findall(r'<text class="c-text"[^>]*>([^<]*)</text>', page)
+    assert len(texts) > 14 and all(not re.search("[0-9]", x) for x in texts)
+    assert sum(1 for x in texts if NATIVE[lang].search(x)) >= 14  # the day numbers under the bars
     assert f'<td class="num">{native_digits(lang, 3)}</td>' in page
 
 

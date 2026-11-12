@@ -187,8 +187,10 @@ def test_day_page_shows_clicks_hour_by_hour(alice, app):
 
     page = alice.get(f"/dashboard/links/{lid}/day/{day.date().isoformat()}")
     assert page.status_code == 200
-    assert 'title="20:00 · 2"' in page.text and 'title="03:00 · 1"' in page.text
-    assert page.text.count('class="bar"') == 24
+    assert "<title>20:00: 2</title>" in page.text and "<title>03:00: 1</title>" in page.text
+    bar_chart = page.text[page.text.index("chart-bar"):page.text.index("chart-line")]
+    assert bar_chart.count('class="c-bar"') == 2  # the two busy hours; quiet hours draw nothing
+    assert bar_chart.count('class="c-hit"') == 24  # one hover area per hour
     assert "Busiest hour: 20:00–21:00" in page.text
     assert "3 clicks" in page.text and "<span>mobile</span>" in page.text
 
@@ -202,7 +204,7 @@ def test_day_page_uses_the_visitors_time_zone(alice, app):
     local_day = when.astimezone(IST).date().isoformat()
     page = alice.get(f"/dashboard/links/{link_id(app)}/day/{local_day}")
     assert page.status_code == 200
-    assert 'title="01:00 · 1"' in page.text and "Busiest hour: 01:00–02:00" in page.text
+    assert "<title>01:00: 1</title>" in page.text and "Busiest hour: 01:00–02:00" in page.text
 
 
 def test_day_page_with_no_clicks_and_day_navigation(alice, app):

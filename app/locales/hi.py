@@ -484,4 +484,21 @@ MESSAGES = {
         "एनालिटिक्स देखने के लिए एक या अधिक लिंक चुनें। एक ही ग्राफ़ में तुलना करने के लिए कई लिंक चुनें।",
     "← Back to link analytics":
         "← लिंक एनालिटिक्स पर वापस",
+    # ---- chart types and hourly graph ----
+    "Chart type":
+        "ग्राफ़ का प्रकार",
+    "Bar":
+        "बार",
+    "Line":
+        "लाइन",
+    "Area":
+        "एरिया",
+    "Clicks today, hour by hour":
+        "आज के क्लिक, घंटे-दर-घंटे",
+    "{n} click today":
+        "आज {n} क्लिक",
+    "{n} clicks today":
+        "आज {n} क्लिक",
+    "No clicks yet today.":
+        "आज अभी तक कोई क्लिक नहीं हुआ।",
 }

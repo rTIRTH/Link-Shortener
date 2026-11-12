@@ -1,0 +1,41 @@
+{# One switch for the chart type, then the charts. Each card is {title, note, svg: {bar, line, area}}.
+   The three pictures are all in the page; CSS shows the one that is selected (so it works without
+   JavaScript). The small script only remembers the choice for next time. #}
+{% from "_icons.html" import icon %}
+{% macro analytics(cards) %}
+<section class="analytics">
+  <input class="ct ct-bar" type="radio" name="charttype" id="ct-bar" value="bar" checked>
+  <input class="ct ct-line" type="radio" name="charttype" id="ct-line" value="line">
+  <input class="ct ct-area" type="radio" name="charttype" id="ct-area" value="area">
+  <script>
+    (function () {
+      var boxes = document.querySelectorAll('.analytics .ct');
+      try {
+        var saved = localStorage.getItem('chartType');
+        if (/^(bar|line|area)$/.test(saved)) document.querySelector('.analytics .ct-' + saved).checked = true;
+      } catch (e) { /* no saved choice */ }
+      Array.prototype.forEach.call(boxes, function (box) {
+        box.addEventListener('change', function () {
+          try { localStorage.setItem('chartType', box.value); } catch (e) { /* private mode */ }
+        });
+      });
+    })();
+  </script>
+  <div class="ct-tabs" role="radiogroup" aria-label="{{ _('Chart type') }}">
+    <label class="tab-bar" for="ct-bar">{{ icon('bar') }}<span>{{ _("Bar") }}</span></label>
+    <label class="tab-line" for="ct-line">{{ icon('line') }}<span>{{ _("Line") }}</span></label>
+    <label class="tab-area" for="ct-area">{{ icon('area') }}<span>{{ _("Area") }}</span></label>
+  </div>
+  <div class="charts">
+    {% for card in cards %}
+      <div class="chart-card">
+        <h2>{{ card.title }}</h2>
+        {% if card.note %}<p class="muted chart-note">{{ card.note }}</p>{% endif %}
+        <figure class="p-bar">{{ card.svg.bar }}</figure>
+        <figure class="p-line">{{ card.svg.line }}</figure>
+        <figure class="p-area">{{ card.svg.area }}</figure>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endmacro %}
