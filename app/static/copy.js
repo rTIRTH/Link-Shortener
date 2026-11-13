@@ -25,12 +25,19 @@
     var button = event.target.closest ? event.target.closest('[data-copy]') : null;
     if (!button) return;
     var tip = button.parentNode.querySelector('.copy-tip');
+    var label = button.querySelector('.copy-label');
+    if (label && !button._label) { // remember the button's own words, and keep its width steady
+      button._label = label.textContent;
+      button.style.minWidth = button.offsetWidth + 'px';
+    }
     function show(message, failed) {
+      if (label) label.textContent = failed ? button._label : message; // "Copy link" -> "Copied!"
       if (tip) { tip.textContent = message; tip.classList.toggle('bad', !!failed); }
       button.classList.toggle('done', !failed);
       clearTimeout(button._timer);
       button._timer = setTimeout(function () {
         button.classList.remove('done');
+        if (label) label.textContent = button._label;
         if (tip) { tip.textContent = ''; tip.classList.remove('bad'); }
       }, 2200);
     }

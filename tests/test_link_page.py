@@ -45,8 +45,11 @@ def test_copy_button_sits_right_after_the_redirects_to_line(alice, app):
     assert line.index("Redirects to") < line.index(f'href="{URL}"') < line.index("copy-btn")
     button = re.search(r'<button[^>]*copy-btn[^>]*>.*?</button>', line, re.S).group(0)
     assert f'data-copy="{URL}"' in button and 'type="button"' in button
-    assert 'aria-label="Copy destination link"' in button
-    assert 'title="Copy destination link"' in button
+    assert 'class="btn small ghost has-icon copy-btn"' in button  # a real button, not icon-only
+    assert '<span class="copy-label">Copy link</span>' in button  # the words are on the button
+    assert button.index("<svg") < button.index("copy-label")  # icon first, then the words
+    assert 'title="Copy destination link"' in button  # what it copies, on hover
+    assert "aria-label" not in button  # the visible words are its name for screen readers
     assert 'aria-live="polite"' in line  # "Copied!" is announced
 
 
@@ -81,6 +84,7 @@ def test_script_is_loaded_and_served(alice, app, client):
     js = r.text
     assert "navigator.clipboard.writeText" in js and "execCommand('copy')" in js  # with a fallback
     assert "data-copy" in js and "share_copied" in js and "share_copy_failed" in js
+    assert ".copy-label" in js  # the button's words change to "Copied!" and back
 
 
 def test_copy_script_is_not_loaded_on_pages_that_do_not_need_it(alice, app):
@@ -93,9 +97,11 @@ def test_copy_button_and_edit_button_are_translated(alice, app, lang):
     make(alice)
     alice.post("/language", data={"lang": lang, "next": "/"})
     page = page_for(alice, app)
-    label = translate(lang, "Copy destination link")
-    assert f'aria-label="{label}"' in page and label != "Copy destination link"
+    hover = translate(lang, "Copy destination link")
+    assert f'title="{hover}"' in page and hover != "Copy destination link"
     assert "Copy destination link" not in page
+    assert f'<span class="copy-label">{translate(lang, "Copy link")}</span>' in page
+    assert translate(lang, "Copy link") != "Copy link"
     assert f"<span>{translate(lang, 'Edit link')}</span>" in page
 
 

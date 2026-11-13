@@ -9,9 +9,9 @@
 <section>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
   <p class="dest-full">{{ _h("Redirects to {url}", url=target) }}
-    <button type="button" class="btn small ghost icon-only copy-btn" data-copy="{{ link.original_url }}"
-            aria-label="{{ _('Copy destination link') }}" title="{{ _('Copy destination link') }}">
-      {{ icon('copylink', 'ico-copy') }}{{ icon('check', 'ico-done') }}</button>
+    <button type="button" class="btn small ghost has-icon copy-btn" data-copy="{{ link.original_url }}"
+            title="{{ _('Copy destination link') }}">
+      {{ icon('copylink', 'ico-copy') }}{{ icon('check', 'ico-done') }}<span class="copy-label">{{ _("Copy link") }}</span></button>
     <span class="copy-tip" role="status" aria-live="polite"></span></p>
   <p class="muted">{{ _n("{n} total click", "{n} total clicks", link.click_count) }} · {{ _("{n} in the last 14 days", n=recent_total) }}</p>
   <p>
