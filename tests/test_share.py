@@ -71,6 +71,25 @@ def test_popup_has_copy_and_qr_on_top_then_apps_then_more(alice):
     assert "hidden" in extra[:60]  # only shown when the browser has no share sheet of its own
 
 
+def test_popup_buttons_have_the_link_icon_and_the_qr_icon(alice):
+    make(alice)
+    page = alice.get("/dashboard").text
+    box = dialog(page)
+    copy_btn = re.search(r'<button[^>]*id="share-copy".*?</button>', box, re.S).group(0)
+    assert "has-icon" in copy_btn and "M10 7H8.5" in copy_btn and "M14 7h1.5" in copy_btn
+    assert copy_btn.index("<svg") < copy_btn.index("<span>Copy link</span>")  # icon, then words
+    qr_btn = re.search(r'<a[^>]*id="share-qr".*?</a>', box, re.S).group(0)
+    list_qr = re.search(r'<a class="btn small ghost qr-btn".*?</a>', page, re.S).group(0)
+    qr_path = re.search(r'<path d="([^"]+)"', list_qr).group(1)
+    assert qr_path in qr_btn  # the very same QR drawing as in the list of links
+    assert qr_btn.index("<svg") < qr_btn.index("<span>Download QR</span>")
+
+
+def test_copy_script_changes_only_the_words_not_the_icon():
+    js = (APP / "static" / "share.js").read_text(encoding="utf-8")
+    assert "copyBtn.textContent" not in js and "querySelector('span')" in js
+
+
 def test_popup_is_accessible(alice):
     make(alice)
     box = dialog(alice.get("/dashboard").text)

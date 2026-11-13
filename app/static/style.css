@@ -410,7 +410,7 @@ img.avatar[src^="/account/photo"] { image-rendering: auto; }  /* real photos mus
 .sd-note { margin: 0; padding: 9px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: .88rem; }
 .sd-note[hidden] { display: none; }
 .sd-top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.sd-top .btn { text-align: center; padding: 10px 12px; }
+.sd-top .btn { text-align: center; justify-content: center; padding: 10px 12px; }
 .sd-status { position: absolute; width: 1px; height: 1px; margin: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sd-status.show { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal;
                   margin: -6px 0 -4px; text-align: center; font-size: .85rem; color: var(--danger); }

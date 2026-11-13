@@ -21,7 +21,8 @@
   var extra = document.getElementById('share-extra');
   var apps = Array.prototype.slice.call(dialog.querySelectorAll('[data-app]'));
   var text = dialog.getAttribute('data-text') || '';
-  var copyLabel = copyBtn.textContent;
+  var copyText_ = copyBtn.querySelector('span') || copyBtn; // the words, so the icon stays
+  var copyLabel = copyText_.textContent;
   var resetTimer = null;
   var current = null; // { url, id, slug, status } of the link being shared
 
@@ -66,7 +67,7 @@
 
   function resetCopyButton() {
     clearTimeout(resetTimer);
-    copyBtn.textContent = copyLabel;
+    copyText_.textContent = copyLabel;
     say('');
   }
 
@@ -101,7 +102,7 @@
   copyBtn.addEventListener('click', function () {
     if (!current) return;
     copyText(current.url).then(function () {
-      copyBtn.textContent = UI.share_copied || 'Copied!';
+      copyText_.textContent = UI.share_copied || 'Copied!';
       say(UI.share_copied || 'Copied!');
       clearTimeout(resetTimer);
       resetTimer = setTimeout(resetCopyButton, 2200);
