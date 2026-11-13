@@ -76,7 +76,7 @@ def test_popup_buttons_have_the_link_icon_and_the_qr_icon(alice):
     page = alice.get("/dashboard").text
     box = dialog(page)
     copy_btn = re.search(r'<button[^>]*id="share-copy".*?</button>', box, re.S).group(0)
-    assert "has-icon" in copy_btn and "M10 7H8.5" in copy_btn and "M14 7h1.5" in copy_btn
+    assert "has-icon" in copy_btn and "M10 6.5H7.5" in copy_btn and "M14 6.5h2.5" in copy_btn
     assert copy_btn.index("<svg") < copy_btn.index("<span>Copy link</span>")  # icon, then words
     qr_btn = re.search(r'<a[^>]*id="share-qr".*?</a>', box, re.S).group(0)
     list_qr = re.search(r'<a class="btn small ghost qr-btn".*?</a>', page, re.S).group(0)
