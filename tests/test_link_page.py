@@ -38,68 +38,11 @@ def test_edit_link_button_has_the_same_icon_as_the_toolbar_edit_button(alice, ap
     assert icon[0] == svgs(toolbar_edit.group(0))[0]  # exactly the same drawing
 
 
-def test_copy_button_sits_right_after_the_redirects_to_line(alice, app):
-    make(alice)
-    page = page_for(alice, app)
-    line = re.search(r'<p class="dest-full">.*?</p>', page, re.S).group(0)
-    assert line.index("Redirects to") < line.index("copy-btn") < line.index(f'href="{URL}"')
-    button = re.search(r'<button[^>]*copy-btn[^>]*>.*?</button>', line, re.S).group(0)
-    assert f'data-copy="{URL}"' in button and 'type="button"' in button
-    assert 'class="btn small ghost has-icon copy-btn"' in button
-    assert "copy-label" not in button and "Copy link" not in button  # icon only, no words
-    assert 'title="Copy destination link"' in button  # what it copies, on hover
-    assert 'aria-label="Copy destination link"' in button  # its name for screen readers
-    assert 'aria-live="polite"' in line  # "Copied!" is announced
-
-
-def test_copy_icon_is_two_squares_with_the_plain_link_and_no_pencil(alice, app):
-    make(alice)
-    page = page_for(alice, app)
-    button = re.search(r'<button[^>]*copy-btn[^>]*>.*?</button>', page, re.S).group(0)
-    copy_icon, done_icon = svgs(button)
-    assert 'class="ico ico-copy"' in copy_icon and 'class="ico ico-done"' in done_icon
-    assert 'rx="3.5"' in copy_icon  # the front square, with rounded corners
-    assert "M17 3H5.5" in copy_icon  # the back corner peeking out behind it
-    assert "M13.6 12.4" in copy_icon and "M15.4 12.4" in copy_icon  # the two link halves
-    edit_button = re.search(r'<a class="btn small has-icon".*?</a>', page, re.S).group(0)
-    edit_icon = svgs(edit_button)[0]
-    assert "M11.2 18.2" in edit_icon and "M11.2 18.2" not in copy_icon  # the pencil stays out
-    assert 'aria-hidden="true"' in copy_icon and 'aria-hidden="true"' in done_icon  # decorative
-
-
-def test_the_url_is_copied_exactly_even_with_special_characters(alice, app):
-    make(alice, url="https://example.com/search?q=a&lang=hi&x=1")
-    page = page_for(alice, app)
-    assert 'data-copy="https://example.com/search?q=a&amp;lang=hi&amp;x=1"' in page  # escaped HTML
-    assert "<script>" not in re.search(r'<button[^>]*copy-btn[^>]*>', page).group(0)
-
-
-def test_script_is_loaded_and_served(alice, app, client):
-    make(alice)
-    page = page_for(alice, app)
-    assert re.search(r'<script src="/static/copy\.js\?v=[^"]+" defer></script>', page)
-    r = client.get("/static/copy.js")
-    assert r.status_code == 200 and "javascript" in r.headers["content-type"]
-    js = r.text
-    assert "navigator.clipboard.writeText" in js and "execCommand('copy')" in js  # with a fallback
-    assert "data-copy" in js and "share_copied" in js and "share_copy_failed" in js
-    assert ".copy-label" in js  # the button's words change to "Copied!" and back
-
-
-def test_copy_script_is_not_loaded_on_pages_that_do_not_need_it(alice, app):
-    make(alice)
-    assert "copy.js" not in alice.get("/dashboard").text
-
-
 @pytest.mark.parametrize("lang", ["hi", "gu"])
-def test_copy_button_and_edit_button_are_translated(alice, app, lang):
+def test_edit_button_is_translated(alice, app, lang):
     make(alice)
     alice.post("/language", data={"lang": lang, "next": "/"})
     page = page_for(alice, app)
-    hover = translate(lang, "Copy destination link")
-    assert f'title="{hover}"' in page and hover != "Copy destination link"
-    assert "Copy destination link" not in page
-    assert f'aria-label="{hover}"' in page
     assert f"<span>{translate(lang, 'Edit link')}</span>" in page
 
 

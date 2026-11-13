@@ -501,7 +501,4 @@ MESSAGES = {
         "આજે {n} ક્લિક",
     "No clicks yet today.":
         "આજે હજી સુધી કોઈ ક્લિક થયું નથી.",
-    # ---- copy button ----
-    "Copy destination link":
-        "ગંતવ્ય લિંક કૉપી કરો",
 }
