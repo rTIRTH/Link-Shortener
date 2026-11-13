@@ -4,14 +4,11 @@
 {% block title %}{{ link.slug }} · Link Shortener{% endblock %}
 {% block content %}
 {% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
-{% set target %}<a href="{{ link.original_url }}" target="_blank" rel="noopener">{{ link.original_url }}</a>{% endset %}
+{% set target %}<button type="button" class="btn small ghost has-icon copy-btn" data-copy="{{ link.original_url }}" title="{{ _('Copy destination link') }}" aria-label="{{ _('Copy destination link') }}">{{ icon('copylink', 'ico-copy') }}{{ icon('check', 'ico-done') }}</button><a href="{{ link.original_url }}" target="_blank" rel="noopener">{{ link.original_url }}</a>{% endset %}
 <p><a href="/dashboard">{{ _("← All links") }}</a></p>
 <section>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
   <p class="dest-full">{{ _h("Redirects to {url}", url=target) }}
-    <button type="button" class="btn small ghost has-icon copy-btn" data-copy="{{ link.original_url }}"
-            title="{{ _('Copy destination link') }}">
-      {{ icon('copylink', 'ico-copy') }}{{ icon('check', 'ico-done') }}<span class="copy-label">{{ _("Copy link") }}</span></button>
     <span class="copy-tip" role="status" aria-live="polite"></span></p>
   <p class="muted">{{ _n("{n} total click", "{n} total clicks", link.click_count) }} · {{ _("{n} in the last 14 days", n=recent_total) }}</p>
   <p>

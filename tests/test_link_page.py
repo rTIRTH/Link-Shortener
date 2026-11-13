@@ -42,14 +42,13 @@ def test_copy_button_sits_right_after_the_redirects_to_line(alice, app):
     make(alice)
     page = page_for(alice, app)
     line = re.search(r'<p class="dest-full">.*?</p>', page, re.S).group(0)
-    assert line.index("Redirects to") < line.index(f'href="{URL}"') < line.index("copy-btn")
+    assert line.index("Redirects to") < line.index("copy-btn") < line.index(f'href="{URL}"')
     button = re.search(r'<button[^>]*copy-btn[^>]*>.*?</button>', line, re.S).group(0)
     assert f'data-copy="{URL}"' in button and 'type="button"' in button
-    assert 'class="btn small ghost has-icon copy-btn"' in button  # a real button, not icon-only
-    assert '<span class="copy-label">Copy link</span>' in button  # the words are on the button
-    assert button.index("<svg") < button.index("copy-label")  # icon first, then the words
+    assert 'class="btn small ghost has-icon copy-btn"' in button
+    assert "copy-label" not in button and "Copy link" not in button  # icon only, no words
     assert 'title="Copy destination link"' in button  # what it copies, on hover
-    assert "aria-label" not in button  # the visible words are its name for screen readers
+    assert 'aria-label="Copy destination link"' in button  # its name for screen readers
     assert 'aria-live="polite"' in line  # "Copied!" is announced
 
 
@@ -60,8 +59,8 @@ def test_copy_icon_is_two_squares_with_the_plain_link_and_no_pencil(alice, app):
     copy_icon, done_icon = svgs(button)
     assert 'class="ico ico-copy"' in copy_icon and 'class="ico ico-done"' in done_icon
     assert 'rx="3.5"' in copy_icon  # the front square, with rounded corners
-    assert "M8 8V5.5" in copy_icon  # the back square peeking out behind it
-    assert "M7.7 13.2" in copy_icon and "M10.3 13.2" in copy_icon  # the two link halves
+    assert "M17 3H5.5" in copy_icon  # the back corner peeking out behind it
+    assert "M13.6 12.4" in copy_icon and "M15.4 12.4" in copy_icon  # the two link halves
     edit_button = re.search(r'<a class="btn small has-icon".*?</a>', page, re.S).group(0)
     edit_icon = svgs(edit_button)[0]
     assert "M11.2 18.2" in edit_icon and "M11.2 18.2" not in copy_icon  # the pencil stays out
@@ -100,8 +99,7 @@ def test_copy_button_and_edit_button_are_translated(alice, app, lang):
     hover = translate(lang, "Copy destination link")
     assert f'title="{hover}"' in page and hover != "Copy destination link"
     assert "Copy destination link" not in page
-    assert f'<span class="copy-label">{translate(lang, "Copy link")}</span>' in page
-    assert translate(lang, "Copy link") != "Copy link"
+    assert f'aria-label="{hover}"' in page
     assert f"<span>{translate(lang, 'Edit link')}</span>" in page
 
 

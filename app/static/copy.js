@@ -31,7 +31,7 @@
       button.style.minWidth = button.offsetWidth + 'px';
     }
     function show(message, failed) {
-      if (label) label.textContent = failed ? button._label : message; // "Copy link" -> "Copied!"
+      if (label) label.textContent = failed ? button._label : message; // a button with words: "Copy link" -> "Copied!" (the icon-only one just turns into a tick)
       if (tip) { tip.textContent = message; tip.classList.toggle('bad', !!failed); }
       button.classList.toggle('done', !failed);
       clearTimeout(button._timer);

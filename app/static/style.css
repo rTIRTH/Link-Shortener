@@ -463,8 +463,8 @@ img.avatar[src^="/account/photo"] { image-rendering: auto; }  /* real photos mus
 
 /* ---- buttons with an icon, and the little copy button next to "Redirects to ..." ---- */
 .btn.has-icon { display: inline-flex; align-items: center; gap: 7px; }
-.btn.copy-btn { vertical-align: middle; margin-left: 8px; padding-top: 4px; padding-bottom: 4px; }
-.copy-btn .ico { width: 20px; height: 20px; }
+.btn.copy-btn { vertical-align: middle; margin: 0 8px 0 4px; padding: 3px; gap: 0; line-height: 0; border-radius: 8px; }
+.copy-btn .ico { width: 18px; height: 18px; }
 .copy-btn .ico-done, .copy-btn.done .ico-copy { display: none; }
 .copy-btn.done .ico-done { display: block; }
 /* "Copied!" is already written on the button: the line below is for screen readers, and shows only for a problem */
