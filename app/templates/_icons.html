@@ -1,6 +1,6 @@
 {# Small outline icons for buttons. They use the button's text colour, so they fit every theme. #}
-{% macro icon(name) -%}
-<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+{% macro icon(name, extra='') -%}
+<svg class="ico{{ ' ' ~ extra if extra }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
 {%- if name == 'edit' -%}
 <path d="M9.5 4.5H7a3.5 3.5 0 0 0 0 7h2.5"/><path d="M8 8h6"/><path d="M14.5 4.5H17a3.5 3.5 0 0 1 3.4 2.7"/><path d="M11.2 18.2 17.2 12.2a1.9 1.9 0 0 1 2.7 2.7l-6 6-4.4 1.5z"/>
 {%- elif name == 'analytics' -%}
@@ -13,6 +13,10 @@
 <path d="M3 17 9 10l4 4 8-9"/>
 {%- elif name == 'area' -%}
 <path d="M3 20v-7l6-5 4 4 8-7v15z"/>
+{%- elif name == 'copylink' -%}
+<path stroke-width="1.8" d="M8 8V5.5A3.5 3.5 0 0 1 11.5 2h7A3.5 3.5 0 0 1 22 5.5v7a3.5 3.5 0 0 1-3.5 3.5H16"/><rect stroke-width="1.8" x="2" y="8" width="14" height="14" rx="3.5"/><g stroke-width="1.6"><path d="M7.7 13.2H6.7a1.8 1.8 0 0 0 0 3.6h1"/><path d="M10.3 13.2h1a1.8 1.8 0 0 1 0 3.6h-1"/><path d="M7 15h4.1"/></g>
+{%- elif name == 'check' -%}
+<path d="m5 12.5 4.5 4.5L19 7.5"/>
 {%- endif -%}
 </svg>
 {%- endmacro %}

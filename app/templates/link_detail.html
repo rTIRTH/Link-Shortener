@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_charts.html" import analytics with context %}
+{% from "_icons.html" import icon %}
 {% block title %}{{ link.slug }} · Link Shortener{% endblock %}
 {% block content %}
 {% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
@@ -7,7 +8,11 @@
 <p><a href="/dashboard">{{ _("← All links") }}</a></p>
 <section>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
-  <p class="dest-full">{{ _h("Redirects to {url}", url=target) }}</p>
+  <p class="dest-full">{{ _h("Redirects to {url}", url=target) }}
+    <button type="button" class="btn small ghost icon-only copy-btn" data-copy="{{ link.original_url }}"
+            aria-label="{{ _('Copy destination link') }}" title="{{ _('Copy destination link') }}">
+      {{ icon('copylink', 'ico-copy') }}{{ icon('check', 'ico-done') }}</button>
+    <span class="copy-tip" role="status" aria-live="polite"></span></p>
   <p class="muted">{{ _n("{n} total click", "{n} total clicks", link.click_count) }} · {{ _("{n} in the last 14 days", n=recent_total) }}</p>
   <p>
     <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad', 'inactive': 'off'}[status] }}">{{ state_names[status] }}</span>
@@ -23,7 +28,7 @@
       <small class="muted">{{ _h("ends {time}", time=ends_t) }}</small>
     {% endif %}
   </p>
-  <p><a class="btn small" href="/dashboard/links/{{ link.id }}/edit">{{ _("Edit link") }}</a></p>
+  <p><a class="btn small has-icon" href="/dashboard/links/{{ link.id }}/edit">{{ icon('edit') }}<span>{{ _("Edit link") }}</span></a></p>
 </section>
 
 {% set cards = [
@@ -92,4 +97,7 @@
 <form method="post" action="/dashboard/links/{{ link.id }}/delete" onsubmit='return confirm({{ _("Delete this link?")|tojson }})'>
   <button class="btn danger" type="submit">{{ _("Delete link") }}</button>
 </form>
+{% endblock %}
+{% block scripts %}
+  <script src="/static/copy.js?v={{ js_version }}" defer></script>
 {% endblock %}

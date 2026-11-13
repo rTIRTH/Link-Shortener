@@ -460,3 +460,12 @@ img.avatar[src^="/account/photo"] { image-rendering: auto; }  /* real photos mus
 .c-hit { fill: transparent; }
 .c-hit:hover { fill: color-mix(in srgb, var(--accent) 8%, transparent); }
 @media (max-width: 480px) { .charts { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- buttons with an icon, and the little copy button next to "Redirects to ..." ---- */
+.btn.has-icon { display: inline-flex; align-items: center; gap: 7px; }
+.btn.icon-only { padding: 6px; line-height: 0; }
+.copy-btn { vertical-align: middle; margin-left: 6px; }
+.copy-btn .ico-done, .copy-btn.done .ico-copy { display: none; }
+.copy-btn.done .ico-done { display: block; }
+.copy-tip { margin-left: 8px; font-size: .85rem; color: var(--muted); }
+.copy-tip.bad { color: var(--danger); }
