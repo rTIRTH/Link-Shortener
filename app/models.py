@@ -96,6 +96,13 @@ class Click(Base):
     clicked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     device: Mapped[str] = mapped_column(String(16), default="desktop")
     referrer: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Who clicked (all optional: clicks from before these columns existed have none of them).
+    source: Mapped[str | None] = mapped_column(String(24), nullable=True)  # whatsapp, direct, ...
+    browser: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    os: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    country: Mapped[str | None] = mapped_column(String(2), nullable=True)  # ISO code, e.g. IN
+    city: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    visitor: Mapped[str | None] = mapped_column(String(16), nullable=True)  # salted hash, no IP
 
     link: Mapped[Link] = relationship(back_populates="clicks")
 

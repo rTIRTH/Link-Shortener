@@ -90,6 +90,7 @@ SIGNUP_EMAIL_BODY = (
 # Sentences that are looked up dynamically (so a text scan cannot find them).
 EXTRA_KEYS = [
     "desktop", "mobile", "tablet", "bot", "Direct",
+    "Other websites", "Unknown", "Other", "In-app browser",  # used by app/insights.py
     "Not Found", "Method Not Allowed",
     "Cat", "Dog", "Fox", "Panda", "Rabbit", "Bear", "Frog", "Owl", "Penguin", "Pig", "Lion",
     "Tiger", "Monkey", "Koala", "Mouse", "Chicken", "Duck", "Elephant", "Wolf", "Raccoon",

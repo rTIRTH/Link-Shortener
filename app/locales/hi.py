@@ -501,4 +501,65 @@ MESSAGES = {
         "आज {n} क्लिक",
     "No clicks yet today.":
         "आज अभी तक कोई क्लिक नहीं हुआ।",
+    # ---- audience (sources, devices, places, best time) ----
+    "Audience":
+        "दर्शक",
+    "Time period":
+        "समय अवधि",
+    "Last {n} days":
+        "पिछले {n} दिन",
+    "Unique visitors":
+        "यूनिक विज़िटर",
+    "Returning visitors":
+        "दोबारा आने वाले विज़िटर",
+    "Each person is counted once, however many times they click.":
+        "हर व्यक्ति को एक ही बार गिना जाता है, चाहे वह कितनी भी बार क्लिक करे।",
+    "{n}% of visitors clicked more than once.":
+        "{n}% विज़िटर ने एक से ज़्यादा बार क्लिक किया।",
+    "Busiest time":
+        "सबसे व्यस्त समय",
+    "Visitors per day":
+        "रोज़ के विज़िटर",
+    "{n} unique visitors in the last 14 days":
+        "पिछले 14 दिनों में {n} यूनिक विज़िटर",
+    "Clicks recorded before visitor tracking are not counted as visitors.":
+        "विज़िटर ट्रैकिंग से पहले दर्ज हुए क्लिक विज़िटर में नहीं गिने जाते।",
+    "No clicks in this period yet.":
+        "इस अवधि में अभी तक कोई क्लिक नहीं।",
+    "Where clicks come from":
+        "क्लिक कहाँ से आते हैं",
+    "Sources":
+        "स्रोत",
+    "Tip: add {example} to the end of a short link you share to count it under that name.":
+        "सुझाव: साझा किए जाने वाले छोटे लिंक के अंत में {example} जोड़ें, ताकि वह उसी नाम से गिना जाए।",
+    "Browsers":
+        "ब्राउज़र",
+    "Operating systems":
+        "ऑपरेटिंग सिस्टम",
+    "Where visitors are":
+        "विज़िटर कहाँ हैं",
+    "Countries":
+        "देश",
+    "Cities":
+        "शहर",
+    "No location data yet. It is recorded for new clicks.":
+        "अभी कोई स्थान डेटा नहीं है। यह नए क्लिक के लिए दर्ज होता है।",
+    "{n} click has no location yet.":
+        "{n} क्लिक का स्थान अभी उपलब्ध नहीं है।",
+    "{n} clicks have no location yet.":
+        "{n} क्लिक का स्थान अभी उपलब्ध नहीं है।",
+    "Best time of day":
+        "दिन का सबसे अच्छा समय",
+    "Clicks by weekday and hour ({tz})":
+        "सप्ताह के दिन और घंटे के अनुसार क्लिक ({tz})",
+    "Fewer":
+        "कम",
+    "Other websites":
+        "अन्य वेबसाइटें",
+    "Unknown":
+        "अज्ञात",
+    "Other":
+        "अन्य",
+    "In-app browser":
+        "ऐप का ब्राउज़र",
 }

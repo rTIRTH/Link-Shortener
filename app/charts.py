@@ -157,3 +157,80 @@ def chart_svg(
 def chart_set(labels: Sequence[str], series: Sequence[dict], **options) -> dict[str, Markup]:
     """The same chart in every kind: {"bar": svg, "line": svg, "area": svg}."""
     return {kind: chart_svg(kind, labels, series, **options) for kind in KINDS}
+
+
+# ---- the weekday-by-hour heatmap and the donut -------------------------------------------------
+
+CELL, GAP = 22, 3
+HEAT_LEFT, HEAT_TOP, HEAT_BOTTOM = 44, 4, 22
+
+
+def heat_level(count: int, peak: int) -> int:
+    """0 for no clicks, then 1 (a few) to 4 (the busiest hours)."""
+    return 0 if not count or not peak else min(4, -(-4 * count // peak))
+
+
+def heatmap_svg(
+    grid: Sequence[Sequence[int]],
+    row_labels: Sequence[str],
+    col_labels: Sequence[str],
+    tips: Sequence[Sequence[str]],
+    *,
+    aria: str,
+    label_every: int = 3,
+) -> Markup:
+    """Weekdays down the side, hours along the bottom; a darker square = more clicks."""
+    peak = max((n for line in grid for n in line), default=0)
+    step = CELL + GAP
+    width = HEAT_LEFT + 24 * step
+    height = HEAT_TOP + 7 * step + HEAT_BOTTOM
+    out = [
+        f'<svg class="chart-svg heatmap" viewBox="0 0 {width} {height}" role="img" '
+        f'aria-label="{escape(aria)}"><title>{escape(aria)}</title>'
+    ]
+    for r, line in enumerate(grid):
+        y = HEAT_TOP + r * step
+        out.append(
+            f'<text class="c-text" x="{HEAT_LEFT - 8}" y="{y + CELL / 2 + 3.5:.1f}" '
+            f'text-anchor="end">{escape(row_labels[r])}</text>'
+        )
+        for h, count in enumerate(line):
+            out.append(
+                f'<rect class="hm-cell hm-l{heat_level(count, peak)}" x="{HEAT_LEFT + h * step}" '
+                f'y="{y}" width="{CELL}" height="{CELL}" rx="5">'
+                f"<title>{escape(tips[r][h])}</title></rect>"
+            )
+    for h, text in enumerate(col_labels):
+        if h % label_every == 0:
+            out.append(
+                f'<text class="c-text" x="{HEAT_LEFT + h * step + CELL / 2}" '
+                f'y="{height - 6}" text-anchor="middle">{escape(text)}</text>'
+            )
+    out.append("</svg>")
+    return Markup("".join(out))
+
+
+def donut_svg(items: Sequence[dict], *, aria: str, center: str) -> Markup:
+    """A ring split by share. items: [{"n": int, "tip": str}, ...] in colour order s1, s2, ..."""
+    total = sum(i["n"] for i in items)
+    out = [
+        f'<svg class="chart-svg donut" viewBox="0 0 42 42" role="img" '
+        f'aria-label="{escape(aria)}"><title>{escape(aria)}</title>'
+        '<circle class="dn-bg" cx="21" cy="21" r="15.9155"/>'
+    ]
+    seen = 0.0
+    for k, item in enumerate(items):
+        if not total or not item["n"]:
+            continue
+        share = 100 * item["n"] / total
+        out.append(
+            f'<circle class="dn-seg" cx="21" cy="21" r="15.9155" '
+            f'style="stroke:var(--s{k % 6 + 1})" stroke-dasharray="{share:.2f} {100 - share:.2f}" '
+            f'stroke-dashoffset="{25 - seen:.2f}"><title>{escape(item["tip"])}</title></circle>'
+        )
+        seen += share
+    out.append(
+        f'<text class="dn-text" x="21" y="24.2" text-anchor="middle">{escape(center)}</text>'
+    )
+    out.append("</svg>")
+    return Markup("".join(out))

@@ -130,7 +130,7 @@ def section(page: str) -> str:
     return page[start:page.index("</section>", start)]
 
 
-def test_analytics_page_has_a_type_switch_and_two_charts(alice, app):
+def test_analytics_page_has_a_type_switch_and_three_charts(alice, app):
     make(alice)
     box = section(alice.get(f"/dashboard/links/{link_id(app)}").text)
     assert re.findall(r'class="ct ct-(\w+)" type="radio"', box) == ["bar", "line", "area"]
@@ -138,8 +138,9 @@ def test_analytics_page_has_a_type_switch_and_two_charts(alice, app):
     assert re.findall(r'<label class="tab-(\w+)"', box) == ["bar", "line", "area"]
     assert 'role="radiogroup" aria-label="Chart type"' in box
     cards = box.split('class="chart-card"')[1:]
-    assert len(cards) == 2
+    assert len(cards) == 3
     assert "Clicks today, hour by hour" in cards[0] and "Clicks per day" in cards[1]
+    assert "Visitors per day" in cards[2]  # clicks next to unique visitors
     for card in cards:  # every chart exists in all three kinds
         assert [k for k in KINDS if f"chart-{k}" in card] == list(KINDS)
     assert box.index("Clicks today") < box.index("Clicks per day")  # hourly first, then day by day

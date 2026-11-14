@@ -501,4 +501,65 @@ MESSAGES = {
         "આજે {n} ક્લિક",
     "No clicks yet today.":
         "આજે હજી સુધી કોઈ ક્લિક થયું નથી.",
+    # ---- audience (sources, devices, places, best time) ----
+    "Audience":
+        "પ્રેક્ષકો",
+    "Time period":
+        "સમયગાળો",
+    "Last {n} days":
+        "છેલ્લા {n} દિવસ",
+    "Unique visitors":
+        "યુનિક મુલાકાતીઓ",
+    "Returning visitors":
+        "ફરી આવનાર મુલાકાતીઓ",
+    "Each person is counted once, however many times they click.":
+        "દરેક વ્યક્તિ ગમે તેટલી વાર ક્લિક કરે, તેને એક જ વાર ગણવામાં આવે છે.",
+    "{n}% of visitors clicked more than once.":
+        "{n}% મુલાકાતીઓએ એક કરતાં વધુ વાર ક્લિક કર્યું.",
+    "Busiest time":
+        "સૌથી વ્યસ્ત સમય",
+    "Visitors per day":
+        "દરરોજના મુલાકાતીઓ",
+    "{n} unique visitors in the last 14 days":
+        "છેલ્લા 14 દિવસમાં {n} યુનિક મુલાકાતીઓ",
+    "Clicks recorded before visitor tracking are not counted as visitors.":
+        "મુલાકાતી ટ્રૅકિંગ પહેલાં નોંધાયેલા ક્લિક મુલાકાતી તરીકે ગણાતા નથી.",
+    "No clicks in this period yet.":
+        "આ સમયગાળામાં હજી કોઈ ક્લિક નથી.",
+    "Where clicks come from":
+        "ક્લિક ક્યાંથી આવે છે",
+    "Sources":
+        "સ્ત્રોત",
+    "Tip: add {example} to the end of a short link you share to count it under that name.":
+        "સૂચન: શેર કરો છો તે ટૂંકી લિંકના અંતે {example} ઉમેરો, જેથી તે એ નામ હેઠળ ગણાય.",
+    "Browsers":
+        "બ્રાઉઝર",
+    "Operating systems":
+        "ઓપરેટિંગ સિસ્ટમ",
+    "Where visitors are":
+        "મુલાકાતીઓ ક્યાં છે",
+    "Countries":
+        "દેશ",
+    "Cities":
+        "શહેરો",
+    "No location data yet. It is recorded for new clicks.":
+        "હજી સ્થાનનો ડેટા નથી. તે નવા ક્લિક માટે નોંધાય છે.",
+    "{n} click has no location yet.":
+        "{n} ક્લિકનું સ્થાન હજી ઉપલબ્ધ નથી.",
+    "{n} clicks have no location yet.":
+        "{n} ક્લિકનું સ્થાન હજી ઉપલબ્ધ નથી.",
+    "Best time of day":
+        "દિવસનો શ્રેષ્ઠ સમય",
+    "Clicks by weekday and hour ({tz})":
+        "અઠવાડિયાના દિવસ અને કલાક પ્રમાણે ક્લિક ({tz})",
+    "Fewer":
+        "ઓછા",
+    "Other websites":
+        "અન્ય વેબસાઇટ્સ",
+    "Unknown":
+        "અજ્ઞાત",
+    "Other":
+        "અન્ય",
+    "In-app browser":
+        "ઍપનું બ્રાઉઝર",
 }

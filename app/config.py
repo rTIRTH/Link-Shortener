@@ -39,6 +39,12 @@ class Settings:
         if not backend:
             backend = "brevo" if self.brevo_api_key else "resend" if self.resend_api_key else "none"
         self.email_backend = backend
+        # Where a click came from (country and city). Hosts such as Cloudflare send it in a header;
+        # otherwise the visitor's IP is looked up once (never stored) and cached for a week.
+        self.geo_lookup = os.getenv("GEO_LOOKUP", "true").lower() == "true"
+        self.geo_url = os.getenv(
+            "GEO_URL", "http://ip-api.com/json/{ip}?fields=status,countryCode,city"
+        )
         # Comma-separated usernames allowed to open /admin, e.g. "r_tirth,alice"
         self.admin_usernames = {
             u.strip().lower() for u in os.getenv("ADMIN_USERNAMES", "").split(",") if u.strip()

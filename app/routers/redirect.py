@@ -12,24 +12,48 @@ from ..cache import cache_get, cache_set, rate_limit
 from ..config import settings
 from ..database import get_db
 from ..deps import client_ip
+from ..insights import (
+    classify_source,
+    client_address,
+    geo_from_headers,
+    lookup_geo,
+    parse_agent,
+    visitor_id,
+)
 from ..models import Click, Link, User, UsernameAlias, as_utc, utcnow
 from ..security import verify_password
 from ..templating import render
-from ..utils import parse_device
 from .dashboard import cache_key
 
 router = APIRouter()
 log = logging.getLogger("linkshortener")
 
 
-def record_click(factory: sessionmaker, link_id: int, user_agent: str | None, referrer: str | None):
-    """Runs AFTER the redirect is sent, so analytics never slow the visitor down."""
+def record_click(
+    factory: sessionmaker,
+    link_id: int,
+    user_agent: str | None,
+    referrer: str | None,
+    address: str | None = None,
+    geo: tuple[str | None, str | None] = (None, None),
+    tag: str | None = None,
+):
+    """Runs AFTER the redirect is sent, so analytics never slow the visitor down.
+
+    The address is only used for the country lookup and a one-way visitor id; it is not stored.
+    """
     try:
         with factory() as db:
             host = None
             if referrer:
                 host = urlparse(referrer).netloc[:255] or None
-            db.add(Click(link_id=link_id, device=parse_device(user_agent), referrer=host))
+            device, browser, system = parse_agent(user_agent)
+            country, city = geo if geo[0] else lookup_geo(address)
+            db.add(Click(
+                link_id=link_id, device=device, referrer=host,
+                source=classify_source(host, user_agent, tag), browser=browser, os=system,
+                country=country, city=city, visitor=visitor_id(address, user_agent),
+            ))
             db.execute(
                 update(Link).where(Link.id == link_id).values(click_count=Link.click_count + 1)
             )
@@ -90,6 +114,9 @@ def count_click(background: BackgroundTasks, request: Request, link_id: int) -> 
         link_id,
         request.headers.get("user-agent"),
         request.headers.get("referer"),
+        client_address(request.headers, request.client.host if request.client else None),
+        geo_from_headers(request.headers),
+        request.query_params.get("ref") or request.query_params.get("utm_source"),
     )
 
 

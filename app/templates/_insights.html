@@ -1,0 +1,21 @@
+{# Small building blocks for the audience section of a link's analytics page. #}
+{% macro stat(label, value, note="") %}
+<div class="stat">
+  <div class="stat-label">{{ label }}</div>
+  <div class="stat-value">{{ value }}</div>
+  {% if note %}<div class="stat-note muted">{{ note }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{# rows: [{label, n, pct, width, code}] -> a ranked list with a bar behind each name #}
+{% macro ranked(rows) %}
+<ul class="rank">
+  {% for r in rows %}
+  <li>
+    <span class="rk-name">{% if r.code %}<b class="rk-code">{{ r.code }}</b>{% endif %}<span>{{ r.label }}</span></span>
+    <span class="rk-val">{{ r.n|num }} <small>· {{ r.pct|num }}%</small></span>
+    <span class="rk-bar"><i style="width: {{ r.width }}%"></i></span>
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}

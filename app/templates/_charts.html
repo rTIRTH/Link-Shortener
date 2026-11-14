@@ -31,6 +31,7 @@
       <div class="chart-card">
         <h2>{{ card.title }}</h2>
         {% if card.note %}<p class="muted chart-note">{{ card.note }}</p>{% endif %}
+        {% if card.legend %}<ul class="legend">{% for l in card.legend %}<li><i style="background: {{ l.color }}"></i>{{ l.name }}</li>{% endfor %}</ul>{% endif %}
         <figure class="p-bar">{{ card.svg.bar }}</figure>
         <figure class="p-line">{{ card.svg.line }}</figure>
         <figure class="p-area">{{ card.svg.area }}</figure>

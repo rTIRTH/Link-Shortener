@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "_charts.html" import analytics with context %}
 {% from "_icons.html" import icon %}
+{% from "_insights.html" import stat, ranked with context %}
 {% block title %}{{ link.slug }} · Link Shortener{% endblock %}
 {% block content %}
 {% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
@@ -32,6 +33,9 @@
    'note': _n("{n} click today", "{n} clicks today", today_total) if today_total else _("No clicks yet today."),
    'svg': hourly_charts},
   {'title': _("Clicks per day"), 'note': _("{n} in the last 14 days", n=recent_total), 'svg': daily_charts},
+  {'title': _("Visitors per day"), 'note': _("{n} unique visitors in the last 14 days", n=unique_recent),
+   'svg': visitors_charts,
+   'legend': [{'name': _("Clicks"), 'color': 'var(--accent)'}, {'name': _("Unique visitors"), 'color': 'var(--accent2)'}]},
 ] %}
 {{ analytics(cards) }}
 
@@ -72,17 +76,81 @@
     {% if log_cut %}{{ _("Showing the last {n} days.", n=log_days) }}{% endif %}</small></p>
 </section>
 
+<section class="audience" id="audience">
+  <div class="aud-head">
+    <h2>{{ _("Audience") }}</h2>
+    <nav class="range" aria-label="{{ _('Time period') }}">
+      {% for d in periods %}
+        <a href="?range={{ d }}#audience" {% if d == period %}class="on" aria-current="true"{% endif %}>{{ _("Last {n} days", n=d) }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+
+  <div class="stats">
+    {{ stat(_("Clicks"), aud.total|num) }}
+    {{ stat(_("Unique visitors"), aud.unique|num, _("Each person is counted once, however many times they click.")) }}
+    {{ stat(_("Returning visitors"), aud.returning|num, _("{n}% of visitors clicked more than once.", n=returning_pct) if aud.unique else "") }}
+    {{ stat(_("Busiest time"), best_day or "—", best_hours) }}
+  </div>
+  {% if aud.untracked and aud.total %}<p class="muted"><small>{{ _("Clicks recorded before visitor tracking are not counted as visitors.") }}</small></p>{% endif %}
+
+  {% if not aud.total %}
+    <p class="muted empty">{{ _("No clicks in this period yet.") }}</p>
+  {% else %}
+  <h3 class="aud-sub">{{ _("Where clicks come from") }}</h3>
+  <div class="aud-grid">
+    <div class="chart-card">
+      <h2>{{ _("Sources") }}</h2>
+      {{ ranked(aud.sources) }}
+      {% set example %}<code>?ref=whatsapp</code>{% endset %}
+      <p class="muted"><small>{{ _h("Tip: add {example} to the end of a short link you share to count it under that name.", example=example) }}</small></p>
+    </div>
+    <div class="chart-card">
+      <h2>{{ _("Devices") }}</h2>
+      <div class="donut-wrap">
+        {{ device_donut }}
+        <ul class="legend-list">
+          {% for r in aud.devices %}
+            <li><i class="dot s{{ loop.index }}"></i><span>{{ r.label }}</span><b>{{ r.pct|num }}%</b></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h2>{{ _("Browsers") }}</h2>
+      {{ ranked(aud.browsers) }}
+    </div>
+    <div class="chart-card">
+      <h2>{{ _("Operating systems") }}</h2>
+      {{ ranked(aud.systems) }}
+    </div>
+  </div>
+
+  <h3 class="aud-sub">{{ _("Where visitors are") }}</h3>
+  <div class="aud-grid">
+    <div class="chart-card">
+      <h2>{{ _("Countries") }}</h2>
+      {% if aud.countries %}{{ ranked(aud.countries) }}{% else %}<p class="muted">{{ _("No location data yet. It is recorded for new clicks.") }}</p>{% endif %}
+    </div>
+    <div class="chart-card">
+      <h2>{{ _("Cities") }}</h2>
+      {% if aud.cities %}{{ ranked(aud.cities) }}{% else %}<p class="muted">{{ _("No location data yet. It is recorded for new clicks.") }}</p>{% endif %}
+    </div>
+  </div>
+  {% if aud.countries and aud.no_location %}<p class="muted"><small>{{ _n("{n} click has no location yet.", "{n} clicks have no location yet.", aud.no_location) }}</small></p>{% endif %}
+
+  <h3 class="aud-sub">{{ _("Best time of day") }}</h3>
+  <div class="chart-card heat-card">
+    <p class="muted chart-note">{{ _("Clicks by weekday and hour ({tz})", tz=tz_name) }}</p>
+    <div class="heat-scroll">{{ heat }}</div>
+    <div class="heat-legend muted"><small>{{ _("Fewer") }}</small>
+      <svg viewBox="0 0 70 14" width="70" height="14" aria-hidden="true">{% for k in range(5) %}<rect class="hm-cell hm-l{{ k }}" x="{{ k * 14 }}" y="0" width="12" height="12" rx="3"/>{% endfor %}</svg>
+      <small>{{ _("More") }}</small></div>
+  </div>
+  {% endif %}
+</section>
+
 <section class="grid2">
-  <div>
-    <h2>{{ _("Devices") }}</h2>
-    {% if devices %}<ul class="plain">{% for name, n in devices %}<li><span>{{ _(name) }}</span><b>{{ n|num }}</b></li>{% endfor %}</ul>
-    {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
-  </div>
-  <div>
-    <h2>{{ _("Top referrers") }}</h2>
-    {% if referrers %}<ul class="plain">{% for name, n in referrers %}<li><span>{{ _(name) }}</span><b>{{ n|num }}</b></li>{% endfor %}</ul>
-    {% else %}<p class="muted">{{ _("No clicks yet.") }}</p>{% endif %}
-  </div>
   <div>
     <h2>{{ _("QR code") }}</h2>
     <img class="qr" src="/dashboard/links/{{ link.id }}/qr.png" alt="{{ _('QR code for {url}', url=short_url) }}" width="180" height="180">

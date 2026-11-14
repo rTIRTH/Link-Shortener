@@ -70,7 +70,7 @@ def test_click_analytics(alice):
     alice.get("/alice/stats", headers={"user-agent": "Windows"})
     page = alice.get("/dashboard/links/1")
     assert page.status_code == 200
-    assert "mobile" in page.text and "twitter.com" in page.text and "Direct" in page.text
+    assert "mobile" in page.text and "<span>X</span>" in page.text and "Direct" in page.text
     assert "2 total clicks" in page.text
 
 

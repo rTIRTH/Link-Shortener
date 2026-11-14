@@ -13,11 +13,12 @@ from sqlalchemy.orm import Session
 
 from ..activity import day_state, day_window, link_events, local_date, visitor_timezone
 from ..cache import cache_delete, rate_limit
-from ..charts import chart_set
+from ..charts import chart_set, donut_svg, heatmap_svg
 from ..config import settings
 from ..database import get_db
 from ..deps import require_user
 from ..i18n import format_date, get_lang, native_digits, translate
+from ..insights import audience, weekday_name
 from ..models import Click, Link, LinkToggle, User, UsernameAlias, as_utc, utcnow
 from ..security import hash_password
 from ..templating import flash, render
@@ -41,6 +42,8 @@ def digits_in(lang: str):
 
 MAX_COMPARE = 8  # how many links can share one graph
 LOG_DAYS = 30  # how many days the activity log shows
+AUDIENCE_RANGES = (7, 30, 90, 365)  # the choices on the audience switch (days)
+DEFAULT_RANGE = 30
 # Colour-blind-friendly palette (Okabe-Ito); one colour per compared link.
 COMPARE_COLORS = [
     "#0072B2", "#E69F00", "#009E73", "#D55E00", "#CC79A7", "#56B4E9", "#F0E442", "#999999",
@@ -438,6 +441,60 @@ def link_detail(
         tip_labels=[num(f"{h:02d}:00") for h in range(24)],
     )
 
+    # clicks vs unique visitors, day by day (a visitor is counted once per day here)
+    seen_per_day: dict = {}
+    for c in clicks:
+        if c.visitor:
+            seen_per_day.setdefault(local_date(c.clicked_at, tz), set()).add(c.visitor)
+    visitors_daily = chart_set(
+        [num(f"{d.day:02d}") for d in days],
+        [
+            {"name": translate(lang, "Clicks"), "color": "var(--accent)",
+             "values": [per_day.get(d, 0) for d in days]},
+            {"name": translate(lang, "Unique visitors"), "color": "var(--accent2)",
+             "values": [len(seen_per_day.get(d, ())) for d in days]},
+        ],
+        aria=translate(lang, "Visitors per day"), num=num,
+        tip_labels=[format_date(d, lang) for d in days],
+    )
+    unique_recent = len(set().union(*(seen_per_day.get(d, set()) for d in days)))
+
+    # the audience section: sources, devices, places and the best time, for the chosen period
+    try:
+        period = int(request.query_params.get("range", DEFAULT_RANGE))
+    except ValueError:
+        period = DEFAULT_RANGE
+    period = period if period in AUDIENCE_RANGES else DEFAULT_RANGE
+    period_start = day_window(today - timedelta(days=period - 1), tz)[0]
+    aud = audience(
+        db.execute(
+            select(
+                Click.clicked_at, Click.device, Click.referrer, Click.source, Click.browser,
+                Click.os, Click.country, Click.city, Click.visitor,
+            ).where(Click.link_id == link.id, Click.clicked_at >= period_start)
+        ),
+        tz, lang,
+    )
+    hours = [num(f"{h:02d}") for h in range(24)]
+    heat = heatmap_svg(
+        aud["grid"],
+        [weekday_name(lang, d, short=True) for d in range(7)],
+        hours,
+        [[f"{weekday_name(lang, d)} {num(f'{h:02d}:00')}: {num(aud['grid'][d][h])}"
+          for h in range(24)] for d in range(7)],
+        aria=translate(lang, "Clicks by weekday and hour ({tz})", tz=tz_name),
+    )
+    best = aud["best"]
+    best_day = best_hours = ""
+    if best:
+        start, end = best["hour"], (best["hour"] + 1) % 24
+        best_day = weekday_name(lang, best["day"])
+        best_hours = f"{num(f'{start:02d}:00')}–{num(f'{end:02d}:00')}"
+    device_donut = donut_svg(
+        [{"n": r["n"], "tip": f"{r['label']}: {num(r['n'])}"} for r in aud["devices"]],
+        aria=translate(lang, "Devices"), center=num(aud["total"]),
+    )
+
     log = []
     for i in range((today - first_log_day).days + 1):
         d = today - timedelta(days=i)
@@ -457,8 +514,16 @@ def link_detail(
         hourly_charts=hourly,
         today_total=sum(per_hour.values()),
         recent_total=len(recent),
-        devices=Counter(c.device for c in recent).most_common(),
-        referrers=Counter(c.referrer or "Direct" for c in recent).most_common(5),
+        visitors_charts=visitors_daily,
+        unique_recent=unique_recent,
+        aud=aud,
+        period=period,
+        periods=AUDIENCE_RANGES,
+        heat=heat,
+        best_day=best_day,
+        best_hours=best_hours,
+        device_donut=device_donut,
+        returning_pct=round(100 * aud["returning"] / aud["unique"]) if aud["unique"] else 0,
         events=link_events(link, now, link.toggles),
         log=log,
         log_cut=created_day < first_log_day,
