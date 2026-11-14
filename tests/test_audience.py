@@ -13,9 +13,9 @@ from app.charts import donut_svg, heat_level, heatmap_svg
 from app.insights import (
     audience,
     classify_source,
-    client_address,
     clean_city,
     clean_country,
+    client_address,
     country_name,
     geo_from_headers,
     lookup_geo,
