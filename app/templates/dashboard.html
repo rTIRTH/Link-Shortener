@@ -16,7 +16,7 @@
     </label>
     <button class="btn" type="submit">{{ _("Shorten") }}</button>
     <details class="more">
-      <summary>{{ _("More options: schedule and password") }}</summary>
+      <summary>{{ _("More options: schedule, password and advanced") }}</summary>
       <div class="more-grid">
         {{ datetime_picker(_("Starts at"), "starts_at", "start") }}
         {{ datetime_picker(_("Ends at"), "expires_at", "end") }}
@@ -27,15 +27,60 @@
         </div>
       </div>
       <p class="field-note">{{ _("Times use your local time. Leave a box empty for no limit.") }}</p>
+      <h3 class="adv-title">{{ _("Advanced") }}</h3>
+      <div class="more-grid">
+        <div class="field">
+          <label for="click_limit">{{ _("Click limit") }} <small>{{ _("(optional)") }}</small></label>
+          <input id="click_limit" name="click_limit" inputmode="numeric" maxlength="9" autocomplete="off"
+                 placeholder="{{ _('No limit') }}" {% if not can('click_limit') %}disabled{% endif %}>
+          {% if can('click_limit') %}<small class="field-note">{{ _("The link stops working after this many clicks. Good for one-time links.") }}</small>
+          {% else %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+        </div>
+        <div class="field">
+          <label for="tags-create">{{ _("Tags") }} <small>{{ _("(optional)") }}</small></label>
+          <input id="tags-create" name="tags" data-tag-input autocomplete="off" maxlength="200"
+                 placeholder="{{ _('e.g. work, school') }}" {% if not can('tags') %}disabled{% endif %}>
+          {% if can('tags') %}<small class="field-note">{{ _("Separate tags with commas. Up to 5 per link.") }}</small>
+            {% if all_tags %}<div class="chips">{% for t in all_tags %}<button type="button" class="chip s{{ t.color }}" data-tag-pick="{{ t.name }}" data-target="tags-create" aria-pressed="false">{{ t.name }}</button>{% endfor %}</div>{% endif %}
+          {% else %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+        </div>
+      </div>
     </details>
   </form>
 </section>
 
 <section>
+  {% if can('archive') or archived_total %}
+  <nav class="viewtabs" aria-label="{{ _('Which links to show') }}">
+    <a href="/dashboard" {% if not show_archived %}class="on" aria-current="page"{% endif %}>{{ _("Active") }} <b>{{ active_total|num }}</b></a>
+    <a href="/dashboard?view=archived" {% if show_archived %}class="on" aria-current="page"{% endif %}>{{ icon('archive') }}{{ _("Archived") }} <b>{{ archived_total|num }}</b></a>
+  </nav>
+  {% endif %}
+  {% if tag_bar %}
+  {% set keep = '&view=archived' if show_archived else '' %}
+  <nav class="tagbar" aria-label="{{ _('Tags') }}">
+    <a class="chip all{{ ' on' if not tag_name }}" href="/dashboard{{ '?view=archived' if show_archived }}">{{ _("All") }}</a>
+    {% for t in tag_bar %}
+      <a class="chip s{{ t.color }}{{ ' on' if t.name == tag_name }}" href="/dashboard?tag={{ t.name|urlencode }}{{ keep }}">{{ t.name }} <b>{{ t.count|num }}</b></a>
+    {% endfor %}
+    {% if tag_name %}
+      <a class="btn small ghost has-icon" href="/dashboard/links/compare?tag={{ tag_name|urlencode }}">{{ icon('analytics') }}<span>{{ _("Compare this tag") }}</span></a>
+    {% endif %}
+  </nav>
+  {% endif %}
   {% if rows %}
   <form method="post" id="bulk" class="toolbar">
     <button class="btn small danger" type="submit" formaction="/dashboard/links/bulk-delete"
             onclick='return confirm({{ _("Delete the selected links? This cannot be undone.")|tojson }})'>{{ _("Delete selected") }}</button>
+    {% if show_archived %}
+      <button class="btn small ghost has-icon" type="submit" formaction="/dashboard/links/archive" name="action" value="restore"
+              title="{{ _('Bring the selected links back to your list.') }}">{{ icon('restore') }}<span>{{ _("Restore") }}</span></button>
+    {% elif can('archive') %}
+      <button class="btn small ghost has-icon" type="submit" formaction="/dashboard/links/archive" name="action" value="archive"
+              title="{{ _('Hide the selected links from this list. They keep working and keep their stats.') }}">{{ icon('archive') }}<span>{{ _("Archive") }}</span></button>
+    {% else %}
+      <button class="btn small ghost has-icon" type="button" disabled title="{{ _('This feature is part of a paid plan.') }}">{{ icon('lock') }}<span>{{ _("Archive") }}</span></button>
+    {% endif %}
     <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip"
             title="{{ _('QR download uses the selected links, or all links if none are selected.') }}">{{ _("Download QR codes") }}</button>
     <a class="btn small ghost" href="/dashboard/links/export.csv">{{ _("Export CSV") }}</a>
@@ -68,12 +113,14 @@
         <td>
           <a class="mono" href="{{ row.short_url }}" target="_blank" rel="noopener">{{ row.short_url|replace('https://','')|replace('http://','') }}</a>
           {% if row.locked %}<span class="tag lock" title="{{ _('Visitors need a password') }}">{{ _("Password") }}</span>{% endif %}
+          {% if row.tags %}<div class="chips">{% for t in row.tags %}<a class="chip s{{ t.color }}" href="/dashboard?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</div>{% endif %}
         </td>
         <td class="dest" title="{{ link.original_url }}">{{ link.original_url }}</td>
-        <td class="num">{{ link.click_count|num }}</td>
+        <td class="num">{{ link.click_count|num }}{% if link.click_limit %}<small class="muted"> / {{ link.click_limit|num }}</small>{% endif %}</td>
         <td>
           {% if row.status == 'inactive' %}<span class="tag off">{{ _("Inactive") }}</span>
           {% elif row.status == 'expired' %}<span class="tag bad">{{ _("Expired") }}</span>
+          {% elif row.status == 'limit' %}<span class="tag bad">{{ _("Limit reached") }}</span>
           {% elif row.status == 'scheduled' %}<span class="tag warn">{{ _("Scheduled") }}</span>
           {% else %}<span class="tag ok">{{ _("Active") }}</span>{% endif %}
           {% if link.starts_at and row.schedule == 'scheduled' %}
@@ -121,6 +168,10 @@
     })();
   </script>
   {% include "_share_dialog.html" %}
+  {% elif show_archived %}
+    <div class="empty"><h3>{{ _("No archived links") }}</h3><p>{{ _("Archived links are hidden from your list but still work. Select links and press Archive to put them here.") }}</p></div>
+  {% elif tag_name %}
+    <div class="empty"><h3>{{ _("No links with this tag") }}</h3></div>
   {% else %}
     <div class="empty"><h3>{{ _("No links yet") }}</h3><p>{{ _("Paste a long URL above to create your first short link.") }}</p></div>
   {% endif %}
@@ -128,4 +179,5 @@
 {% endblock %}
 {% block scripts %}
   <script src="/static/share.js?v={{ js_version }}" defer></script>
+  <script src="/static/tags.js?v={{ js_version }}" defer></script>
 {% endblock %}

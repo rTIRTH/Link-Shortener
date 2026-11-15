@@ -2,11 +2,13 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean,
+    Column,
     DateTime,
     ForeignKey,
     Integer,
     LargeBinary,
     String,
+    Table,
     Text,
     UniqueConstraint,
     true,
@@ -51,6 +53,9 @@ class User(Base):
     links: Mapped[list["Link"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"
     )
+    tags: Mapped[list["Tag"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan", order_by="Tag.name"
+    )
     old_usernames: Mapped[list["UsernameAlias"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
@@ -60,6 +65,29 @@ class User(Base):
     email_change: Mapped["EmailChange | None"] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False
     )
+
+
+# Which tags a link has (a link can have a few; a tag can be on many links).
+link_tags = Table(
+    "link_tags",
+    Base.metadata,
+    Column("link_id", ForeignKey("links.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
+)
+
+
+class Tag(Base):
+    """A label the owner puts on links to group them. Names are lower case and unique per user."""
+
+    __tablename__ = "tags"
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_tags_user_name"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    name: Mapped[str] = mapped_column(String(24))
+
+    owner: Mapped["User"] = relationship(back_populates="tags")
+    links: Mapped[list["Link"]] = relationship(secondary=link_tags, back_populates="tags")
 
 
 class Link(Base):
@@ -79,7 +107,19 @@ class Link(Base):
     # The owner's on/off switch. Off = visitors see a message, whatever the schedule says.
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
 
+    # The link stops working once it has had this many clicks (None = no limit).
+    click_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # When the last click of the limit was used (None until then, and again if the limit changes).
+    limit_reached_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    # Archived links are hidden from the dashboard list but keep working and keep their stats.
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     owner: Mapped[User] = relationship(back_populates="links")
+    tags: Mapped[list[Tag]] = relationship(
+        secondary=link_tags, back_populates="links", order_by="Tag.name"
+    )
     clicks: Mapped[list["Click"]] = relationship(
         back_populates="link", cascade="all, delete-orphan"
     )

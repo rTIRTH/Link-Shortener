@@ -88,13 +88,30 @@ def validate_url(raw: str, blocked_hosts: tuple[str, ...] = ()) -> str:
 
 def parse_device(user_agent: str | None) -> str:
     ua = (user_agent or "").lower()
-    if any(w in ua for w in ("bot", "crawler", "spider", "preview")):
+    # "facebookexternalhit" and "whatsapp/" are the robots that fetch a link to draw its preview
+    previews = (
+        "bot", "crawler", "spider", "preview", "facebookexternalhit", "whatsapp/", "embedly",
+    )
+    if any(w in ua for w in previews):
         return "bot"
     if "ipad" in ua or "tablet" in ua or ("android" in ua and "mobile" not in ua):
         return "tablet"
     if any(w in ua for w in ("mobi", "iphone", "android")):
         return "mobile"
     return "desktop"
+
+
+MAX_CLICK_LIMIT = 1_000_000
+
+
+def parse_click_limit(raw: str | None) -> int | None:
+    """The 'click limit' box -> a whole number, or None for no limit. Hindi/Gujarati digits work."""
+    text = ascii_digits((raw or "").strip()).replace(",", "")
+    if not text:
+        return None
+    if not text.isascii() or not text.isdigit() or not 1 <= int(text) <= MAX_CLICK_LIMIT:
+        raise ValueError("The click limit must be a whole number from 1 to 1,000,000.")
+    return int(text)
 
 
 def csv_safe(value: str) -> str:

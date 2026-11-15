@@ -7,9 +7,9 @@ from datetime import date, datetime, timedelta
 import qrcode
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse, Response
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from ..activity import day_state, day_window, link_events, local_date, visitor_timezone
 from ..cache import cache_delete, rate_limit
@@ -17,14 +17,17 @@ from ..charts import chart_set, donut_svg, heatmap_svg
 from ..config import settings
 from ..database import get_db
 from ..deps import require_user
+from ..features import can, require
 from ..i18n import format_date, get_lang, native_digits, translate
 from ..insights import audience, weekday_name
-from ..models import Click, Link, LinkToggle, User, UsernameAlias, as_utc, utcnow
+from ..models import Click, Link, LinkToggle, Tag, User, UsernameAlias, as_utc, link_tags, utcnow
 from ..security import hash_password
+from ..tags import clean_tag, parse_tags, prune_tags, set_link_tags, tag_color
 from ..templating import flash, render
 from ..utils import (
     csv_safe,
     generate_slug,
+    parse_click_limit,
     parse_moment,
     validate_link_password,
     validate_slug,
@@ -71,11 +74,17 @@ def schedule_status(link: Link, now: datetime | None = None) -> str:
     return "active"
 
 
+def limit_used_up(link: Link) -> bool:
+    limit = getattr(link, "click_limit", None)
+    return limit is not None and link.click_count >= limit
+
+
 def link_status(link: Link, now: datetime | None = None) -> str:
-    """'inactive' (the owner switched it off), else the schedule's: expired/scheduled/active."""
+    """'inactive' (switched off), else expired / scheduled, 'limit' (no clicks left) or active."""
     if not link.is_active:
         return "inactive"
-    return schedule_status(link, now)
+    status = schedule_status(link, now)
+    return "limit" if status == "active" and limit_used_up(link) else status
 
 
 def read_schedule(starts_at: str, starts_at_utc: str, expires_at: str, expires_at_utc: str):
@@ -109,11 +118,30 @@ def short_url(request: Request, user: User, link: Link) -> str:
     return f"{base}/{user.username}/{link.slug}"
 
 
-def user_links(db: Session, user: User, ids: list[int] | None = None) -> list[Link]:
-    stmt = select(Link).where(Link.user_id == user.id).order_by(Link.created_at.desc())
+def user_links(
+    db: Session, user: User, ids: list[int] | None = None, *, archived: bool | None = None
+) -> list[Link]:
+    """The user's links, newest first. archived: True = only archived, False = hide archived."""
+    stmt = (
+        select(Link).where(Link.user_id == user.id).order_by(Link.created_at.desc())
+        .options(selectinload(Link.tags))
+    )
     if ids:
         stmt = stmt.where(Link.id.in_(ids))
+    if archived is True:
+        stmt = stmt.where(Link.archived_at.is_not(None))
+    elif archived is False:
+        stmt = stmt.where(Link.archived_at.is_(None))
     return list(db.scalars(stmt))
+
+
+def tag_chips(link: Link) -> list[dict]:
+    return [{"name": t.name, "color": tag_color(t.name)} for t in link.tags]
+
+
+def limit_reached_at(link: Link):
+    """When the link used its last click (only known for limits reached since this was recorded)."""
+    return link.limit_reached_at if limit_used_up(link) else None
 
 
 def qr_png_bytes(text: str) -> bytes:
@@ -123,8 +151,18 @@ def qr_png_bytes(text: str) -> bytes:
 
 
 @router.get("")
-def dashboard(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
-    links = user_links(db, user)
+def dashboard(
+    request: Request,
+    tag: str = Query(""),
+    view: str = Query(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    show_archived = view == "archived" and can(user, "archive")
+    shown = user_links(db, user, archived=show_archived)
+    tag_name = clean_tag(tag)
+    tag_counts = Counter(t.name for link in shown for t in link.tags)
+    links = [x for x in shown if tag_name in {t.name for t in x.tags}] if tag_name else shown
     rows = [
         {
             "link": link,
@@ -132,13 +170,26 @@ def dashboard(request: Request, user: User = Depends(require_user), db: Session 
             "status": link_status(link),
             "schedule": schedule_status(link),
             "locked": bool(link.password_hash),
+            "tags": tag_chips(link),
         }
         for link in links
     ]
-    total_clicks = sum(link.click_count for link in links)
+    archived_total = db.scalar(
+        select(func.count()).select_from(Link).where(
+            Link.user_id == user.id, Link.archived_at.is_not(None)
+        )
+    )
+    all_total = db.scalar(select(func.count()).select_from(Link).where(Link.user_id == user.id))
     return render(
         request, "dashboard.html", user,
-        rows=rows, total_clicks=total_clicks, max_compare=MAX_COMPARE,
+        rows=rows, total_clicks=sum(link.click_count for link in links),
+        max_compare=MAX_COMPARE, show_archived=show_archived,
+        archived_total=archived_total, active_total=all_total - archived_total,
+        tag_name=tag_name,
+        tag_bar=[
+            {"name": n, "count": c, "color": tag_color(n)} for n, c in sorted(tag_counts.items())
+        ],
+        all_tags=[{"name": t.name, "color": tag_color(t.name)} for t in user.tags],
     )
 
 
@@ -152,6 +203,8 @@ def create_link(
     expires_at: str = Form(""),
     expires_at_utc: str = Form(""),
     link_password: str = Form(""),
+    click_limit: str = Form(""),
+    tags: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -171,6 +224,12 @@ def create_link(
         if end and end <= utcnow():
             raise ValueError("The end time must be in the future.")
         pw_hash = hash_password(validate_link_password(link_password)) if link_password else None
+        limit = parse_click_limit(click_limit)
+        names = parse_tags(tags)
+        if limit is not None:
+            require(user, "click_limit")
+        if names:
+            require(user, "tags")
     except ValueError as e:
         return back(str(e))
 
@@ -201,7 +260,13 @@ def create_link(
         starts_at=start,
         expires_at=end,
         password_hash=pw_hash,
+        click_limit=limit,
     )
+    try:
+        set_link_tags(db, user, link, names)
+    except ValueError as e:
+        db.rollback()
+        return back(str(e))
     db.add(link)
     try:
         db.commit()
@@ -226,8 +291,40 @@ def bulk_delete(
     for link in links:
         forget_link(db, user, link.slug)
         db.delete(link)
+    db.flush()
+    prune_tags(db, user)
     db.commit()
     flash(request, "Deleted {n} link(s).", "success", n=len(links))
+    return RedirectResponse("/dashboard", status_code=303)
+
+
+@router.post("/links/archive")
+def bulk_archive(
+    request: Request,
+    ids: list[int] = Form(default=[]),
+    action: str = Form("archive"),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Toolbar "Archive" / "Restore": hide links from the list (or bring them back)."""
+    try:
+        require(user, "archive")
+    except ValueError as e:
+        flash(request, str(e), "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    if not ids:
+        flash(request, "Select at least one link first.", "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    restore = action == "restore"
+    links = user_links(db, user, ids)
+    for link in links:
+        link.archived_at = None if restore else utcnow()
+    db.commit()
+    if restore:
+        flash(request, "Restored {n} link(s).", "success", n=len(links))
+        return RedirectResponse("/dashboard", status_code=303)
+    flash(request, "Archived {n} link(s). They are hidden from your list but still work.",
+          "success", n=len(links))
     return RedirectResponse("/dashboard", status_code=303)
 
 
@@ -238,6 +335,7 @@ def export_csv(request: Request, user: User = Depends(require_user), db: Session
     writer.writerow([
         "short_url", "slug", "original_url", "clicks", "created_at",
         "starts_at", "expires_at", "password_protected", "active",
+        "click_limit", "archived", "tags",
     ])
     for link in user_links(db, user):
         writer.writerow([
@@ -250,6 +348,9 @@ def export_csv(request: Request, user: User = Depends(require_user), db: Session
             as_utc(link.expires_at).isoformat() if link.expires_at else "",
             "yes" if link.password_hash else "no",
             "yes" if link.is_active else "no",
+            link.click_limit or "",
+            "yes" if link.archived_at else "no",
+            csv_safe(", ".join(t.name for t in link.tags)),
         ])
     return Response(
         buf.getvalue(),
@@ -265,7 +366,7 @@ def qr_zip(
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
-    links = user_links(db, user, ids or None)  # no ids = all links
+    links = user_links(db, user, ids or None, archived=None if ids else False)  # none picked = all
     if not links:
         raise HTTPException(404, "No links to download.")
     buf = io.BytesIO()
@@ -320,20 +421,40 @@ def edit_selected(
 def compare_links(
     request: Request,
     ids: list[int] = Query(default=[]),
+    tag: str = Query(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
-    """Toolbar "Stats" button: one link -> its stats page, several -> one shared graph."""
+    """Toolbar "Stats" button: one link -> its stats page, several -> one shared graph.
+
+    With ?tag=name it compares the links that have that tag (the most-clicked ones, up to the
+    same limit as picking them by hand).
+    """
     unique = list(dict.fromkeys(ids))
-    if not unique:
-        flash(request, "Select at least one link first.", "error")
-        return RedirectResponse("/dashboard", status_code=303)
-    if len(unique) > MAX_COMPARE:
-        flash(request, "You can compare up to {n} links at a time.", "error", n=MAX_COMPARE)
-        return RedirectResponse("/dashboard", status_code=303)
-    links = user_links(db, user, unique)  # only the user's own links can match
-    if not links:
-        raise HTTPException(404, "Link not found.")
+    tag_name = clean_tag(tag)
+    trimmed = False
+    if tag_name:
+        links = list(db.scalars(
+            select(Link).join(link_tags, link_tags.c.link_id == Link.id)
+            .join(Tag, Tag.id == link_tags.c.tag_id)
+            .where(Tag.user_id == user.id, Tag.name == tag_name)
+            .order_by(Link.click_count.desc(), Link.id)
+        ))
+        if not links:
+            flash(request, "No links have that tag.", "error")
+            return RedirectResponse("/dashboard", status_code=303)
+        trimmed = len(links) > MAX_COMPARE
+        links = links[:MAX_COMPARE]
+    else:
+        if not unique:
+            flash(request, "Select at least one link first.", "error")
+            return RedirectResponse("/dashboard", status_code=303)
+        if len(unique) > MAX_COMPARE:
+            flash(request, "You can compare up to {n} links at a time.", "error", n=MAX_COMPARE)
+            return RedirectResponse("/dashboard", status_code=303)
+        links = user_links(db, user, unique)  # only the user's own links can match
+        if not links:
+            raise HTTPException(404, "Link not found.")
     if len(links) == 1:
         return RedirectResponse(f"/dashboard/links/{links[0].id}", status_code=303)
 
@@ -393,7 +514,8 @@ def compare_links(
 
     return render(
         request, "compare_links.html", user, entries=entries, daily_charts=daily,
-        hourly_charts=hourly, today_total=len(clicks_today),
+        hourly_charts=hourly, today_total=len(clicks_today), tag_name=tag_name,
+        trimmed=trimmed, max_compare=MAX_COMPARE,
     )
 
 
@@ -500,7 +622,8 @@ def link_detail(
         d = today - timedelta(days=i)
         log.append({
             "iso": d.isoformat(), "label": format_date(d, lang, year=True),
-            "state": day_state(link, d, tz, now, link.toggles), "count": per_day.get(d, 0),
+            "state": day_state(link, d, tz, now, link.toggles, limit_reached_at(link)),
+            "count": per_day.get(d, 0),
         })
 
     recent_start = day_window(today - timedelta(days=13), tz)[0]
@@ -524,7 +647,8 @@ def link_detail(
         best_hours=best_hours,
         device_donut=device_donut,
         returning_pct=round(100 * aud["returning"] / aud["unique"]) if aud["unique"] else 0,
-        events=link_events(link, now, link.toggles),
+        events=link_events(link, now, link.toggles, limit_reached_at(link)),
+        tags=tag_chips(link),
         log=log,
         log_cut=created_day < first_log_day,
         log_days=LOG_DAYS,
@@ -580,7 +704,7 @@ def link_day(
         link=link,
         short_url=short_url(request, user, link),
         day_label=format_date(d, lang, year=True),
-        state=day_state(link, d, tz, now, link.toggles),
+        state=day_state(link, d, tz, now, link.toggles, limit_reached_at(link)),
         hour_charts=hours,
         total=len(clicks),
         busiest=None if busiest is None else native_digits(
@@ -602,6 +726,8 @@ def delete_one(
     link = get_owned_link(db, user, link_id)
     forget_link(db, user, link.slug)
     db.delete(link)
+    db.flush()
+    prune_tags(db, user)
     db.commit()
     flash(request, "Link deleted.", "success")
     return RedirectResponse("/dashboard", status_code=303)
@@ -616,7 +742,36 @@ def edit_page(
     return render(
         request, "edit_link.html", user,
         link=link, short_url=short_url(request, user, link), status=link_status(link),
+        tags=tag_chips(link), tag_text=", ".join(t.name for t in link.tags),
+        all_tags=[{"name": t.name, "color": tag_color(t.name)} for t in user.tags],
+        linked={t.name for t in link.tags},
     )
+
+
+@router.post("/links/{link_id}/archive")
+def archive_one(
+    request: Request,
+    link_id: int,
+    archived: str = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Edit page button: archive ("1") or restore ("0") one link. Repeating it is harmless."""
+    link = get_owned_link(db, user, link_id)
+    try:
+        require(user, "archive")
+    except ValueError as e:
+        flash(request, str(e), "error")
+        return RedirectResponse(f"/dashboard/links/{link.id}/edit", status_code=303)
+    if archived == "1" and link.archived_at is None:
+        link.archived_at = utcnow()
+        db.commit()
+        flash(request, "Link archived. It is hidden from your list but still works.", "success")
+    elif archived == "0" and link.archived_at is not None:
+        link.archived_at = None
+        db.commit()
+        flash(request, "Link restored.", "success")
+    return RedirectResponse(f"/dashboard/links/{link.id}/edit", status_code=303)
 
 
 @router.post("/links/{link_id}/toggle")
@@ -653,6 +808,10 @@ def edit_save(
     expires_at_utc: str = Form(""),
     password_action: str = Form("keep"),
     new_password: str = Form(""),
+    click_limit: str = Form(""),
+    tags: str = Form(""),
+    limit_box: str = Form(""),  # "1" when the click-limit box was on the page (not locked)
+    tags_box: str = Form(""),  # same for the tags box; without it those settings stay as they are
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -669,13 +828,29 @@ def edit_save(
             link, starts_at, starts_at_utc, expires_at, expires_at_utc,
             password_action, new_password,
         )
+        limit = parse_click_limit(click_limit) if limit_box == "1" else link.click_limit
+        if limit != link.click_limit:
+            require(user, "click_limit")
+        current = [t.name for t in link.tags]
+        names = parse_tags(tags) if tags_box == "1" else current
+        if set(names) != set(current):
+            require(user, "tags")
+            set_link_tags(db, user, link, names)
     except ValueError as e:
+        db.rollback()
         return back(str(e))
 
     link.original_url = url
     link.starts_at = start
     link.expires_at = end
     link.password_hash = new_hash
+    if limit != link.click_limit:  # a new limit starts afresh: "reached" is judged again
+        link.limit_reached_at = None
+        if limit is not None and link.click_count >= limit:
+            link.limit_reached_at = utcnow()
+    link.click_limit = limit
+    db.flush()
+    prune_tags(db, user)
     db.commit()
     forget_link(db, user, link.slug)  # visitors must see the new settings straight away
     flash(request, "Link updated.", "success")

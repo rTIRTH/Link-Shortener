@@ -51,7 +51,8 @@ def _off_spans(toggles: list[LinkToggle]) -> list[tuple[datetime, datetime]]:
 
 
 def day_state(
-    link: Link, day: date, tz: tzinfo, now: datetime, toggles: list[LinkToggle] = ()
+    link: Link, day: date, tz: tzinfo, now: datetime, toggles: list[LinkToggle] = (),
+    limit_at: datetime | None = None,
 ) -> str:
     """What the link was doing on one local day.
 
@@ -60,6 +61,7 @@ def day_state(
     'inactive'   the owner had it switched off for the whole day
     'scheduled'  not live yet that day (its start time came later)
     'expired'    no longer live that day (its end time had passed)
+    'limit'      no longer live that day (it had used up its click limit; `limit_at` is when)
 
     Days before the link existed are not asked about. The schedule is the link's *current* one;
     the owner's on/off switching comes from the recorded `toggles`.
@@ -71,12 +73,17 @@ def day_state(
         seen_to = seen_from + timedelta(seconds=1)
 
     live_from = max(seen_from, as_utc(link.starts_at)) if link.starts_at else seen_from
-    live_to = min(seen_to, as_utc(link.expires_at)) if link.expires_at else seen_to
+    closers = []  # the moments it stopped working for good, and why
+    if link.expires_at:
+        closers.append((as_utc(link.expires_at), "expired"))
+    if limit_at:
+        closers.append((as_utc(limit_at), "limit"))
+    live_to = min([seen_to, *(when for when, _why in closers)])
 
-    if live_to <= live_from:  # the schedule had it closed for that whole day
+    if live_to <= live_from:  # it was closed for that whole day
         if link.starts_at and as_utc(link.starts_at) >= seen_to:
             return "scheduled"
-        return "expired"
+        return min(closers)[1] if closers else "expired"
 
     live = live_to - live_from
     for off_start, off_end in _off_spans(list(toggles)):
@@ -90,8 +97,10 @@ def day_state(
     return "partial"
 
 
-def link_events(link: Link, now: datetime, toggles: list[LinkToggle] = ()) -> list[dict]:
-    """Created / goes live / expires / switched off or on, oldest first.
+def link_events(
+    link: Link, now: datetime, toggles: list[LinkToggle] = (), limit_at: datetime | None = None
+) -> list[dict]:
+    """Created / goes live / expires / click limit reached / switched off or on, oldest first.
 
     `future` marks the ones still to come. Only the 10 latest on/off switches are listed.
     """
@@ -102,6 +111,8 @@ def link_events(link: Link, now: datetime, toggles: list[LinkToggle] = ()) -> li
     if link.expires_at:
         end = as_utc(link.expires_at)
         events.append({"key": "expires", "at": end, "future": end > now})
+    if limit_at:
+        events.append({"key": "limit", "at": as_utc(limit_at), "future": False})
     for t in sorted(toggles, key=lambda t: as_utc(t.at))[-10:]:
         events.append({"key": "on" if t.active else "off", "at": as_utc(t.at), "future": False})
     return sorted(events, key=lambda e: e["at"])

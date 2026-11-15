@@ -4,15 +4,16 @@
 {% from "_insights.html" import stat, ranked with context %}
 {% block title %}{{ link.slug }} · Link Shortener{% endblock %}
 {% block content %}
-{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
+{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive'), 'limit': _('Limit reached')} %}
 {% set target %}<a href="{{ link.original_url }}" target="_blank" rel="noopener">{{ link.original_url }}</a>{% endset %}
 <p><a href="/dashboard">{{ _("← All links") }}</a></p>
 <section>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
   <p class="dest-full">{{ _h("Redirects to {url}", url=target) }}</p>
-  <p class="muted">{{ _n("{n} total click", "{n} total clicks", link.click_count) }} · {{ _("{n} in the last 14 days", n=recent_total) }}</p>
+  <p class="muted">{{ _n("{n} total click", "{n} total clicks", link.click_count) }} · {{ _("{n} in the last 14 days", n=recent_total) }}{% if link.click_limit %} · {{ _("{used} of {limit} clicks used", used=link.click_count, limit=link.click_limit) }}{% endif %}</p>
+  {% if tags %}<p class="chips">{% for t in tags %}<a class="chip s{{ t.color }}" href="/dashboard?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</p>{% endif %}
   <p>
-    <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad', 'inactive': 'off'}[status] }}">{{ state_names[status] }}</span>
+    <span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad', 'inactive': 'off', 'limit': 'bad'}[status] }}">{{ state_names[status] }}</span>
     {% if link.password_hash %}<span class="tag lock">{{ _("Password protected") }}</span>{% endif %}
     {% set created_t %}<time data-utc="{{ link.created_at|utc_iso }}">{{ link.created_at|utc_text }}</time>{% endset %}
     <small class="muted">{{ _h("created {time}", time=created_t) }}</small>
@@ -40,7 +41,7 @@
 {{ analytics(cards) }}
 
 <section>
-  {% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')], 'inactive': ['off', _('Inactive')]} %}
+  {% set day_tags = {'active': ['ok', _('Active')], 'partial': ['warn', _('Partly active')], 'scheduled': ['warn', _('Scheduled')], 'expired': ['bad', _('Expired')], 'inactive': ['off', _('Inactive')], 'limit': ['bad', _('Limit reached')]} %}
   <h2>{{ _("Activity log") }} <small class="muted">({{ tz_name }})</small></h2>
   <ul class="plain">
     {% for e in events %}
@@ -50,6 +51,7 @@
           {% elif e.key == 'starts' %}{{ _("Goes live") if e.future else _("Went live") }}
           {% elif e.key == 'off' %}{{ _("Deactivated") }}
           {% elif e.key == 'on' %}{{ _("Activated") }}
+          {% elif e.key == 'limit' %}{{ _("Click limit reached") }}
           {% else %}{{ _("Expires") if e.future else _("Expired") }}{% endif %}
         </span>
         <b><time data-utc="{{ e.at|utc_iso }}">{{ e.at|utc_text }}</time></b>

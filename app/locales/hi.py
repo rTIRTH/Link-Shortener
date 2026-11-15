@@ -58,7 +58,6 @@ MESSAGES = {
     "(optional)": "(वैकल्पिक)",
     "optional": "वैकल्पिक",
     "Shorten": "छोटा करें",
-    "More options: schedule and password": "और विकल्प: समय-सारणी और पासवर्ड",
     "Starts at": "शुरू होने का समय",
     "Ends at": "समाप्त होने का समय",
     "Visitors must enter it": "आने वालों को इसे डालना होगा",
@@ -562,4 +561,91 @@ MESSAGES = {
         "अन्य",
     "In-app browser":
         "ऐप का ब्राउज़र",
+    # ---- click limit, tags, archive ----
+    "A link can have up to 5 tags.":
+        "एक लिंक पर ज़्यादा से ज़्यादा 5 टैग हो सकते हैं।",
+    "A tag can be up to 24 characters, without symbols like # ? / & or quotes.":
+        "टैग 24 अक्षरों तक का हो सकता है, और उसमें # ? / & या उद्धरण चिह्न जैसे प्रतीक नहीं होने चाहिए।",
+    "Advanced":
+        "उन्नत",
+    "All":
+        "सभी",
+    "Archive":
+        "आर्काइव",
+    "Archive link":
+        "लिंक आर्काइव करें",
+    "Archived":
+        "आर्काइव किए गए",
+    "Archived links are hidden from your dashboard list but keep working and keep their stats.":
+        "आर्काइव किए गए लिंक आपकी डैशबोर्ड सूची में नहीं दिखते, लेकिन काम करते रहते हैं और उनके आँकड़े बने रहते हैं।",
+    "Archived links are hidden from your list but still work. Select links and press Archive to put them here.":
+        "आर्काइव किए गए लिंक आपकी सूची में नहीं दिखते, लेकिन काम करते रहते हैं। लिंक चुनें और उन्हें यहाँ रखने के लिए आर्काइव दबाएँ।",
+    "Archived {n} link(s). They are hidden from your list but still work.":
+        "{n} लिंक आर्काइव किए गए। वे आपकी सूची में नहीं दिखेंगे, लेकिन काम करते रहेंगे।",
+    "Bring the selected links back to your list.":
+        "चुने हुए लिंक को वापस अपनी सूची में लाएँ।",
+    "Click limit":
+        "क्लिक सीमा",
+    "Click limit reached":
+        "क्लिक सीमा पूरी हुई",
+    "Compare this tag":
+        "इस टैग की तुलना करें",
+    "Hide the selected links from this list. They keep working and keep their stats.":
+        "चुने हुए लिंक को इस सूची से छिपाएँ। वे काम करते रहेंगे और उनके आँकड़े बने रहेंगे।",
+    "Limit reached":
+        "सीमा पूरी",
+    "Link archived. It is hidden from your list but still works.":
+        "लिंक आर्काइव हो गया। वह आपकी सूची में नहीं दिखेगा, लेकिन काम करता रहेगा।",
+    "Link restored.":
+        "लिंक वापस ला दिया गया।",
+    "Maximum clicks":
+        "अधिकतम क्लिक",
+    "More options: schedule, password and advanced":
+        "और विकल्प: समय-सारणी, पासवर्ड और उन्नत",
+    "No archived links":
+        "कोई आर्काइव किया हुआ लिंक नहीं",
+    "No limit":
+        "कोई सीमा नहीं",
+    "No links have that tag.":
+        "किसी भी लिंक पर वह टैग नहीं है।",
+    "No links with this tag":
+        "इस टैग वाला कोई लिंक नहीं",
+    "Restore":
+        "वापस लाएँ",
+    "Restore link":
+        "लिंक वापस लाएँ",
+    "Restored {n} link(s).":
+        "{n} लिंक वापस लाए गए।",
+    "Separate tags with commas. Up to 5 per link.":
+        "टैग को कॉमा से अलग करें। हर लिंक पर 5 तक।",
+    "Showing the {n} most-clicked links of this tag.":
+        "इस टैग के सबसे ज़्यादा क्लिक वाले {n} लिंक दिखाए जा रहे हैं।",
+    "Tags":
+        "टैग",
+    "Tags group your links. You can filter the dashboard by a tag and compare all its links in one graph.":
+        "टैग आपके लिंक को समूह में रखते हैं। आप डैशबोर्ड को किसी टैग से फ़िल्टर कर सकते हैं और उसके सभी लिंक की एक ग्राफ़ में तुलना कर सकते हैं।",
+    "The click limit must be a whole number from 1 to 1,000,000.":
+        "क्लिक सीमा 1 से 1,000,000 के बीच की पूरी संख्या होनी चाहिए।",
+    "The link stops working after this many clicks. Good for one-time links.":
+        "इतने क्लिक के बाद लिंक काम करना बंद कर देता है। एक बार वाले लिंक के लिए अच्छा।",
+    "The link stops working after this many clicks. Good for one-time links. Leave the box empty for no limit.":
+        "इतने क्लिक के बाद लिंक काम करना बंद कर देता है। एक बार वाले लिंक के लिए अच्छा। कोई सीमा न चाहिए तो बॉक्स खाली छोड़ें।",
+    "This feature is part of a paid plan.":
+        "यह सुविधा सशुल्क प्लान का हिस्सा है।",
+    "This link is archived.":
+        "यह लिंक आर्काइव किया हुआ है।",
+    "This short link has reached its click limit.":
+        "इस छोटे लिंक की क्लिक सीमा पूरी हो चुकी है।",
+    "Which links to show":
+        "कौन से लिंक दिखाएँ",
+    "You can have up to 50 tags in total.":
+        "आपके कुल मिलाकर 50 टैग तक हो सकते हैं।",
+    "e.g. work, school":
+        "जैसे: काम, स्कूल",
+    "{n} click used so far.":
+        "अब तक {n} क्लिक इस्तेमाल हुआ।",
+    "{n} clicks used so far.":
+        "अब तक {n} क्लिक इस्तेमाल हुए।",
+    "{used} of {limit} clicks used":
+        "{limit} में से {used} क्लिक इस्तेमाल हुए",
 }

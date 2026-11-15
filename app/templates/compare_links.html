@@ -6,6 +6,10 @@
 <section>
   <h1>{{ _("Compare links") }}</h1>
   <p class="muted">{{ _n("{n} link", "{n} links", entries|length) }}</p>
+  {% if tag_name %}
+    <p><span class="chip s{{ tag_color(tag_name) }}">{{ tag_name }}</span></p>
+    {% if trimmed %}<p class="muted"><small>{{ _("Showing the {n} most-clicked links of this tag.", n=max_compare) }}</small></p>{% endif %}
+  {% endif %}
 </section>
 
 {% set cards = [

@@ -23,6 +23,7 @@ from ..insights import (
 from ..models import Click, Link, User, UsernameAlias, as_utc, utcnow
 from ..security import verify_password
 from ..templating import render
+from ..utils import parse_device
 from .dashboard import cache_key
 
 router = APIRouter()
@@ -37,8 +38,12 @@ def record_click(
     address: str | None = None,
     geo: tuple[str | None, str | None] = (None, None),
     tag: str | None = None,
+    counted: bool = False,
 ):
     """Runs AFTER the redirect is sent, so analytics never slow the visitor down.
+
+    `counted` means the link's click counter was already raised (links with a click limit raise
+    it before redirecting, so two visitors can never both take the last click).
 
     The address is only used for the country lookup and a one-way visitor id; it is not stored.
     """
@@ -54,9 +59,10 @@ def record_click(
                 source=classify_source(host, user_agent, tag), browser=browser, os=system,
                 country=country, city=city, visitor=visitor_id(address, user_agent),
             ))
-            db.execute(
-                update(Link).where(Link.id == link_id).values(click_count=Link.click_count + 1)
-            )
+            if not counted:
+                db.execute(
+                    update(Link).where(Link.id == link_id).values(click_count=Link.click_count + 1)
+                )
             db.commit()
     except Exception:  # analytics must never break redirects
         log.exception("Failed to record click for link %s", link_id)
@@ -88,6 +94,7 @@ def load_link(db: Session, username: str, slug: str) -> dict:
         "start": starts.isoformat() if starts else None,
         "locked": bool(link.password_hash),  # the hash itself is never cached
         "off": not link.is_active,  # the owner switched it off
+        "limit": link.click_limit,  # how many clicks it may have (the count itself is not cached)
     }
     ttl = settings.cache_ttl
     if expires:
@@ -107,7 +114,45 @@ def check_window(data: dict) -> None:
         raise HTTPException(403, "This short link is not active yet. Please check back later.")
 
 
-def count_click(background: BackgroundTasks, request: Request, link_id: int) -> None:
+def limit_reached(db: Session, link_id: int) -> bool:
+    """True if the link has a click limit and has used it up."""
+    return bool(db.scalar(select(Link.click_count >= Link.click_limit).where(Link.id == link_id)))
+
+
+def take_click(
+    db: Session, background: BackgroundTasks, request: Request, data: dict
+) -> None:
+    """Count this visit, or raise 410 when the link has no clicks left.
+
+    Links with a limit reserve their click right here with one atomic UPDATE, so with one click
+    left only one of two simultaneous visitors gets it. Link-preview robots (WhatsApp, Slack, ...)
+    are let through without using a click, so sharing a one-time link does not burn it.
+    """
+    if data.get("limit") is None:
+        count_click(background, request, data["id"])
+        return
+    if parse_device(request.headers.get("user-agent")) == "bot":
+        if limit_reached(db, data["id"]):
+            raise HTTPException(410, "This short link has reached its click limit.")
+        return
+    taken = db.execute(
+        update(Link)
+        .where(Link.id == data["id"], Link.click_count < Link.click_limit)
+        .values(click_count=Link.click_count + 1)
+        .returning(Link.click_count, Link.click_limit)
+    ).first()
+    if taken is None:
+        db.rollback()
+        raise HTTPException(410, "This short link has reached its click limit.")
+    if taken.click_count >= taken.click_limit:  # that was the last one: remember when
+        db.execute(update(Link).where(Link.id == data["id"]).values(limit_reached_at=utcnow()))
+    db.commit()
+    count_click(background, request, data["id"], counted=True)
+
+
+def count_click(
+    background: BackgroundTasks, request: Request, link_id: int, counted: bool = False
+) -> None:
     background.add_task(
         record_click,
         request.app.state.session_factory,
@@ -117,6 +162,7 @@ def count_click(background: BackgroundTasks, request: Request, link_id: int) -> 
         client_address(request.headers, request.client.host if request.client else None),
         geo_from_headers(request.headers),
         request.query_params.get("ref") or request.query_params.get("utm_source"),
+        counted,
     )
 
 
@@ -138,8 +184,10 @@ def follow(
     data = load_link(db, username, slug)
     check_window(data)
     if data.get("locked"):  # show the password form, never the destination
+        if data.get("limit") is not None and limit_reached(db, data["id"]):
+            raise HTTPException(410, "This short link has reached its click limit.")
         return render(request, "unlock.html", viewer(request, db), username=username, slug=slug)
-    count_click(background, request, data["id"])
+    take_click(db, background, request, data)
     return RedirectResponse(data["url"], status_code=302)
 
 
@@ -172,5 +220,5 @@ def unlock(
         return render(request, "unlock.html", viewer(request, db), status_code=403,
                       username=username, slug=slug, error="Wrong password. Try again.")
 
-    count_click(background, request, data["id"])
+    take_click(db, background, request, data)
     return RedirectResponse(data["url"], status_code=302)

@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ _("Edit link") }} · Link Shortener{% endblock %}
 {% from "_picker.html" import datetime_picker with context %}
+{% from "_icons.html" import icon %}
 {% block content %}
-{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive')} %}
-{% set state %}<span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad', 'inactive': 'off'}[status] }}">{{ state_names[status] }}</span>{% endset %}
+{% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive'), 'limit': _('Limit reached')} %}
+{% set state %}<span class="tag {{ {'active': 'ok', 'scheduled': 'warn', 'expired': 'bad', 'inactive': 'off', 'limit': 'bad'}[status] }}">{{ state_names[status] }}</span>{% endset %}
 <div class="account">
   <p><a href="/dashboard">{{ _("← All links") }}</a> · <a href="/dashboard/links/{{ link.id }}">{{ _("Analytics") }}</a></p>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
@@ -26,6 +27,25 @@
     {% endif %}
   </section>
 
+  <section class="panel">
+    <h2>{{ _("Archive") }}</h2>
+    <p class="muted">{{ _("Archived links are hidden from your dashboard list but keep working and keep their stats.") }}</p>
+    {% if not can('archive') %}
+      <p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>
+    {% elif link.archived_at %}
+      <p class="muted">{{ _("This link is archived.") }}</p>
+      <form method="post" action="/dashboard/links/{{ link.id }}/archive" class="inline">
+        <input type="hidden" name="archived" value="0">
+        <button class="btn small has-icon" type="submit">{{ icon('restore') }}<span>{{ _("Restore link") }}</span></button>
+      </form>
+    {% else %}
+      <form method="post" action="/dashboard/links/{{ link.id }}/archive" class="inline">
+        <input type="hidden" name="archived" value="1">
+        <button class="btn small ghost has-icon" type="submit">{{ icon('archive') }}<span>{{ _("Archive link") }}</span></button>
+      </form>
+    {% endif %}
+  </section>
+
   <form method="post" action="/dashboard/links/{{ link.id }}/edit">
     <section class="panel">
       <h2>{{ _("Destination") }}</h2>
@@ -42,6 +62,32 @@
         {{ datetime_picker(_("Ends at"), "expires_at", "end", link.expires_at) }}
       </div>
       <p class="muted">{{ _h("Right now this link is {state}.", state=state) }}</p>
+    </section>
+
+    <section class="panel">
+      <h2>{{ _("Click limit") }}</h2>
+      <p class="muted">{{ _("The link stops working after this many clicks. Good for one-time links. Leave the box empty for no limit.") }}</p>
+      <label for="click_limit">{{ _("Maximum clicks") }}
+        {% if can('click_limit') %}<input type="hidden" name="limit_box" value="1">{% endif %}
+        <input id="click_limit" name="click_limit" inputmode="numeric" maxlength="9" autocomplete="off"
+               value="{{ link.click_limit or '' }}" placeholder="{{ _('No limit') }}" {% if not can('click_limit') %}disabled{% endif %}>
+      </label>
+      {% if not can('click_limit') %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
+      <p class="muted">{{ _n("{n} click used so far.", "{n} clicks used so far.", link.click_count) }}</p>
+    </section>
+
+    <section class="panel">
+      <h2>{{ _("Tags") }}</h2>
+      <p class="muted">{{ _("Tags group your links. You can filter the dashboard by a tag and compare all its links in one graph.") }}</p>
+      <label for="tags-edit">{{ _("Tags") }}
+        {% if can('tags') %}<input type="hidden" name="tags_box" value="1">{% endif %}
+        <input id="tags-edit" name="tags" data-tag-input autocomplete="off" maxlength="200" value="{{ tag_text }}"
+               placeholder="{{ _('e.g. work, school') }}" {% if not can('tags') %}disabled{% endif %}>
+      </label>
+      {% if can('tags') %}
+        <small class="field-note">{{ _("Separate tags with commas. Up to 5 per link.") }}</small>
+        {% if all_tags %}<div class="chips">{% for t in all_tags %}<button type="button" class="chip s{{ t.color }}{{ ' on' if t.name in linked }}" data-tag-pick="{{ t.name }}" data-target="tags-edit" aria-pressed="{{ 'true' if t.name in linked else 'false' }}">{{ t.name }}</button>{% endfor %}</div>{% endif %}
+      {% else %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
     </section>
 
     <section class="panel">
@@ -83,4 +129,7 @@
     <a class="btn ghost" href="/dashboard">{{ _("Cancel") }}</a>
   </form>
 </div>
+{% endblock %}
+{% block scripts %}
+  <script src="/static/tags.js?v={{ js_version }}" defer></script>
 {% endblock %}

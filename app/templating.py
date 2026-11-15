@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from jinja2 import pass_context
 
 from .config import settings
+from .features import can
 from .i18n import (
     LANGUAGE_ICONS,
     LANGUAGES,
@@ -19,6 +20,7 @@ from .i18n import (
     translate_plural,
 )
 from .profile import THEMES
+from .tags import tag_color
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
@@ -32,7 +34,9 @@ def _version(*names: str) -> str:
 
 
 templates.env.globals["css_version"] = _version("style.css")
-templates.env.globals["js_version"] = _version("app.js", "datetime-picker.js", "photo-editor.js")
+templates.env.globals["js_version"] = _version(
+    "app.js", "datetime-picker.js", "photo-editor.js", "tags.js"
+)
 
 
 def avatar_src(user) -> str:
@@ -44,6 +48,7 @@ def avatar_src(user) -> str:
 
 
 templates.env.globals["avatar_src"] = avatar_src
+templates.env.globals["tag_color"] = tag_color
 
 
 def _utc(dt):
@@ -105,6 +110,7 @@ def render(request: Request, name: str, user=None, status_code: int = 200, **con
     context["_h"] = lambda text, **params: translate_html(lang, text, **params)
     context["js_i18n"] = js_data(lang)
     context["user"] = user
+    context["can"] = lambda feature: can(user, feature)  # paid-plan gate (see features.py)
     context["is_admin"] = bool(user and user.username in settings.admin_usernames)
     context["flashes"] = request.session.pop("_flashes", [])
     return templates.TemplateResponse(request, name, context, status_code=status_code)
