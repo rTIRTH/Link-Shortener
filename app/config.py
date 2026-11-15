@@ -45,6 +45,17 @@ class Settings:
         self.geo_url = os.getenv(
             "GEO_URL", "http://ip-api.com/json/{ip}?fields=status,countryCode,city"
         )
+        # Link check when a link is made or its destination changes (see app/linkcheck.py).
+        # BLOCKED_DOMAINS (comma-separated) are always refused, with all their subdomains.
+        self.link_check = os.getenv("LINK_CHECK", "true").lower() == "true"
+        self.link_check_timeout = float(os.getenv("LINK_CHECK_TIMEOUT", "3"))
+        self.link_check_budget = float(os.getenv("LINK_CHECK_BUDGET", "5"))  # seconds, in all
+        self.blocked_domains = tuple(
+            d.strip().lower().lstrip(".") for d in os.getenv("BLOCKED_DOMAINS", "").split(",")
+            if d.strip()
+        )
+        # optional: a free key from Google Safe Browsing
+        self.safe_browsing_key = os.getenv("SAFE_BROWSING_API_KEY", "")
         # Comma-separated usernames allowed to open /admin, e.g. "r_tirth,alice"
         self.admin_usernames = {
             u.strip().lower() for u in os.getenv("ADMIN_USERNAMES", "").split(",") if u.strip()

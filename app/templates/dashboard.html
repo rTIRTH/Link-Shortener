@@ -47,6 +47,10 @@
       </div>
     </details>
   </form>
+  <p class="muted import-hint">
+    {% if can('csv_import') %}<a href="/dashboard/links/import">{{ _("Import many links from a CSV file") }}</a>
+    {% else %}<span class="lock-note">{{ icon('lock') }}{{ _("Import many links from a CSV file") }} · {{ _("This feature is part of a paid plan.") }}</span>{% endif %}
+  </p>
 </section>
 
 <section>

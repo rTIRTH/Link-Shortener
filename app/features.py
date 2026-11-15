@@ -8,9 +8,9 @@ Every page and route already asks `can()` (templates call `can('tags')`), so not
 
 # Every feature that can be put behind a plan. Basics (links, QR codes, analytics, schedule,
 # password) are deliberately not listed: they stay free.
-FEATURES = ("click_limit", "tags", "archive")
+FEATURES = ("click_limit", "tags", "archive", "csv_import")
 
-PAID: frozenset[str] = frozenset()  # e.g. frozenset({"click_limit", "tags", "archive"})
+PAID: frozenset[str] = frozenset()  # later e.g. frozenset({"click_limit", "tags"})
 
 
 def has_paid_plan(user) -> bool:

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Guide") }} · Link Shortener{% endblock %}
+
+{% macro feature(id, title, intro) %}
+<section class="guide-card" id="{{ id }}">
+  <h2>{{ title }}</h2>
+  <p class="muted">{{ intro }}</p>
+  <ol class="steps">{{ caller() }}</ol>
+</section>
+{% endmacro %}
+
+{% block content %}
+{% set sections = [
+  ('create', _("Create a short link")),
+  ('schedule', _("Schedule a link")),
+  ('password', _("Password-protected links")),
+  ('limit', _("Click limit")),
+  ('tags', _("Tags")),
+  ('archive', _("Archive")),
+  ('edit', _("Edit a link")),
+  ('analytics', _("Analytics")),
+  ('share', _("Share and QR codes")),
+  ('data', _("Import and export")),
+  ('safety', _("Safety check")),
+] %}
+<section class="guide-head">
+  <h1>{{ _("Guide") }}</h1>
+  <p class="lede">{{ _("Everything this site can do, with simple steps for each feature.") }}</p>
+  <nav class="guide-nav" aria-label="{{ _('On this page') }}">
+    {% for id, title in sections %}<a class="chip" href="#{{ id }}">{{ title }}</a>{% endfor %}
+  </nav>
+</section>
+
+<div class="guide-grid">
+  {% call feature('create', _("Create a short link"), _("Turn a long web address into a short one that is easy to share.")) %}
+    <li>{{ _("Paste the long address into the Long URL box on your dashboard.") }}</li>
+    <li>{{ _("If you like, type your own short name in Custom alias. Otherwise a random one is made.") }}</li>
+    <li>{{ _("Press Shorten, then copy or share your new link.") }}</li>
+  {% endcall %}
+
+  {% call feature('schedule', _("Schedule a link"), _("Make a link work only between two moments.")) %}
+    <li>{{ _("Open More options when creating a link, or press Edit on an existing one.") }}</li>
+    <li>{{ _("Pick a start time, an end time, or both.") }}</li>
+    <li>{{ _("Before the start and after the end, visitors see a message instead of being sent on.") }}</li>
+  {% endcall %}
+
+  {% call feature('password', _("Password-protected links"), _("Only people who know the password can open the link.")) %}
+    <li>{{ _("Open More options and type a password, or choose Set a password on the Edit page.") }}</li>
+    <li>{{ _("Share the link, and tell people the password separately.") }}</li>
+    <li>{{ _("On the Edit page, choose No password to remove it.") }}</li>
+  {% endcall %}
+
+  {% call feature('limit', _("Click limit"), _("A link that stops working after a set number of clicks, ideal for one-time links.")) %}
+    <li>{{ _("Open More options, then Advanced, and type a number in Click limit.") }}</li>
+    <li>{{ _("Every real visit uses one click. Link previews from chat apps do not.") }}</li>
+    <li>{{ _("To open the link again, raise the limit on the Edit page.") }}</li>
+  {% endcall %}
+
+  {% call feature('tags', _("Tags"), _("Group your links with labels such as work or school.")) %}
+    <li>{{ _("Type tags separated by commas when you create or edit a link.") }}</li>
+    <li>{{ _("Click a tag above your list to see only the links that have it.") }}</li>
+    <li>{{ _("Press Compare this tag to see all its links in one graph.") }}</li>
+  {% endcall %}
+
+  {% call feature('archive', _("Archive"), _("Tidy your list without losing anything.")) %}
+    <li>{{ _("Tick one or more links and press Archive.") }}</li>
+    <li>{{ _("Open the Archived tab to see them, and press Restore to bring them back.") }}</li>
+    <li>{{ _("Archived links keep working and keep their stats. Use Deactivate link to stop one.") }}</li>
+  {% endcall %}
+
+  {% call feature('edit', _("Edit a link"), _("Change a link without changing its short address.")) %}
+    <li>{{ _("Tick a link and press Edit.") }}</li>
+    <li>{{ _("Change the destination, schedule, click limit, tags or password, then save.") }}</li>
+    <li>{{ _("Every change of destination is written in the activity log, with the old and new address.") }}</li>
+  {% endcall %}
+
+  {% call feature('analytics', _("Analytics"), _("See who clicks your links.")) %}
+    <li>{{ _("Tick a link and press Analytics.") }}</li>
+    <li>{{ _("Read the graphs of clicks by hour and by day. Click a day to see its hours.") }}</li>
+    <li>{{ _("Further down, the Audience section shows where visitors come from, what they use, where they are, and the best time of day.") }}</li>
+    <li>{{ _("To compare links, tick several and press Analytics.") }}</li>
+  {% endcall %}
+
+  {% call feature('share', _("Share and QR codes"), _("Send a link in a tap, or print a QR code.")) %}
+    <li>{{ _("Tick a link and press Share to copy it or send it with an app.") }}</li>
+    <li>{{ _("In the Share window, press Download QR to save its QR code.") }}</li>
+    <li>{{ _("Download QR codes on the dashboard saves one for every link you ticked.") }}</li>
+  {% endcall %}
+
+  {% call feature('data', _("Import and export"), _("Move your links in and out with a spreadsheet file.")) %}
+    <li>{{ _("Press Export CSV to download all your links.") }}</li>
+    <li>{{ _("Press Import many links from a CSV file and choose a file with an original_url column.") }}</li>
+    <li>{{ _("Rows that cannot be imported are skipped and listed with the reason.") }}</li>
+  {% endcall %}
+
+  {% call feature('safety', _("Safety check"), _("We look at an address before turning it into a link.")) %}
+    <li>{{ _("Addresses on a list of unsafe sites are refused.") }}</li>
+    <li>{{ _("If an address does not answer, you get a warning, but the link is still saved.") }}</li>
+    <li>{{ _("Links to private or local addresses are never allowed.") }}</li>
+  {% endcall %}
+</div>
+
+<p class="guide-cta">
+  {% if user %}
+    <a class="btn" href="/dashboard">{{ _("Go to my links") }}</a>
+  {% else %}
+    <a class="btn" href="/register">{{ _("Create a free account") }}</a>
+    <a class="btn ghost" href="/login">{{ _("Log in") }}</a>
+  {% endif %}
+</p>
+{% endblock %}

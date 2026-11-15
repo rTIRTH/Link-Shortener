@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ _("Import links") }} · Link Shortener{% endblock %}
+{% block content %}
+<p><a href="/dashboard">{{ _("← All links") }}</a></p>
+<h1>{{ _("Import links") }}</h1>
+<p class="muted">{{ _("Add many links at once from a CSV file, for example one made with Export CSV.") }}</p>
+
+{% if error %}<div class="flash error" role="alert">{{ error }}</div>{% endif %}
+
+{% if result %}
+<section class="import-result" id="result">
+  <div class="flash {{ 'success' if result.created else 'info' }}" role="status">
+    {{ _n("Imported {n} link.", "Imported {n} links.", result.created) }}
+    {% if result.skipped %}{{ _n("{n} row was skipped.", "{n} rows were skipped.", result.skipped|length) }}{% endif %}
+  </div>
+  {% if result.skipped %}
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="num">{{ _("Row") }}</th><th>{{ _("Address") }}</th><th>{{ _("Why it was skipped") }}</th></tr></thead>
+      <tbody>
+        {% for s in result.skipped[:20] %}
+        <tr><td class="num">{{ s.line|num }}</td><td class="mono clip">{{ s.url }}</td><td>{{ s.why }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if result.skipped|length > 20 %}<p class="muted"><small>{{ _("Only the first 20 skipped rows are shown.") }}</small></p>{% endif %}
+  {% endif %}
+  {% if result.created %}<p><a class="btn small" href="/dashboard">{{ _("Go to my links") }}</a></p>{% endif %}
+</section>
+{% endif %}
+
+<section class="panel">
+  <h2>{{ _("Choose a file") }}</h2>
+  {% if not can('csv_import') %}
+    <p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>
+  {% else %}
+  <form method="post" action="/dashboard/links/import" enctype="multipart/form-data" class="import-form">
+    <input type="file" name="file" accept=".csv,text/csv" required aria-label="{{ _('CSV file') }}">
+    <button class="btn" type="submit">{{ _("Import") }}</button>
+  </form>
+  <p class="muted"><small>{{ _("Up to 200 links and 500 KB in one file.") }}</small></p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>{{ _("What the file needs") }}</h2>
+  <p class="muted">{{ _("The first row holds the column names. Only original_url is required.") }}</p>
+  <div class="tablewrap">
+    <table>
+      <tbody>
+        <tr><td class="mono">original_url</td><td>{{ _("The long web address. Required.") }}</td></tr>
+        <tr><td class="mono">slug</td><td>{{ _("Your own short name. Leave it empty to get a random one.") }}</td></tr>
+        <tr><td class="mono">starts_at, expires_at</td><td>{{ _("A date like 2027-12-31, or a date and time like 2027-12-31 18:00.") }}</td></tr>
+        <tr><td class="mono">click_limit</td><td>{{ _("A number of clicks. Use 1 for a one-time link.") }}</td></tr>
+        <tr><td class="mono">tags</td><td>{{ _("Tag names separated by commas.") }}</td></tr>
+        <tr><td class="mono">active</td><td>{{ _("Write no to import the link switched off.") }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted"><small>{{ _("Passwords are never imported. Each address is checked against the unsafe-sites list, but not opened to see whether it answers.") }}</small></p>
+  <p><a href="/dashboard/links/import-template.csv" download>{{ _("Download a sample file") }}</a></p>
+</section>
+{% endblock %}

@@ -648,4 +648,192 @@ MESSAGES = {
         "अब तक {n} क्लिक इस्तेमाल हुए।",
     "{used} of {limit} clicks used":
         "{limit} में से {used} क्लिक इस्तेमाल हुए",
+    # ---- link check ----
+    "This web address is on a list of unsafe sites, so it can't be shortened.":
+        "यह वेब पता असुरक्षित साइटों की सूची में है, इसलिए इसे छोटा नहीं किया जा सकता।",
+    "Heads up: that address did not answer when we checked it. The link was saved anyway, but please make sure the address is correct.":
+        "ध्यान दें: जाँच करते समय उस पते ने जवाब नहीं दिया। लिंक फिर भी सहेज लिया गया है, लेकिन कृपया जाँच लें कि पता सही है।",
+    # ---- destination history ----
+    "Destination changed":
+        "गंतव्य बदला गया",
+    "Every change to the destination is written in the activity log.":
+        "गंतव्य में हर बदलाव गतिविधि लॉग में दर्ज होता है।",
+    # ---- csv import ----
+    "Import links":
+        "लिंक आयात करें",
+    "Add many links at once from a CSV file, for example one made with Export CSV.":
+        "CSV फ़ाइल से एक साथ कई लिंक जोड़ें, जैसे CSV एक्सपोर्ट से बनी फ़ाइल।",
+    "Imported {n} link.":
+        "{n} लिंक आयात हुआ।",
+    "Imported {n} links.":
+        "{n} लिंक आयात हुए।",
+    "{n} row was skipped.":
+        "{n} पंक्ति छोड़ दी गई।",
+    "{n} rows were skipped.":
+        "{n} पंक्तियाँ छोड़ दी गईं।",
+    "Row":
+        "पंक्ति",
+    "Address":
+        "पता",
+    "Why it was skipped":
+        "क्यों छोड़ी गई",
+    "Only the first 20 skipped rows are shown.":
+        "छोड़ी गई पंक्तियों में से केवल पहली 20 दिखाई गई हैं।",
+    "Go to my links":
+        "मेरे लिंक पर जाएँ",
+    "Choose a file":
+        "फ़ाइल चुनें",
+    "CSV file":
+        "CSV फ़ाइल",
+    "Import":
+        "आयात करें",
+    "Up to 200 links and 500 KB in one file.":
+        "एक फ़ाइल में 200 लिंक और 500 KB तक।",
+    "What the file needs":
+        "फ़ाइल में क्या होना चाहिए",
+    "The first row holds the column names. Only original_url is required.":
+        "पहली पंक्ति में कॉलम के नाम होते हैं। केवल original_url ज़रूरी है।",
+    "The long web address. Required.":
+        "लंबा वेब पता। ज़रूरी।",
+    "Your own short name. Leave it empty to get a random one.":
+        "आपका अपना छोटा नाम। खाली छोड़ेंगे तो अपने आप एक नाम मिलेगा।",
+    "A date like 2027-12-31, or a date and time like 2027-12-31 18:00.":
+        "2027-12-31 जैसी तारीख़, या 2027-12-31 18:00 जैसी तारीख़ और समय।",
+    "A number of clicks. Use 1 for a one-time link.":
+        "क्लिक की संख्या। एक बार वाले लिंक के लिए 1 लिखें।",
+    "Tag names separated by commas.":
+        "टैग के नाम, कॉमा से अलग किए हुए।",
+    "Write no to import the link switched off.":
+        "लिंक को बंद करके आयात करने के लिए no लिखें।",
+    "Passwords are never imported. Each address is checked against the unsafe-sites list, but not opened to see whether it answers.":
+        "पासवर्ड कभी आयात नहीं होते। हर पते को असुरक्षित साइटों की सूची से मिलाया जाता है, लेकिन यह देखने के लिए नहीं खोला जाता कि वह जवाब देता है या नहीं।",
+    "Download a sample file":
+        "नमूना फ़ाइल डाउनलोड करें",
+    "Import many links from a CSV file":
+        "CSV फ़ाइल से कई लिंक आयात करें",
+    "That file is too big. The most is 500 KB.":
+        "वह फ़ाइल बहुत बड़ी है। अधिकतम 500 KB की अनुमति है।",
+    "That is not a text (UTF-8) CSV file.":
+        "यह टेक्स्ट (UTF-8) CSV फ़ाइल नहीं है।",
+    "The first row must hold the column names, including original_url.":
+        "पहली पंक्ति में कॉलम के नाम होने चाहिए, जिनमें original_url भी हो।",
+    "The file has no links in it.":
+        "फ़ाइल में कोई लिंक नहीं है।",
+    "A file can have up to 200 links. Split it into smaller files.":
+        "एक फ़ाइल में 200 लिंक तक हो सकते हैं। उसे छोटी फ़ाइलों में बाँटें।",
+    "You're importing too quickly. Wait a minute.":
+        "आप बहुत जल्दी आयात कर रहे हैं। एक मिनट रुकें।",
+    "Choose a CSV file first.":
+        "पहले एक CSV फ़ाइल चुनें।",
+    # ---- guide page ----
+    "Guide":
+        "गाइड",
+    "Everything this site can do, with simple steps for each feature.":
+        "यह साइट जो कुछ भी कर सकती है, हर सुविधा के सरल चरणों के साथ।",
+    "On this page":
+        "इस पेज पर",
+    "Create a short link":
+        "छोटा लिंक बनाएँ",
+    "Turn a long web address into a short one that is easy to share.":
+        "लंबे वेब पते को छोटे पते में बदलें, जिसे साझा करना आसान हो।",
+    "Paste the long address into the Long URL box on your dashboard.":
+        "अपने डैशबोर्ड पर \"लंबा URL\" वाले बॉक्स में लंबा पता चिपकाएँ।",
+    "If you like, type your own short name in Custom alias. Otherwise a random one is made.":
+        "चाहें तो \"कस्टम नाम\" में अपना छोटा नाम लिखें। नहीं तो अपने आप एक नाम बन जाता है।",
+    "Press Shorten, then copy or share your new link.":
+        "\"छोटा करें\" दबाएँ, फिर अपना नया लिंक कॉपी या साझा करें।",
+    "Schedule a link":
+        "लिंक की समय-सारणी बनाएँ",
+    "Make a link work only between two moments.":
+        "लिंक को केवल दो समयों के बीच काम करने दें।",
+    "Open More options when creating a link, or press Edit on an existing one.":
+        "लिंक बनाते समय \"और विकल्प\" खोलें, या पहले से बने लिंक पर \"संपादित करें\" दबाएँ।",
+    "Pick a start time, an end time, or both.":
+        "शुरू होने का समय, समाप्त होने का समय, या दोनों चुनें।",
+    "Before the start and after the end, visitors see a message instead of being sent on.":
+        "शुरू होने से पहले और समाप्त होने के बाद, आने वालों को आगे भेजने की जगह एक संदेश दिखता है।",
+    "Password-protected links":
+        "पासवर्ड वाले लिंक",
+    "Only people who know the password can open the link.":
+        "केवल पासवर्ड जानने वाले लोग ही लिंक खोल सकते हैं।",
+    "Open More options and type a password, or choose Set a password on the Edit page.":
+        "\"और विकल्प\" खोलकर पासवर्ड लिखें, या संपादन पेज पर \"पासवर्ड सेट करें\" चुनें।",
+    "Share the link, and tell people the password separately.":
+        "लिंक साझा करें, और पासवर्ड लोगों को अलग से बताएँ।",
+    "On the Edit page, choose No password to remove it.":
+        "उसे हटाने के लिए संपादन पेज पर \"कोई पासवर्ड नहीं\" चुनें।",
+    "A link that stops working after a set number of clicks, ideal for one-time links.":
+        "ऐसा लिंक जो तय संख्या में क्लिक के बाद काम करना बंद कर देता है, एक बार वाले लिंक के लिए बढ़िया।",
+    "Open More options, then Advanced, and type a number in Click limit.":
+        "\"और विकल्प\" खोलें, फिर \"उन्नत\" में \"क्लिक सीमा\" में एक संख्या लिखें।",
+    "Every real visit uses one click. Link previews from chat apps do not.":
+        "हर असली विज़िट एक क्लिक इस्तेमाल करती है। चैट ऐप के लिंक प्रीव्यू नहीं करते।",
+    "To open the link again, raise the limit on the Edit page.":
+        "लिंक को फिर से खोलने के लिए संपादन पेज पर सीमा बढ़ाएँ।",
+    "Group your links with labels such as work or school.":
+        "अपने लिंक को काम या स्कूल जैसे लेबल से समूह में रखें।",
+    "Type tags separated by commas when you create or edit a link.":
+        "लिंक बनाते या संपादित करते समय टैग को कॉमा से अलग करके लिखें।",
+    "Click a tag above your list to see only the links that have it.":
+        "सूची के ऊपर किसी टैग पर क्लिक करें, तो केवल वही लिंक दिखेंगे जिन पर वह टैग है।",
+    "Press Compare this tag to see all its links in one graph.":
+        "उसके सभी लिंक एक ग्राफ़ में देखने के लिए \"इस टैग की तुलना करें\" दबाएँ।",
+    "Tidy your list without losing anything.":
+        "कुछ खोए बिना अपनी सूची साफ़ रखें।",
+    "Tick one or more links and press Archive.":
+        "एक या ज़्यादा लिंक चुनें और \"आर्काइव\" दबाएँ।",
+    "Open the Archived tab to see them, and press Restore to bring them back.":
+        "उन्हें देखने के लिए \"आर्काइव किए गए\" टैब खोलें, और वापस लाने के लिए \"वापस लाएँ\" दबाएँ।",
+    "Archived links keep working and keep their stats. Use Deactivate link to stop one.":
+        "आर्काइव किए गए लिंक काम करते रहते हैं और उनके आँकड़े बने रहते हैं। किसी को रोकने के लिए \"लिंक बंद करें\" का उपयोग करें।",
+    "Edit a link":
+        "लिंक संपादित करें",
+    "Change a link without changing its short address.":
+        "लिंक का छोटा पता बदले बिना उसमें बदलाव करें।",
+    "Tick a link and press Edit.":
+        "एक लिंक चुनें और \"संपादित करें\" दबाएँ।",
+    "Change the destination, schedule, click limit, tags or password, then save.":
+        "गंतव्य, समय-सारणी, क्लिक सीमा, टैग या पासवर्ड बदलें, फिर सहेजें।",
+    "Every change of destination is written in the activity log, with the old and new address.":
+        "गंतव्य का हर बदलाव गतिविधि लॉग में पुराने और नए पते के साथ दर्ज होता है।",
+    "See who clicks your links.":
+        "देखें कि आपके लिंक पर कौन क्लिक करता है।",
+    "Tick a link and press Analytics.":
+        "एक लिंक चुनें और \"एनालिटिक्स\" दबाएँ।",
+    "Read the graphs of clicks by hour and by day. Click a day to see its hours.":
+        "घंटे और दिन के अनुसार क्लिक के ग्राफ़ देखें। किसी दिन पर क्लिक करके उसके घंटे देखें।",
+    "Further down, the Audience section shows where visitors come from, what they use, where they are, and the best time of day.":
+        "नीचे \"दर्शक\" भाग दिखाता है कि विज़िटर कहाँ से आते हैं, क्या इस्तेमाल करते हैं, कहाँ हैं, और दिन का सबसे अच्छा समय कौन-सा है।",
+    "To compare links, tick several and press Analytics.":
+        "लिंक की तुलना के लिए कई लिंक चुनें और \"एनालिटिक्स\" दबाएँ।",
+    "Share and QR codes":
+        "साझा करना और QR कोड",
+    "Send a link in a tap, or print a QR code.":
+        "एक टैप में लिंक भेजें, या QR कोड प्रिंट करें।",
+    "Tick a link and press Share to copy it or send it with an app.":
+        "एक लिंक चुनें और उसे कॉपी करने या किसी ऐप से भेजने के लिए \"साझा करें\" दबाएँ।",
+    "In the Share window, press Download QR to save its QR code.":
+        "साझा करने की विंडो में उसका QR कोड सहेजने के लिए \"QR डाउनलोड करें\" दबाएँ।",
+    "Download QR codes on the dashboard saves one for every link you ticked.":
+        "डैशबोर्ड पर \"QR कोड डाउनलोड करें\" आपके चुने हर लिंक का एक QR कोड सहेजता है।",
+    "Import and export":
+        "आयात और एक्सपोर्ट",
+    "Move your links in and out with a spreadsheet file.":
+        "स्प्रेडशीट फ़ाइल से अपने लिंक अंदर और बाहर ले जाएँ।",
+    "Press Export CSV to download all your links.":
+        "अपने सभी लिंक डाउनलोड करने के लिए \"CSV एक्सपोर्ट करें\" दबाएँ।",
+    "Press Import many links from a CSV file and choose a file with an original_url column.":
+        "\"CSV फ़ाइल से कई लिंक आयात करें\" दबाएँ और original_url कॉलम वाली फ़ाइल चुनें।",
+    "Rows that cannot be imported are skipped and listed with the reason.":
+        "जो पंक्तियाँ आयात नहीं हो सकतीं, उन्हें कारण सहित छोड़कर सूची में दिखाया जाता है।",
+    "Safety check":
+        "सुरक्षा जाँच",
+    "We look at an address before turning it into a link.":
+        "पते को लिंक बनाने से पहले हम उसकी जाँच करते हैं।",
+    "Addresses on a list of unsafe sites are refused.":
+        "असुरक्षित साइटों की सूची वाले पते स्वीकार नहीं किए जाते।",
+    "If an address does not answer, you get a warning, but the link is still saved.":
+        "अगर कोई पता जवाब नहीं देता, तो आपको चेतावनी मिलती है, लेकिन लिंक फिर भी सहेज लिया जाता है।",
+    "Links to private or local addresses are never allowed.":
+        "निजी या स्थानीय पतों के लिंक की कभी अनुमति नहीं होती।",
 }

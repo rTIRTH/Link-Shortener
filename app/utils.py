@@ -11,7 +11,7 @@ BASE62 = string.ascii_letters + string.digits
 RESERVED_USERNAMES = {
     "dashboard", "static", "login", "logout", "register", "docs", "redoc",
     "openapi", "health", "api", "admin", "www", "u", "links", "account", "settings", "profile",
-    "language",
+    "language", "guide",
 }
 USERNAME_RE = re.compile(r"^[a-z0-9_]{3,20}$")
 SLUG_RE = re.compile(r"^[A-Za-z0-9_-]{3,32}$")
@@ -112,6 +112,11 @@ def parse_click_limit(raw: str | None) -> int | None:
     if not text.isascii() or not text.isdigit() or not 1 <= int(text) <= MAX_CLICK_LIMIT:
         raise ValueError("The click limit must be a whole number from 1 to 1,000,000.")
     return int(text)
+
+
+def csv_safe_undo(value: str) -> str:
+    """Reverse csv_safe: Export CSV puts a ' in front of cells that start with = + - or @."""
+    return value[1:] if len(value) > 1 and value[0] == "'" and value[1] in "=+-@" else value
 
 
 def csv_safe(value: str) -> str:

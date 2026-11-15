@@ -91,6 +91,12 @@ SIGNUP_EMAIL_BODY = (
 EXTRA_KEYS = [
     "desktop", "mobile", "tablet", "bot", "Direct",
     "Other websites", "Unknown", "Other", "In-app browser",  # used by app/insights.py
+    # the first import message is a module constant in app/importer.py
+    "The first row must hold the column names, including original_url.",
+    # the link check messages are module constants in app/linkcheck.py
+    "This web address is on a list of unsafe sites, so it can't be shortened.",
+    "Heads up: that address did not answer when we checked it. The link was saved anyway, "
+    "but please make sure the address is correct.",
     "Not Found", "Method Not Allowed",
     "Cat", "Dog", "Fox", "Panda", "Rabbit", "Bear", "Frog", "Owl", "Penguin", "Pig", "Lion",
     "Tiger", "Monkey", "Koala", "Mouse", "Chicken", "Duck", "Elephant", "Wolf", "Raccoon",

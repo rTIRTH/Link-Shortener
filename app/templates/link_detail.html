@@ -52,6 +52,7 @@
           {% elif e.key == 'off' %}{{ _("Deactivated") }}
           {% elif e.key == 'on' %}{{ _("Activated") }}
           {% elif e.key == 'limit' %}{{ _("Click limit reached") }}
+          {% elif e.key == 'dest' %}{{ _("Destination changed") }}<small class="dest-change"><s>{{ e.old }}</s> → {{ e.new }}</small>
           {% else %}{{ _("Expires") if e.future else _("Expired") }}{% endif %}
         </span>
         <b><time data-utc="{{ e.at|utc_iso }}">{{ e.at|utc_text }}</time></b>

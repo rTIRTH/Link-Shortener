@@ -126,6 +126,9 @@ class Link(Base):
     toggles: Mapped[list["LinkToggle"]] = relationship(
         back_populates="link", cascade="all, delete-orphan", order_by="LinkToggle.at"
     )
+    edits: Mapped[list["LinkEdit"]] = relationship(
+        back_populates="link", cascade="all, delete-orphan", order_by="LinkEdit.at"
+    )
 
 
 class Click(Base):
@@ -158,6 +161,20 @@ class LinkToggle(Base):
     active: Mapped[bool] = mapped_column(Boolean)  # the state it was switched TO
 
     link: Mapped[Link] = relationship(back_populates="toggles")
+
+
+class LinkEdit(Base):
+    """One time the owner pointed a link at a new destination (the short address never changes)."""
+
+    __tablename__ = "link_edits"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    link_id: Mapped[int] = mapped_column(ForeignKey("links.id"), index=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    old_url: Mapped[str] = mapped_column(Text)
+    new_url: Mapped[str] = mapped_column(Text)
+
+    link: Mapped[Link] = relationship(back_populates="edits")
 
 
 class UsernameAlias(Base):

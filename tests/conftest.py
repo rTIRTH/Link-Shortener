@@ -3,8 +3,17 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import cache
+from app.config import settings
 from app.database import Base
 from app.main import create_app
+
+
+@pytest.fixture(autouse=True)
+def no_network_link_check(monkeypatch):
+    """Tests never call out to real websites (the link check has its own tests with a fake net)."""
+    monkeypatch.setattr(settings, "link_check", False)
+    monkeypatch.setattr(settings, "blocked_domains", ())
+    monkeypatch.setattr(settings, "safe_browsing_key", "")
 
 
 @pytest.fixture()

@@ -5,7 +5,7 @@ from collections import Counter
 from datetime import date, datetime, timedelta
 
 import qrcode
-from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import RedirectResponse, Response
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -19,8 +19,21 @@ from ..database import get_db
 from ..deps import require_user
 from ..features import can, require
 from ..i18n import format_date, get_lang, native_digits, translate
+from ..importer import MAX_IMPORT_BYTES, TEMPLATE_ROWS, import_links, read_rows
 from ..insights import audience, weekday_name
-from ..models import Click, Link, LinkToggle, Tag, User, UsernameAlias, as_utc, link_tags, utcnow
+from ..linkcheck import NO_ANSWER_MESSAGE, UNSAFE_MESSAGE, check_destination
+from ..models import (
+    Click,
+    Link,
+    LinkEdit,
+    LinkToggle,
+    Tag,
+    User,
+    UsernameAlias,
+    as_utc,
+    link_tags,
+    utcnow,
+)
 from ..security import hash_password
 from ..tags import clean_tag, parse_tags, prune_tags, set_link_tags, tag_color
 from ..templating import flash, render
@@ -218,6 +231,9 @@ def create_link(
         url = validate_url(original_url, blocked_hosts=(request.url.hostname or "",))
     except ValueError as e:
         return back(str(e))
+    destination = check_destination(url)
+    if destination.verdict == "blocked":
+        return back(UNSAFE_MESSAGE)
 
     try:
         start, end = read_schedule(starts_at, starts_at_utc, expires_at, expires_at_utc)
@@ -274,6 +290,8 @@ def create_link(
         db.rollback()
         return back("That alias was just taken. Try another.")
     flash(request, "Created {url}", "success", url=short_url(request, user, link))
+    if destination.verdict == "unreachable":
+        flash(request, NO_ANSWER_MESSAGE, "warn")
     return RedirectResponse("/dashboard", status_code=303)
 
 
@@ -326,6 +344,51 @@ def bulk_archive(
     flash(request, "Archived {n} link(s). They are hidden from your list but still work.",
           "success", n=len(links))
     return RedirectResponse("/dashboard", status_code=303)
+
+
+@router.get("/links/import")
+def import_page(request: Request, user: User = Depends(require_user)):
+    return render(request, "import_links.html", user, result=None, error=None)
+
+
+@router.get("/links/import-template.csv")
+def import_template(user: User = Depends(require_user)):
+    buf = io.StringIO()
+    csv.writer(buf).writerows(TEMPLATE_ROWS)
+    return Response(
+        buf.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="link-shortener-import-sample.csv"'},
+    )
+
+
+@router.post("/links/import")
+def import_run(
+    request: Request,
+    file: UploadFile | None = File(None),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    lang = get_lang(request)
+
+    def show(status_code: int = 200, **context):
+        context.setdefault("result", None)
+        context.setdefault("error", None)
+        return render(request, "import_links.html", user, status_code=status_code, **context)
+
+    try:
+        require(user, "csv_import")
+    except ValueError as e:
+        return show(403, error=translate(lang, str(e)))
+    if not rate_limit(f"rl:import:{user.id}", 5, 60):
+        return show(429, error=translate(lang, "You're importing too quickly. Wait a minute."))
+    if file is None or not file.filename:
+        return show(400, error=translate(lang, "Choose a CSV file first."))
+    try:
+        rows = read_rows(file.file.read(MAX_IMPORT_BYTES + 1))
+    except ValueError as e:
+        return show(400, error=translate(lang, str(e)))
+    return show(result=import_links(db, user, rows, lang, request.url.hostname or ""))
 
 
 @router.get("/links/export.csv")
@@ -647,7 +710,7 @@ def link_detail(
         best_hours=best_hours,
         device_donut=device_donut,
         returning_pct=round(100 * aud["returning"] / aud["unique"]) if aud["unique"] else 0,
-        events=link_events(link, now, link.toggles, limit_reached_at(link)),
+        events=link_events(link, now, link.toggles, limit_reached_at(link), link.edits),
         tags=tag_chips(link),
         log=log,
         log_cut=created_day < first_log_day,
@@ -824,6 +887,9 @@ def edit_save(
 
     try:
         url = validate_url(original_url, blocked_hosts=(request.url.hostname or "",))
+        destination = check_destination(url) if url != link.original_url else None
+        if destination and destination.verdict == "blocked":
+            raise ValueError(UNSAFE_MESSAGE)
         start, end, new_hash = read_settings(
             link, starts_at, starts_at_utc, expires_at, expires_at_utc,
             password_action, new_password,
@@ -840,6 +906,8 @@ def edit_save(
         db.rollback()
         return back(str(e))
 
+    if url != link.original_url:  # remember where it used to go (shown in the activity log)
+        link.edits.append(LinkEdit(old_url=link.original_url, new_url=url))
     link.original_url = url
     link.starts_at = start
     link.expires_at = end
@@ -854,4 +922,6 @@ def edit_save(
     db.commit()
     forget_link(db, user, link.slug)  # visitors must see the new settings straight away
     flash(request, "Link updated.", "success")
+    if destination and destination.verdict == "unreachable":
+        flash(request, NO_ANSWER_MESSAGE, "warn")
     return RedirectResponse("/dashboard", status_code=303)

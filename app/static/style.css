@@ -92,6 +92,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 .flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; border: 1px solid var(--line); background: var(--card); }
 .flash.success { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
 .flash.error { background: var(--err-bg); color: var(--danger); border-color: transparent; }
+.flash.warn { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
 .create { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin: 20px 0 32px;
           padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
           box-shadow: var(--shadow-sm); }
@@ -544,3 +545,24 @@ button.chip { font-family: var(--sans); }
 .lock-note .ico { flex: none; width: 15px; height: 15px; }
 .adv-title { margin: 18px 0 8px; font-size: .95rem; }
 input:disabled { opacity: .6; cursor: not-allowed; }
+.dest-change { display: block; margin-top: 2px; color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
+.dest-change s { opacity: .75; }
+.import-hint { margin: 10px 2px 0; font-size: .9rem; }
+.import-form { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.clip { max-width: 22rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- the guide page ---- */
+.guide-head { margin: 8px 0 22px; }
+.guide-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+.guide-card { padding: 18px 20px; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+              box-shadow: var(--shadow-sm); scroll-margin-top: 80px; }
+.guide-card h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.guide-card:target { border-color: var(--accent); }
+.steps { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: step; }
+.steps li { position: relative; padding-left: 38px; min-height: 28px; line-height: 1.45; counter-increment: step; }
+.steps li::before { content: counter(step); position: absolute; left: 0; top: -1px; width: 26px; height: 26px;
+                    display: grid; place-items: center; font-weight: 700; font-size: .85rem;
+                    color: var(--accent-ink); background: var(--accent); border-radius: 50%; }
+.guide-cta { margin: 28px 0 8px; display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 480px) { .guide-grid { grid-template-columns: minmax(0, 1fr); } }

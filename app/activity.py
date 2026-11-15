@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import Request
 
-from .models import Link, LinkToggle, as_utc
+from .models import Link, LinkEdit, LinkToggle, as_utc
 
 # e.g. "Asia/Kolkata", "America/Argentina/Buenos_Aires", "UTC":
 # letters, digits, _ + - and up to 2 slashes.
@@ -98,11 +98,17 @@ def day_state(
 
 
 def link_events(
-    link: Link, now: datetime, toggles: list[LinkToggle] = (), limit_at: datetime | None = None
+    link: Link,
+    now: datetime,
+    toggles: list[LinkToggle] = (),
+    limit_at: datetime | None = None,
+    edits: list[LinkEdit] = (),
 ) -> list[dict]:
-    """Created / goes live / expires / click limit reached / switched off or on, oldest first.
+    """Created / goes live / expires / click limit reached / switched off or on / destination
+    changed, oldest first.
 
-    `future` marks the ones still to come. Only the 10 latest on/off switches are listed.
+    `future` marks the ones still to come. Only the 10 latest switches and the 10 latest
+    destination changes are listed.
     """
     events = [{"key": "created", "at": as_utc(link.created_at), "future": False}]
     if link.starts_at:
@@ -115,4 +121,8 @@ def link_events(
         events.append({"key": "limit", "at": as_utc(limit_at), "future": False})
     for t in sorted(toggles, key=lambda t: as_utc(t.at))[-10:]:
         events.append({"key": "on" if t.active else "off", "at": as_utc(t.at), "future": False})
+    for e in sorted(edits, key=lambda e: as_utc(e.at))[-10:]:
+        events.append({
+            "key": "dest", "at": as_utc(e.at), "future": False, "old": e.old_url, "new": e.new_url,
+        })
     return sorted(events, key=lambda e: e["at"])

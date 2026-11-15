@@ -9,7 +9,7 @@ from .config import settings
 from .database import make_session_factory
 from .deps import NotAuthenticated
 from .i18n import get_lang, translate
-from .routers import account, admin, auth, dashboard, language, redirect
+from .routers import account, admin, auth, dashboard, guide, language, redirect
 from .templating import BASE_DIR, render
 
 
@@ -47,5 +47,6 @@ def create_app(database_url: str | None = None) -> FastAPI:
     app.include_router(admin.router)
     app.include_router(account.router)
     app.include_router(language.router)
+    app.include_router(guide.router)
     app.include_router(redirect.router)
     return app
