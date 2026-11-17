@@ -4,12 +4,11 @@ import zipfile
 from collections import Counter
 from datetime import date, datetime, timedelta
 
-import qrcode
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import RedirectResponse, Response
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, selectinload, undefer
 
 from ..activity import day_state, day_window, link_events, local_date, visitor_timezone
 from ..cache import cache_delete, rate_limit
@@ -34,6 +33,17 @@ from ..models import (
     link_tags,
     utcnow,
 )
+from ..qr import (
+    DEFAULT_BG,
+    DEFAULT_FG,
+    MAX_LOGO_BYTES,
+    QrStyle,
+    check_colors,
+    parse_color,
+    png_bytes,
+    process_logo,
+    svg_text,
+)
 from ..security import hash_password
 from ..tags import clean_tag, parse_tags, prune_tags, set_link_tags, tag_color
 from ..templating import flash, render
@@ -42,10 +52,12 @@ from ..utils import (
     generate_slug,
     parse_click_limit,
     parse_moment,
+    parse_preview_message,
     validate_link_password,
     validate_slug,
     validate_url,
 )
+from ..utm import UTM_KEYS, clean_value, merge, split_utm, with_utm
 
 router = APIRouter(prefix="/dashboard")
 
@@ -132,13 +144,16 @@ def short_url(request: Request, user: User, link: Link) -> str:
 
 
 def user_links(
-    db: Session, user: User, ids: list[int] | None = None, *, archived: bool | None = None
+    db: Session, user: User, ids: list[int] | None = None, *, archived: bool | None = None,
+    with_logos: bool = False,
 ) -> list[Link]:
     """The user's links, newest first. archived: True = only archived, False = hide archived."""
     stmt = (
         select(Link).where(Link.user_id == user.id).order_by(Link.created_at.desc())
         .options(selectinload(Link.tags))
     )
+    if with_logos:  # the QR logos are big, so they are only loaded when they are needed
+        stmt = stmt.options(undefer(Link.qr_logo))
     if ids:
         stmt = stmt.where(Link.id.in_(ids))
     if archived is True:
@@ -157,10 +172,17 @@ def limit_reached_at(link: Link):
     return link.limit_reached_at if limit_used_up(link) else None
 
 
-def qr_png_bytes(text: str) -> bytes:
-    buf = io.BytesIO()
-    qrcode.make(text).save(buf, format="PNG")
-    return buf.getvalue()
+SVG_HEADERS = {  # an SVG opened on its own page must never be able to run anything
+    "Content-Security-Policy": "default-src 'none'; img-src data:; style-src 'unsafe-inline'",
+    "X-Content-Type-Options": "nosniff",
+}
+
+
+def qr_file(text: str, style: QrStyle, fmt: str) -> tuple[bytes, str]:
+    """(file contents, media type) of a QR code in "png" or "svg"."""
+    if fmt == "svg":
+        return svg_text(text, style).encode("utf-8"), "image/svg+xml"
+    return png_bytes(text, style), "image/png"
 
 
 @router.get("")
@@ -218,6 +240,11 @@ def create_link(
     link_password: str = Form(""),
     click_limit: str = Form(""),
     tags: str = Form(""),
+    utm_source: str = Form(""),
+    utm_medium: str = Form(""),
+    utm_campaign: str = Form(""),
+    preview: str = Form(""),
+    preview_message: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -229,6 +256,20 @@ def create_link(
         return back("You're creating links too quickly. Wait a minute.")
     try:
         url = validate_url(original_url, blocked_hosts=(request.url.hostname or "",))
+        boxes = {
+            "utm_source": clean_value(utm_source), "utm_medium": clean_value(utm_medium),
+            "utm_campaign": clean_value(utm_campaign),
+        }
+        clean, campaign = merge(url, boxes)
+        if campaign:
+            require(user, "utm")
+            url = validate_url(
+                with_utm(clean, campaign), blocked_hosts=(request.url.hostname or "",)
+            )
+        show_preview = preview == "1"
+        note = parse_preview_message(preview_message) if show_preview else None
+        if show_preview:
+            require(user, "preview")
     except ValueError as e:
         return back(str(e))
     destination = check_destination(url)
@@ -277,6 +318,8 @@ def create_link(
         expires_at=end,
         password_hash=pw_hash,
         click_limit=limit,
+        preview=show_preview,
+        preview_message=note,
     )
     try:
         set_link_tags(db, user, link, names)
@@ -426,16 +469,21 @@ def export_csv(request: Request, user: User = Depends(require_user), db: Session
 def qr_zip(
     request: Request,
     ids: list[int] = Query(default=[]),
+    format: str = Query("png"),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
-    links = user_links(db, user, ids or None, archived=None if ids else False)  # none picked = all
+    fmt = "svg" if format == "svg" else "png"
+    links = user_links(
+        db, user, ids or None, archived=None if ids else False, with_logos=True
+    )  # none picked = all the links you see
     if not links:
         raise HTTPException(404, "No links to download.")
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for link in links:
-            zf.writestr(f"{link.slug}.png", qr_png_bytes(short_url(request, user, link)))
+            data, _kind = qr_file(short_url(request, user, link), QrStyle.of(link), fmt)
+            zf.writestr(f"{link.slug}.{fmt}", data)
     return Response(
         buf.getvalue(),
         media_type="application/zip",
@@ -459,9 +507,66 @@ def qr_single(
     headers = {}
     if download:  # the dashboard button: save the file instead of showing it
         headers["Content-Disposition"] = f'attachment; filename="{link.slug}-qr.png"'
-    return Response(
-        qr_png_bytes(short_url(request, user, link)), media_type="image/png", headers=headers
-    )
+    data, kind = qr_file(short_url(request, user, link), QrStyle.of(link), "png")
+    return Response(data, media_type=kind, headers=headers)
+
+
+@router.get("/links/{link_id}/qr.svg")
+def qr_single_svg(
+    request: Request, link_id: int, download: bool = Query(False),
+    user: User = Depends(require_user), db: Session = Depends(get_db),
+):
+    """The same QR code as a vector picture: sharp at any size, good for printing."""
+    link = get_owned_link(db, user, link_id)
+    headers = dict(SVG_HEADERS)
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="{link.slug}-qr.svg"'
+    data, kind = qr_file(short_url(request, user, link), QrStyle.of(link), "svg")
+    return Response(data, media_type=kind, headers=headers)
+
+
+@router.post("/links/{link_id}/qr-style")
+def qr_style_save(
+    request: Request,
+    link_id: int,
+    qr_fg: str = Form(DEFAULT_FG),
+    qr_bg: str = Form(DEFAULT_BG),
+    reset: str = Form(""),
+    remove_logo: str = Form(""),
+    logo: UploadFile | None = File(None),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Edit page, QR code panel: colours and a centre logo (or back to the plain code)."""
+    link = get_owned_link(db, user, link_id)
+    edit_url = f"/dashboard/links/{link.id}/edit#qr"
+
+    def finish(message: str, kind: str):
+        flash(request, message, kind)
+        return RedirectResponse(edit_url, status_code=303)
+
+    if reset == "1":  # going back to the plain code is always allowed
+        link.qr_fg = link.qr_bg = link.qr_logo = None
+        db.commit()
+        return finish("The QR code is back to the plain style.", "success")
+    try:
+        fg, bg = parse_color(qr_fg), parse_color(qr_bg)
+        check_colors(fg, bg)
+        picture = QrStyle.of(link).logo
+        if logo is not None and logo.filename:
+            picture = process_logo(logo.file.read(MAX_LOGO_BYTES + 1))
+        elif remove_logo == "1":
+            picture = None
+        style = QrStyle(fg, bg, picture)
+        if style != QrStyle.of(link) and not style.is_default:
+            require(user, "qr_style")
+    except ValueError as e:
+        return finish(str(e), "error")
+    link.qr_fg = fg if fg != DEFAULT_FG else None
+    link.qr_bg = bg if bg != DEFAULT_BG else None
+    link.qr_logo = picture
+    db.commit()
+    return finish("QR code style saved.", "success")
 
 
 @router.get("/links/edit")
@@ -692,7 +797,7 @@ def link_detail(
     recent_start = day_window(today - timedelta(days=13), tz)[0]
     recent = [c for c in clicks if as_utc(c.clicked_at) >= recent_start]
     return render(
-        request, "link_detail.html", user,
+        request, "link_detail.html", user, qr_version=QrStyle.of(link).version,
         link=link,
         short_url=short_url(request, user, link),
         status=link_status(link),
@@ -802,9 +907,13 @@ def edit_page(
     user: User = Depends(require_user), db: Session = Depends(get_db),
 ):
     link = get_owned_link(db, user, link_id)
+    clean_url, campaign = split_utm(link.original_url)
+    qr = QrStyle.of(link)
     return render(
         request, "edit_link.html", user,
         link=link, short_url=short_url(request, user, link), status=link_status(link),
+        clean_url=clean_url, utm=campaign, utm_keys=UTM_KEYS,
+        qr_fg=qr.fg, qr_bg=qr.bg, qr_has_logo=qr.logo is not None, qr_version=qr.version,
         tags=tag_chips(link), tag_text=", ".join(t.name for t in link.tags),
         all_tags=[{"name": t.name, "color": tag_color(t.name)} for t in user.tags],
         linked={t.name for t in link.tags},
@@ -875,6 +984,15 @@ def edit_save(
     tags: str = Form(""),
     limit_box: str = Form(""),  # "1" when the click-limit box was on the page (not locked)
     tags_box: str = Form(""),  # same for the tags box; without it those settings stay as they are
+    utm_source: str = Form(""),
+    utm_medium: str = Form(""),
+    utm_campaign: str = Form(""),
+    utm_term: str = Form(""),
+    utm_content: str = Form(""),
+    utm_box: str = Form(""),
+    preview: str = Form(""),
+    preview_message: str = Form(""),
+    preview_box: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -887,6 +1005,26 @@ def edit_save(
 
     try:
         url = validate_url(original_url, blocked_hosts=(request.url.hostname or "",))
+        clean, typed = split_utm(url)
+        before = split_utm(link.original_url)[1]
+        if utm_box == "1":  # the boxes win over tags typed into the address
+            boxes = {
+                "utm_source": clean_value(utm_source), "utm_medium": clean_value(utm_medium),
+                "utm_campaign": clean_value(utm_campaign), "utm_term": clean_value(utm_term),
+                "utm_content": clean_value(utm_content),
+            }
+            campaign = {**typed, **{k: v for k, v in boxes.items() if v}}
+        else:  # the boxes were not on the page (locked): the tags stay as they were
+            campaign = {**before, **typed}
+        if campaign != before:
+            require(user, "utm")
+        url = validate_url(with_utm(clean, campaign), blocked_hosts=(request.url.hostname or "",))
+        show_preview, note = link.preview, link.preview_message
+        if preview_box == "1":
+            show_preview = preview == "1"
+            note = parse_preview_message(preview_message) if show_preview else None
+        if (show_preview, note) != (link.preview, link.preview_message):
+            require(user, "preview")
         destination = check_destination(url) if url != link.original_url else None
         if destination and destination.verdict == "blocked":
             raise ValueError(UNSAFE_MESSAGE)
@@ -912,6 +1050,8 @@ def edit_save(
     link.starts_at = start
     link.expires_at = end
     link.password_hash = new_hash
+    link.preview = show_preview
+    link.preview_message = note
     if limit != link.click_limit:  # a new limit starts afresh: "reached" is judged again
         link.limit_reached_at = None
         if limit is not None and link.click_count >= limit:

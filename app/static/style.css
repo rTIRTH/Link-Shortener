@@ -566,3 +566,36 @@ input:disabled { opacity: .6; cursor: not-allowed; }
                     color: var(--accent-ink); background: var(--accent); border-radius: 50%; }
 .guide-cta { margin: 28px 0 8px; display: flex; flex-wrap: wrap; gap: 10px; }
 @media (max-width: 480px) { .guide-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- the preview page shown before a redirect ---- */
+.preview-card { max-width: 640px; margin: 40px auto; padding: 28px 30px; background: var(--card);
+                border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+.pv-eyebrow { margin: 0 0 4px; color: var(--accent); font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; }
+.preview-card h1 { margin: 0 0 10px; font-size: 1.7rem; overflow-wrap: anywhere; }
+.pv-url { margin: 4px 0 18px; padding: 10px 12px; background: var(--head); border: 1px solid var(--line);
+          border-radius: 10px; overflow-wrap: anywhere; font-size: .95rem; }
+.pv-note { margin: 0 0 20px; padding: 12px 14px; border-left: 4px solid var(--accent); background: var(--head); border-radius: 0 10px 10px 0; }
+.pv-note figcaption { font-weight: 700; font-size: .85rem; color: var(--muted); }
+.pv-note blockquote { margin: 6px 0 4px; font-size: 1.05rem; overflow-wrap: anywhere; }
+.pv-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+
+/* ---- preview tick box, tracking tags, QR style ---- */
+.field-wide { grid-column: 1 / -1; }
+.check { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; }
+.pv-msg { display: none; margin-top: 8px; }
+.pv-scope:has(.pv-toggle:checked) .pv-msg { display: block; }
+.utm-box { margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.utm-box legend { padding: 0 6px; font-weight: 600; font-size: .92rem; }
+.utm-box legend small { font-weight: 400; color: var(--muted); }
+.utm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 10px; }
+.utm-grid label { display: grid; gap: 4px; font-weight: 600; font-size: .9rem; }
+.utm-final { margin: 12px 0 0; overflow-wrap: anywhere; }
+.qr-edit { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start; margin-top: 8px; }
+.qr-form { flex: 1; min-width: 240px; display: grid; gap: 12px; }
+.qr-form label { display: grid; gap: 4px; font-weight: 600; font-size: .9rem; }
+.qr-form label.check { display: inline-flex; font-weight: 500; }
+.color-row { display: flex; flex-wrap: wrap; gap: 18px; }
+input[type="color"] { width: 56px; height: 38px; padding: 2px; border-radius: 8px; cursor: pointer; }
+.qr-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.qr-downloads { margin: 14px 0 0; }

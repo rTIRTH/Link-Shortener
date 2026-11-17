@@ -7,8 +7,8 @@ import pytest
 
 from app.models import Link
 
-SECTIONS = ["create", "schedule", "password", "limit", "tags", "archive", "edit", "analytics",
-            "share", "data", "safety"]
+SECTIONS = ["create", "schedule", "password", "limit", "tags", "archive", "edit", "preview", "utm",
+            "analytics", "share", "data", "safety"]
 
 
 def cards(page):
@@ -71,7 +71,8 @@ def test_the_guide_names_buttons_that_really_exist(alice, app):
              "No password", "Advanced", "Click limit", "Archive", "Archived", "Restore",
              "Deactivate link", "Compare this tag", "Analytics", "Audience", "Share",
              "Download QR", "Download QR codes", "Export CSV",
-             "Import many links from a CSV file"]
+             "Import many links from a CSV file", "Show a preview page before redirecting",
+             "Source", "Medium", "Campaign", "Visitors will land on", "QR code"]
     for label in named:
         assert label in screens, f"the guide mentions '{label}' but no screen has it"
         assert label in guide, f"'{label}' is not used in the guide any more"
@@ -87,7 +88,7 @@ def test_the_guide_reads_in_every_language(client, lang, title, step_word):
     for english in ("Create a short link", "Schedule a link", "Everything this site can do",
                     "Press Shorten"):
         assert english not in page
-    assert len(cards(page)) == 11
+    assert len(cards(page)) == len(SECTIONS)
 
 
 def test_the_guide_does_not_need_a_login_cookie_to_switch_language(client):

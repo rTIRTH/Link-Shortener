@@ -18,6 +18,8 @@
   ('tags', _("Tags")),
   ('archive', _("Archive")),
   ('edit', _("Edit a link")),
+  ('preview', _("Preview page")),
+  ('utm', _("Campaign tracking (UTM)")),
   ('analytics', _("Analytics")),
   ('share', _("Share and QR codes")),
   ('data', _("Import and export")),
@@ -74,6 +76,18 @@
     <li>{{ _("Every change of destination is written in the activity log, with the old and new address.") }}</li>
   {% endcall %}
 
+  {% call feature('preview', _("Preview page"), _("Show visitors where they are going before they are sent on.")) %}
+    <li>{{ _("Open More options, then Advanced, and tick Show a preview page before redirecting.") }}</li>
+    <li>{{ _("Add a short message for visitors if you like. It is shown as written by you.") }}</li>
+    <li>{{ _("Visitors press Continue to go on. A click is counted only then.") }}</li>
+  {% endcall %}
+
+  {% call feature('utm', _("Campaign tracking (UTM)"), _("Add tracking tags so your analytics tools know where visitors came from.")) %}
+    <li>{{ _("Open More options, then Advanced, and fill in Source, Medium or Campaign.") }}</li>
+    <li>{{ _("On the Edit page you can also fill in Term and Content.") }}</li>
+    <li>{{ _("The tags are added to the destination address. You can check the result under Visitors will land on.") }}</li>
+  {% endcall %}
+
   {% call feature('analytics', _("Analytics"), _("See who clicks your links.")) %}
     <li>{{ _("Tick a link and press Analytics.") }}</li>
     <li>{{ _("Read the graphs of clicks by hour and by day. Click a day to see its hours.") }}</li>
@@ -85,6 +99,7 @@
     <li>{{ _("Tick a link and press Share to copy it or send it with an app.") }}</li>
     <li>{{ _("In the Share window, press Download QR to save its QR code.") }}</li>
     <li>{{ _("Download QR codes on the dashboard saves one for every link you ticked.") }}</li>
+    <li>{{ _("On the Edit page, open QR code to choose colours and a logo, and download the code as PNG or SVG.") }}</li>
   {% endcall %}
 
   {% call feature('data', _("Import and export"), _("Move your links in and out with a spreadsheet file.")) %}

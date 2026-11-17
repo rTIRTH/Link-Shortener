@@ -46,11 +46,41 @@
     {% endif %}
   </section>
 
-  <form method="post" action="/dashboard/links/{{ link.id }}/edit">
+  <section class="panel" id="qr">
+    <h2>{{ _("QR code") }}</h2>
+    <p class="muted">{{ _("Choose colours and put a small logo in the middle. Keep the code dark on a light background so phones can scan it.") }}</p>
+    <div class="qr-edit">
+      <img class="qr" src="/dashboard/links/{{ link.id }}/qr.png?v={{ qr_version }}" alt="{{ _('QR code for {url}', url=short_url) }}" width="180" height="180">
+      <form method="post" action="/dashboard/links/{{ link.id }}/qr-style" enctype="multipart/form-data" class="qr-form">
+        <div class="color-row">
+          <label>{{ _("Code colour") }}<input type="color" name="qr_fg" value="{{ qr_fg }}" {% if not can('qr_style') %}disabled{% endif %}></label>
+          <label>{{ _("Background colour") }}<input type="color" name="qr_bg" value="{{ qr_bg }}" {% if not can('qr_style') %}disabled{% endif %}></label>
+        </div>
+        <label>{{ _("Logo in the centre") }}
+          <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" {% if not can('qr_style') %}disabled{% endif %}>
+        </label>
+        {% if qr_has_logo and can('qr_style') %}
+          <label class="check"><input type="checkbox" name="remove_logo" value="1"> {{ _("Remove the logo") }}</label>
+        {% endif %}
+        {% if can('qr_style') %}<small class="field-note">{{ _("PNG, JPG or WebP, up to 1 MB. It is shrunk and placed in the middle.") }}</small>
+        {% else %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+        <div class="qr-buttons">
+          {% if can('qr_style') %}<button class="btn small" type="submit">{{ _("Save QR style") }}</button>{% endif %}
+          <button class="btn small ghost" type="submit" name="reset" value="1" formnovalidate>{{ _("Back to the plain code") }}</button>
+        </div>
+      </form>
+    </div>
+    <p class="qr-downloads">
+      <a href="/dashboard/links/{{ link.id }}/qr.png?download=1">{{ _("Download PNG") }}</a> ·
+      <a href="/dashboard/links/{{ link.id }}/qr.svg?download=1">{{ _("Download SVG") }}</a>
+    </p>
+  </section>
+
+  <form method="post" action="/dashboard/links/{{ link.id }}/edit" data-utm-scope>
     <section class="panel">
       <h2>{{ _("Destination") }}</h2>
       <label>{{ _("Long URL") }}
-        <input name="original_url" value="{{ link.original_url }}" required>
+        <input name="original_url" value="{{ clean_url }}" required data-utm-url>
       </label>
       <p class="muted"><small>{{ _("Every change to the destination is written in the activity log.") }}</small></p>
     </section>
@@ -89,6 +119,29 @@
         <small class="field-note">{{ _("Separate tags with commas. Up to 5 per link.") }}</small>
         {% if all_tags %}<div class="chips">{% for t in all_tags %}<button type="button" class="chip s{{ t.color }}{{ ' on' if t.name in linked }}" data-tag-pick="{{ t.name }}" data-target="tags-edit" aria-pressed="{{ 'true' if t.name in linked else 'false' }}">{{ t.name }}</button>{% endfor %}</div>{% endif %}
       {% else %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
+    </section>
+
+    <section class="panel pv-scope">
+      <h2>{{ _("Preview page") }}</h2>
+      <p class="muted">{{ _("Show visitors where they are going and let them press Continue. A click is counted only then.") }}</p>
+      {% if can('preview') %}<input type="hidden" name="preview_box" value="1">{% endif %}
+      <label class="check"><input type="checkbox" name="preview" value="1" class="pv-toggle" {% if link.preview %}checked{% endif %} {% if not can('preview') %}disabled{% endif %}> {{ _("Show a preview page before redirecting") }}</label>
+      <input class="pv-msg" name="preview_message" maxlength="200" autocomplete="off" value="{{ link.preview_message or '' }}"
+             aria-label="{{ _('Message for visitors') }}" placeholder="{{ _('A message for visitors (optional)') }}" {% if not can('preview') %}disabled{% endif %}>
+      {% if not can('preview') %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>{{ _("Campaign tracking (UTM)") }}</h2>
+      <p class="muted">{{ _("These tags are added to the end of the destination address, so analytics tools can tell where your visitors came from.") }}</p>
+      {% if can('utm') %}<input type="hidden" name="utm_box" value="1">{% endif %}
+      <div class="utm-grid">
+        {% for key, label in [('utm_source', _("Source")), ('utm_medium', _("Medium")), ('utm_campaign', _("Campaign")), ('utm_term', _("Term")), ('utm_content', _("Content"))] %}
+          <label>{{ label }}<input name="{{ key }}" maxlength="100" autocomplete="off" value="{{ utm.get(key, '') }}" data-utm-input="{{ key }}" {% if not can('utm') %}disabled{% endif %}></label>
+        {% endfor %}
+      </div>
+      {% if not can('utm') %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
+      <p class="utm-final" data-utm-final-wrap {% if not utm %}hidden{% endif %}><small class="muted">{{ _("Visitors will land on:") }}</small> <code class="mono" data-utm-final>{{ link.original_url if utm else '' }}</code></p>
     </section>
 
     <section class="panel">
@@ -133,4 +186,5 @@
 {% endblock %}
 {% block scripts %}
   <script src="/static/tags.js?v={{ js_version }}" defer></script>
+  <script src="/static/utm.js?v={{ js_version }}" defer></script>
 {% endblock %}

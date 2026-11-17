@@ -101,6 +101,17 @@ def parse_device(user_agent: str | None) -> str:
     return "desktop"
 
 
+MAX_PREVIEW_MESSAGE = 200
+
+
+def parse_preview_message(raw: str | None) -> str | None:
+    """The owner's note on the preview page: plain text on one line, up to 200 characters."""
+    text = " ".join((raw or "").split())
+    if len(text) > MAX_PREVIEW_MESSAGE or any(ord(c) < 32 for c in text):
+        raise ValueError("The message can be up to 200 characters.")
+    return text or None
+
+
 MAX_CLICK_LIMIT = 1_000_000
 
 

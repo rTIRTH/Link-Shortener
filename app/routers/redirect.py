@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from itsdangerous import BadSignature, URLSafeTimedSerializer
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -28,6 +29,12 @@ from .dashboard import cache_key
 
 router = APIRouter()
 log = logging.getLogger("linkshortener")
+
+PREVIEW_TOKEN_SECONDS = 15 * 60  # how long the Continue button on a preview page stays valid
+
+
+def _signer() -> URLSafeTimedSerializer:
+    return URLSafeTimedSerializer(settings.secret_key, salt="preview-continue")
 
 
 def record_click(
@@ -95,6 +102,8 @@ def load_link(db: Session, username: str, slug: str) -> dict:
         "locked": bool(link.password_hash),  # the hash itself is never cached
         "off": not link.is_active,  # the owner switched it off
         "limit": link.click_limit,  # how many clicks it may have (the count itself is not cached)
+        "preview": bool(link.preview),  # show "You're going to ..." before redirecting
+        "note": link.preview_message,  # the owner's message on that page
     }
     ttl = settings.cache_ttl
     if expires:
@@ -172,6 +181,24 @@ def viewer(request: Request, db: Session) -> User | None:
     return db.get(User, user_id) if user_id else None
 
 
+def preview_page(request: Request, db: Session, data: dict, username: str, slug: str):
+    """The page shown before the redirect. Nothing is counted until the visitor presses Continue.
+
+    The Continue button carries a signed, short-lived token. For a password-protected link the
+    token is only handed out after the password, so it cannot be skipped.
+    """
+    if data.get("limit") is not None and limit_reached(db, data["id"]):
+        raise HTTPException(410, "This short link has reached its click limit.")
+    response = render(
+        request, "preview.html", viewer(request, db), username=username, slug=slug,
+        host=urlparse(data["url"]).hostname or "", url=data["url"], note=data.get("note"),
+        token=_signer().dumps(data["id"]),
+    )
+    response.headers["X-Robots-Tag"] = "noindex"
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @router.get("/{username}/{slug}")
 def follow(
     username: str,
@@ -187,6 +214,31 @@ def follow(
         if data.get("limit") is not None and limit_reached(db, data["id"]):
             raise HTTPException(410, "This short link has reached its click limit.")
         return render(request, "unlock.html", viewer(request, db), username=username, slug=slug)
+    if data.get("preview"):
+        return preview_page(request, db, data, username, slug)
+    take_click(db, background, request, data)
+    return RedirectResponse(data["url"], status_code=302)
+
+
+@router.post("/{username}/{slug}/continue")
+def continue_to_destination(
+    username: str,
+    slug: str,
+    request: Request,
+    background: BackgroundTasks,
+    token: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    """The Continue button of a preview page: count the visit and go on to the destination."""
+    username = username.lower()
+    data = load_link(db, username, slug)
+    check_window(data)
+    try:
+        valid = _signer().loads(token, max_age=PREVIEW_TOKEN_SECONDS) == data["id"]
+    except BadSignature:
+        valid = False
+    if not valid:  # no preview was shown (or it is too old): start again from the link
+        return RedirectResponse(f"/{username}/{slug}", status_code=303)
     take_click(db, background, request, data)
     return RedirectResponse(data["url"], status_code=302)
 
@@ -220,5 +272,7 @@ def unlock(
         return render(request, "unlock.html", viewer(request, db), status_code=403,
                       username=username, slug=slug, error="Wrong password. Try again.")
 
+    if data.get("preview"):  # the right password: now the preview, then Continue
+        return preview_page(request, db, data, username, slug)
     take_click(db, background, request, data)
     return RedirectResponse(data["url"], status_code=302)

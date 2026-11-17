@@ -13,7 +13,7 @@ from sqlalchemy import (
     UniqueConstraint,
     true,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, deferred, mapped_column, relationship
 
 from .database import Base
 
@@ -113,6 +113,13 @@ class Link(Base):
     limit_reached_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    # Optional page shown before the redirect ("You're going to example.com"), with a message.
+    preview: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    preview_message: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    # QR code style: colours (#rrggbb) and a small PNG logo for the centre. None = the default.
+    qr_fg: Mapped[str | None] = mapped_column(String(7), nullable=True)
+    qr_bg: Mapped[str | None] = mapped_column(String(7), nullable=True)
+    qr_logo: Mapped[bytes | None] = deferred(mapped_column(LargeBinary, nullable=True))
     # Archived links are hidden from the dashboard list but keep working and keep their stats.
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

@@ -7,9 +7,9 @@
   <h1>{{ _("Your links") }}</h1>
   <p class="muted">{{ _n("{n} link", "{n} links", rows|length) }} · {{ _n("{n} total click", "{n} total clicks", total_clicks) }}</p>
 
-  <form method="post" action="/dashboard/links" class="create">
+  <form method="post" action="/dashboard/links" data-utm-scope class="create">
     <label class="grow"><span class="lbl">{{ _("Long URL") }}</span>
-      <input name="original_url" placeholder="https://example.com/a/very/long/page" required>
+      <input name="original_url" placeholder="https://example.com/a/very/long/page" required data-utm-url>
     </label>
     <label><span class="lbl">{{ _("Custom alias") }} <small>{{ _("(optional)") }}</small></span>
       <input name="slug" placeholder="my-portfolio" maxlength="32">
@@ -44,6 +44,25 @@
             {% if all_tags %}<div class="chips">{% for t in all_tags %}<button type="button" class="chip s{{ t.color }}" data-tag-pick="{{ t.name }}" data-target="tags-create" aria-pressed="false">{{ t.name }}</button>{% endfor %}</div>{% endif %}
           {% else %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
         </div>
+        <div class="field field-wide pv-scope">
+          <label class="check"><input type="checkbox" name="preview" value="1" class="pv-toggle" {% if not can('preview') %}disabled{% endif %}> {{ _("Show a preview page before redirecting") }}</label>
+          {% if can('preview') %}
+            <small class="field-note">{{ _("Visitors see where they are going and press Continue. A click is counted only then.") }}</small>
+            <input class="pv-msg" name="preview_message" maxlength="200" autocomplete="off" aria-label="{{ _('Message for visitors') }}"
+                   placeholder="{{ _('A message for visitors (optional)') }}">
+          {% else %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+        </div>
+        <fieldset class="field field-wide utm-box">
+          <legend>{{ _("Campaign tracking (UTM)") }} <small>{{ _("(optional)") }}</small></legend>
+          <small class="field-note">{{ _("These tags are added to the end of the destination address, so analytics tools can tell where your visitors came from.") }}</small>
+          <div class="utm-grid">
+            <label>{{ _("Source") }}<input name="utm_source" maxlength="100" autocomplete="off" data-utm-input="utm_source" placeholder="{{ _('e.g. {example}', example='instagram') }}" {% if not can('utm') %}disabled{% endif %}></label>
+            <label>{{ _("Medium") }}<input name="utm_medium" maxlength="100" autocomplete="off" data-utm-input="utm_medium" placeholder="{{ _('e.g. {example}', example='social') }}" {% if not can('utm') %}disabled{% endif %}></label>
+            <label>{{ _("Campaign") }}<input name="utm_campaign" maxlength="100" autocomplete="off" data-utm-input="utm_campaign" placeholder="{{ _('e.g. {example}', example='summer-sale') }}" {% if not can('utm') %}disabled{% endif %}></label>
+          </div>
+          {% if not can('utm') %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+          <p class="utm-final" data-utm-final-wrap hidden><small class="muted">{{ _("Visitors will land on:") }}</small> <code class="mono" data-utm-final></code></p>
+        </fieldset>
       </div>
     </details>
   </form>
@@ -117,6 +136,7 @@
         <td>
           <a class="mono" href="{{ row.short_url }}" target="_blank" rel="noopener">{{ row.short_url|replace('https://','')|replace('http://','') }}</a>
           {% if row.locked %}<span class="tag lock" title="{{ _('Visitors need a password') }}">{{ _("Password") }}</span>{% endif %}
+          {% if link.preview %}<span class="tag" title="{{ _('Visitors see a preview page first') }}">{{ _("Preview") }}</span>{% endif %}
           {% if row.tags %}<div class="chips">{% for t in row.tags %}<a class="chip s{{ t.color }}" href="/dashboard?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}</div>{% endif %}
         </td>
         <td class="dest" title="{{ link.original_url }}">{{ link.original_url }}</td>
@@ -184,4 +204,5 @@
 {% block scripts %}
   <script src="/static/share.js?v={{ js_version }}" defer></script>
   <script src="/static/tags.js?v={{ js_version }}" defer></script>
+  <script src="/static/utm.js?v={{ js_version }}" defer></script>
 {% endblock %}

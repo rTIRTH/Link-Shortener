@@ -27,7 +27,9 @@ def lock(monkeypatch, *names):
 def test_every_feature_is_free_for_now():
     assert features.PAID == frozenset()
     assert all(features.can(None, name) for name in features.FEATURES)
-    assert set(features.FEATURES) == {"click_limit", "tags", "archive", "csv_import"}
+    assert set(features.FEATURES) == {
+        "click_limit", "tags", "archive", "csv_import", "preview", "utm", "qr_style",
+    }
 
 
 def test_the_basics_are_not_on_the_list():

@@ -836,4 +836,104 @@ MESSAGES = {
         "જો કોઈ સરનામું જવાબ ન આપે, તો તમને ચેતવણી મળે છે, પણ લિંક તોય સચવાય છે.",
     "Links to private or local addresses are never allowed.":
         "ખાનગી કે સ્થાનિક સરનામાની લિંકને ક્યારેય મંજૂરી નથી.",
+    # ---- preview page, tracking tags, QR style ----
+    "Show a preview page before redirecting":
+        "રીડાયરેક્ટ પહેલાં પ્રિવ્યૂ પેજ બતાવો",
+    "Visitors see where they are going and press Continue. A click is counted only then.":
+        "મુલાકાતીઓ જુએ છે કે તેઓ ક્યાં જઈ રહ્યા છે અને \"આગળ વધો\" દબાવે છે. ક્લિક ત્યારે જ ગણાય છે.",
+    "Message for visitors":
+        "મુલાકાતીઓ માટે સંદેશ",
+    "A message for visitors (optional)":
+        "મુલાકાતીઓ માટે એક સંદેશ (વૈકલ્પિક)",
+    "Campaign tracking (UTM)":
+        "કૅમ્પેઇન ટ્રૅકિંગ (UTM)",
+    "These tags are added to the end of the destination address, so analytics tools can tell where your visitors came from.":
+        "આ ટૅગ ગંતવ્ય સરનામાના અંતે ઉમેરાય છે, જેથી ઍનાલિટિક્સ ટૂલ જાણી શકે કે તમારા મુલાકાતીઓ ક્યાંથી આવ્યા.",
+    "Source":
+        "સ્ત્રોત",
+    "Medium":
+        "માધ્યમ",
+    "Campaign":
+        "કૅમ્પેઇન",
+    "Term":
+        "શબ્દ",
+    "Content":
+        "સામગ્રી",
+    "Visitors will land on:":
+        "મુલાકાતીઓ અહીં પહોંચશે:",
+    "Visitors see a preview page first":
+        "મુલાકાતીઓને પહેલા પ્રિવ્યૂ પેજ દેખાય છે",
+    "Preview page":
+        "પ્રિવ્યૂ પેજ",
+    "Show visitors where they are going and let them press Continue. A click is counted only then.":
+        "મુલાકાતીઓને બતાવો કે તેઓ ક્યાં જઈ રહ્યા છે અને તેમને \"આગળ વધો\" દબાવવા દો. ક્લિક ત્યારે જ ગણાય છે.",
+    "Choose colours and put a small logo in the middle. Keep the code dark on a light background so phones can scan it.":
+        "રંગ પસંદ કરો અને વચ્ચે એક નાનો લોગો મૂકો. કોડને હળવી પૃષ્ઠભૂમિ પર ઘેરો રાખો જેથી ફોન તેને સ્કેન કરી શકે.",
+    "Code colour":
+        "કોડનો રંગ",
+    "Background colour":
+        "પૃષ્ઠભૂમિનો રંગ",
+    "Logo in the centre":
+        "વચ્ચે લોગો",
+    "Remove the logo":
+        "લોગો દૂર કરો",
+    "PNG, JPG or WebP, up to 1 MB. It is shrunk and placed in the middle.":
+        "PNG, JPG કે WebP, વધુમાં વધુ 1 MB. તેને નાનો કરીને વચ્ચે મૂકવામાં આવે છે.",
+    "Save QR style":
+        "QR શૈલી સાચવો",
+    "Back to the plain code":
+        "સાદા કોડ પર પાછા જાઓ",
+    "Download SVG":
+        "SVG ડાઉનલોડ કરો",
+    "Change style":
+        "શૈલી બદલો",
+    "Download QR as SVG":
+        "QR ને SVG તરીકે ડાઉનલોડ કરો",
+    "You're going to {host}":
+        "તમે {host} પર જઈ રહ્યા છો",
+    "Before you continue":
+        "આગળ વધતા પહેલાં",
+    "You will be taken to this address:":
+        "તમને આ સરનામે લઈ જવામાં આવશે:",
+    "A message from the link's owner":
+        "લિંકના માલિકનો સંદેશ",
+    "Written by the link's owner, not by this site.":
+        "આ સંદેશ લિંકના માલિકે લખ્યો છે, આ સાઇટે નહીં.",
+    "Go back":
+        "પાછા જાઓ",
+    "Only continue if you trust this address.":
+        "ફક્ત ત્યારે જ આગળ વધો જ્યારે તમે આ સરનામા પર ભરોસો કરતા હો.",
+    "Each tracking tag can be up to 100 characters.":
+        "દરેક ટ્રૅકિંગ ટૅગ 100 અક્ષર સુધીનો હોઈ શકે છે.",
+    "The message can be up to 200 characters.":
+        "સંદેશ 200 અક્ષર સુધીનો હોઈ શકે છે.",
+    "Pick colours as #RRGGBB values, for example #1a2b3c.":
+        "રંગ #RRGGBB સ્વરૂપમાં પસંદ કરો, જેમ કે #1a2b3c.",
+    "The colours need more contrast so phones can scan the code. Use a darker code colour on a lighter background.":
+        "ફોનથી સ્કેન થઈ શકે તે માટે રંગોમાં વધુ તફાવત જોઈએ. હળવી પૃષ્ઠભૂમિ પર ઘેરા રંગનો કોડ રાખો.",
+    "The logo must be a PNG, JPG or WebP picture up to 1 MB.":
+        "લોગો PNG, JPG કે WebP ચિત્ર હોવો જોઈએ, વધુમાં વધુ 1 MB.",
+    "The QR code is back to the plain style.":
+        "QR કોડ સાદી શૈલીમાં પાછો આવી ગયો.",
+    "QR code style saved.":
+        "QR કોડની શૈલી સાચવી લેવાઈ.",
+    # ---- guide: preview, tracking tags, QR ----
+    "Show visitors where they are going before they are sent on.":
+        "આગળ મોકલતા પહેલાં મુલાકાતીઓને બતાવો કે તેઓ ક્યાં જઈ રહ્યા છે.",
+    "Open More options, then Advanced, and tick Show a preview page before redirecting.":
+        "\"વધુ વિકલ્પો\" ખોલો, પછી \"ઍડ્વાન્સ્ડ\" માં \"રીડાયરેક્ટ પહેલાં પ્રિવ્યૂ પેજ બતાવો\" પર ટિક કરો.",
+    "Add a short message for visitors if you like. It is shown as written by you.":
+        "ઇચ્છો તો મુલાકાતીઓ માટે એક ટૂંકો સંદેશ ઉમેરો. તે તમે લખ્યા મુજબ જ દેખાય છે.",
+    "Visitors press Continue to go on. A click is counted only then.":
+        "મુલાકાતીઓ આગળ જવા માટે \"આગળ વધો\" દબાવે છે. ક્લિક ત્યારે જ ગણાય છે.",
+    "Add tracking tags so your analytics tools know where visitors came from.":
+        "ટ્રૅકિંગ ટૅગ ઉમેરો જેથી તમારા ઍનાલિટિક્સ ટૂલ જાણી શકે કે મુલાકાતીઓ ક્યાંથી આવ્યા.",
+    "Open More options, then Advanced, and fill in Source, Medium or Campaign.":
+        "\"વધુ વિકલ્પો\" ખોલો, પછી \"ઍડ્વાન્સ્ડ\" માં \"સ્ત્રોત\", \"માધ્યમ\" અથવા \"કૅમ્પેઇન\" ભરો.",
+    "On the Edit page you can also fill in Term and Content.":
+        "ફેરફાર પેજ પર તમે \"શબ્દ\" અને \"સામગ્રી\" પણ ભરી શકો છો.",
+    "The tags are added to the destination address. You can check the result under Visitors will land on.":
+        "ટૅગ ગંતવ્ય સરનામામાં ઉમેરાઈ જાય છે. પરિણામ તમે \"મુલાકાતીઓ અહીં પહોંચશે:\" નીચે જોઈ શકો છો.",
+    "On the Edit page, open QR code to choose colours and a logo, and download the code as PNG or SVG.":
+        "ફેરફાર પેજ પર \"QR કોડ\" માં રંગ અને લોગો પસંદ કરો, અને કોડને PNG અથવા SVG તરીકે ડાઉનલોડ કરો.",
 }

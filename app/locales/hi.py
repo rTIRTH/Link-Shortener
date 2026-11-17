@@ -836,4 +836,104 @@ MESSAGES = {
         "अगर कोई पता जवाब नहीं देता, तो आपको चेतावनी मिलती है, लेकिन लिंक फिर भी सहेज लिया जाता है।",
     "Links to private or local addresses are never allowed.":
         "निजी या स्थानीय पतों के लिंक की कभी अनुमति नहीं होती।",
+    # ---- preview page, tracking tags, QR style ----
+    "Show a preview page before redirecting":
+        "रीडायरेक्ट से पहले पूर्वावलोकन पेज दिखाएँ",
+    "Visitors see where they are going and press Continue. A click is counted only then.":
+        "आने वाले देखते हैं कि वे कहाँ जा रहे हैं और \"आगे बढ़ें\" दबाते हैं। क्लिक तभी गिना जाता है।",
+    "Message for visitors":
+        "आने वालों के लिए संदेश",
+    "A message for visitors (optional)":
+        "आने वालों के लिए एक संदेश (वैकल्पिक)",
+    "Campaign tracking (UTM)":
+        "कैंपेन ट्रैकिंग (UTM)",
+    "These tags are added to the end of the destination address, so analytics tools can tell where your visitors came from.":
+        "ये टैग गंतव्य पते के अंत में जोड़े जाते हैं, ताकि एनालिटिक्स टूल बता सकें कि आपके विज़िटर कहाँ से आए।",
+    "Source":
+        "स्रोत",
+    "Medium":
+        "माध्यम",
+    "Campaign":
+        "कैंपेन",
+    "Term":
+        "शब्द",
+    "Content":
+        "सामग्री",
+    "Visitors will land on:":
+        "विज़िटर यहाँ पहुँचेंगे:",
+    "Visitors see a preview page first":
+        "आने वालों को पहले पूर्वावलोकन पेज दिखता है",
+    "Preview page":
+        "पूर्वावलोकन पेज",
+    "Show visitors where they are going and let them press Continue. A click is counted only then.":
+        "आने वालों को दिखाएँ कि वे कहाँ जा रहे हैं और उन्हें \"आगे बढ़ें\" दबाने दें। क्लिक तभी गिना जाता है।",
+    "Choose colours and put a small logo in the middle. Keep the code dark on a light background so phones can scan it.":
+        "रंग चुनें और बीच में एक छोटा लोगो लगाएँ। कोड को हल्की पृष्ठभूमि पर गहरा रखें ताकि फ़ोन उसे स्कैन कर सकें।",
+    "Code colour":
+        "कोड का रंग",
+    "Background colour":
+        "पृष्ठभूमि का रंग",
+    "Logo in the centre":
+        "बीच में लोगो",
+    "Remove the logo":
+        "लोगो हटाएँ",
+    "PNG, JPG or WebP, up to 1 MB. It is shrunk and placed in the middle.":
+        "PNG, JPG या WebP, अधिकतम 1 MB। उसे छोटा करके बीच में लगाया जाता है।",
+    "Save QR style":
+        "QR शैली सहेजें",
+    "Back to the plain code":
+        "सादे कोड पर वापस जाएँ",
+    "Download SVG":
+        "SVG डाउनलोड करें",
+    "Change style":
+        "शैली बदलें",
+    "Download QR as SVG":
+        "QR को SVG में डाउनलोड करें",
+    "You're going to {host}":
+        "आप {host} पर जा रहे हैं",
+    "Before you continue":
+        "आगे बढ़ने से पहले",
+    "You will be taken to this address:":
+        "आपको इस पते पर ले जाया जाएगा:",
+    "A message from the link's owner":
+        "लिंक के मालिक का संदेश",
+    "Written by the link's owner, not by this site.":
+        "यह संदेश लिंक के मालिक ने लिखा है, इस साइट ने नहीं।",
+    "Go back":
+        "वापस जाएँ",
+    "Only continue if you trust this address.":
+        "केवल तभी आगे बढ़ें जब आप इस पते पर भरोसा करते हों।",
+    "Each tracking tag can be up to 100 characters.":
+        "हर ट्रैकिंग टैग 100 अक्षरों तक का हो सकता है।",
+    "The message can be up to 200 characters.":
+        "संदेश 200 अक्षरों तक का हो सकता है।",
+    "Pick colours as #RRGGBB values, for example #1a2b3c.":
+        "रंग #RRGGBB रूप में चुनें, जैसे #1a2b3c।",
+    "The colours need more contrast so phones can scan the code. Use a darker code colour on a lighter background.":
+        "फ़ोन से स्कैन हो सके, इसके लिए रंगों में और अंतर चाहिए। हल्की पृष्ठभूमि पर गहरे रंग का कोड रखें।",
+    "The logo must be a PNG, JPG or WebP picture up to 1 MB.":
+        "लोगो PNG, JPG या WebP तस्वीर होनी चाहिए, अधिकतम 1 MB।",
+    "The QR code is back to the plain style.":
+        "QR कोड सादी शैली में लौट आया।",
+    "QR code style saved.":
+        "QR कोड की शैली सहेज ली गई।",
+    # ---- guide: preview, tracking tags, QR ----
+    "Show visitors where they are going before they are sent on.":
+        "आने वालों को आगे भेजने से पहले दिखाएँ कि वे कहाँ जा रहे हैं।",
+    "Open More options, then Advanced, and tick Show a preview page before redirecting.":
+        "\"और विकल्प\" खोलें, फिर \"उन्नत\" में \"रीडायरेक्ट से पहले पूर्वावलोकन पेज दिखाएँ\" पर निशान लगाएँ।",
+    "Add a short message for visitors if you like. It is shown as written by you.":
+        "चाहें तो आने वालों के लिए एक छोटा संदेश जोड़ें। वह आपके लिखे अनुसार दिखता है।",
+    "Visitors press Continue to go on. A click is counted only then.":
+        "आने वाले आगे जाने के लिए \"आगे बढ़ें\" दबाते हैं। क्लिक तभी गिना जाता है।",
+    "Add tracking tags so your analytics tools know where visitors came from.":
+        "ट्रैकिंग टैग जोड़ें ताकि आपके एनालिटिक्स टूल जान सकें कि विज़िटर कहाँ से आए।",
+    "Open More options, then Advanced, and fill in Source, Medium or Campaign.":
+        "\"और विकल्प\" खोलें, फिर \"उन्नत\" में \"स्रोत\", \"माध्यम\" या \"कैंपेन\" भरें।",
+    "On the Edit page you can also fill in Term and Content.":
+        "संपादन पेज पर आप \"शब्द\" और \"सामग्री\" भी भर सकते हैं।",
+    "The tags are added to the destination address. You can check the result under Visitors will land on.":
+        "टैग गंतव्य पते में जोड़ दिए जाते हैं। नतीजा आप \"विज़िटर यहाँ पहुँचेंगे:\" के नीचे देख सकते हैं।",
+    "On the Edit page, open QR code to choose colours and a logo, and download the code as PNG or SVG.":
+        "संपादन पेज पर \"QR कोड\" में रंग और लोगो चुनें, और कोड को PNG या SVG में डाउनलोड करें।",
 }

@@ -93,6 +93,10 @@ EXTRA_KEYS = [
     "Other websites", "Unknown", "Other", "In-app browser",  # used by app/insights.py
     # the first import message is a module constant in app/importer.py
     "The first row must hold the column names, including original_url.",
+    # messages built in app/qr.py and the QR style route in app/routers/dashboard.py
+    "The logo must be a PNG, JPG or WebP picture up to 1 MB.",
+    "The QR code is back to the plain style.",
+    "QR code style saved.",
     # the link check messages are module constants in app/linkcheck.py
     "This web address is on a list of unsafe sites, so it can't be shortened.",
     "Heads up: that address did not answer when we checked it. The link was saved anyway, "

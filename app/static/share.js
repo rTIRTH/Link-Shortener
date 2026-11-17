@@ -15,6 +15,7 @@
   var urlBox = document.getElementById('share-url');
   var copyBtn = document.getElementById('share-copy');
   var qrLink = document.getElementById('share-qr');
+  var svgLink = document.getElementById('share-qr-svg');
   var note = document.getElementById('share-note');
   var status = document.getElementById('share-status');
   var more = document.getElementById('share-more');
@@ -88,6 +89,8 @@
     urlBox.value = current.url;
     qrLink.href = '/dashboard/links/' + current.id + '/qr.png?download=1';
     qrLink.setAttribute('download', current.slug + '-qr.png');
+    svgLink.href = '/dashboard/links/' + current.id + '/qr.svg?download=1';
+    svgLink.setAttribute('download', current.slug + '-qr.svg');
     note.hidden = current.status === 'active';
     apps.forEach(function (a) {
       var make = ADDRESS[a.getAttribute('data-app')];
