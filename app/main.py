@@ -1,6 +1,6 @@
 """Application factory: create_app() builds a fresh, fully configured app."""
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
@@ -25,6 +25,14 @@ def create_app(database_url: str | None = None) -> FastAPI:
         max_age=14 * 24 * 3600,
     )
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+
+    @app.get("/favicon.ico", include_in_schema=False)
+    def favicon():
+        """Browsers ask for this address by themselves, whatever the page says."""
+        return FileResponse(
+            BASE_DIR / "static" / "favicon.ico", media_type="image/x-icon",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
 
     @app.exception_handler(NotAuthenticated)
     async def _login_redirect(request: Request, exc: NotAuthenticated):

@@ -54,6 +54,8 @@ h2 { font-size: 1.1rem; margin: 0 0 .6rem; }
           padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--card);
           box-shadow: var(--shadow-sm); }
 .brand { font-weight: 800; font-size: 1.15rem; text-decoration: none; color: var(--ink); letter-spacing: -0.02em; }
+/* the mark sits inline so the name keeps the text baseline; -8px centres it on the capital letters */
+.brand-mark { display: inline-block; width: 30px; height: 30px; margin-right: 10px; vertical-align: -8px; border-radius: 8px; }
 nav { display: flex; gap: 16px; align-items: center; }
 nav a { text-decoration: none; }
 .inline { display: inline; margin: 0; }
