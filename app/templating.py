@@ -19,7 +19,7 @@ from .i18n import (
     translate_html,
     translate_plural,
 )
-from .profile import THEMES
+from .profile import SCHEMES, THEMES
 from .tags import tag_color
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -98,6 +98,8 @@ def flash(request: Request, message: str, category: str = "info", **params) -> N
 def render(request: Request, name: str, user=None, status_code: int = 200, **context):
     theme = user.theme if user else request.cookies.get("theme")
     context["theme"] = theme if theme in THEMES else "system"
+    scheme = user.color_scheme if user else request.cookies.get("scheme")
+    context["scheme"] = scheme if scheme in SCHEMES else "default"
     lang = get_lang(request)
     if context.get("error"):
         context["error"] = translate(lang, context["error"])

@@ -16,6 +16,7 @@
   --edge: linear-gradient(100deg, var(--accent), var(--accent2));   /* the outline every button gets */
   --edge-danger: linear-gradient(100deg, var(--danger), #ff9a62);
   --ring: 1.5px;                                                    /* thickness of that outline */
+  --glow: none; --text-glow: none; --bar-glow: none; --backdrop: none;  /* only the colour schemes use these */
 }
 /* Dark theme: used when chosen explicitly, or when "system" and the device is dark */
 :root[data-theme="dark"] {
@@ -42,8 +43,108 @@
     --shadow: 0 12px 32px rgba(0, 0, 0, .55);
   }
 }
+/* ---- colour schemes (Account > Appearance): they change COLOURS ONLY, nothing moves ----
+   Each scheme has a light and a dark look, in the same three places as the default theme:
+   light (and system in a light browser), dark, and system in a dark browser. */
+/* Classic: soft royal blue and violet */
+:root[data-scheme="classic"]:not([data-theme="dark"]) {
+  color-scheme: light;
+  --paper: #eceefb; --card: #f6f6fc; --field: #f1f1fb; --hover: #e8e9f8; --head: #eff0fb;
+  --ink: #1c1b3a; --muted: #5b5a85;
+  --line: #d7d8ef; --field-line: #8588b4; --accent: #3a4fd7; --accent-ink: #ffffff; --accent2: #7b3fe4;
+  --danger: #b3173f; --ok-bg: #dcefe8; --ok: #17653f; --err-bg: #f9e2ea;
+  --warn-bg: #f4ecc8; --warn: #6b4e00;
+  --s1: #3a4fd7; --s2: #b45309; --s3: #0f766e; --s4: #7b3fe4; --s5: #be185d; --s6: #64748b;
+  --shadow-sm: 0 1px 2px rgba(40, 40, 100, .08), 0 1px 3px rgba(40, 40, 100, .06);
+  --shadow: 0 12px 32px rgba(58, 79, 215, .16);
+  --glow: none; --text-glow: none; --bar-glow: none;
+  --backdrop: radial-gradient(900px 320px at 92% -6%, rgba(123, 63, 228, .14), transparent);
+}
+:root[data-scheme="classic"][data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0f1024; --card: #181a36; --field: #12132b; --hover: #1f2142; --head: #1c1e3d;
+  --ink: #e8e9ff; --muted: #a5a7d6;
+  --line: #2f3260; --field-line: #6b70b5; --accent: #8097ff; --accent-ink: #0f1024; --accent2: #b88cff;
+  --danger: #ff8fa8; --ok-bg: #12302a; --ok: #7fdcb8; --err-bg: #3a1a2c;
+  --warn-bg: #3a3010; --warn: #f0c850;
+  --s1: #8097ff; --s2: #f5a65b; --s3: #4fd1b5; --s4: #c39bff; --s5: #ff8fb8; --s6: #9aa3c7;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .45);
+  --shadow: 0 12px 32px rgba(0, 0, 0, .6);
+  --glow: none; --text-glow: none; --bar-glow: none;
+  --backdrop: radial-gradient(900px 320px at 90% -8%, rgba(184, 140, 255, .12), transparent);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-scheme="classic"][data-theme="system"] {
+    color-scheme: dark;
+    --paper: #0f1024; --card: #181a36; --field: #12132b; --hover: #1f2142; --head: #1c1e3d;
+    --ink: #e8e9ff; --muted: #a5a7d6;
+    --line: #2f3260; --field-line: #6b70b5; --accent: #8097ff; --accent-ink: #0f1024; --accent2: #b88cff;
+    --danger: #ff8fa8; --ok-bg: #12302a; --ok: #7fdcb8; --err-bg: #3a1a2c;
+    --warn-bg: #3a3010; --warn: #f0c850;
+    --s1: #8097ff; --s2: #f5a65b; --s3: #4fd1b5; --s4: #c39bff; --s5: #ff8fb8; --s6: #9aa3c7;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .45);
+    --shadow: 0 12px 32px rgba(0, 0, 0, .6);
+    --glow: none; --text-glow: none; --bar-glow: none;
+    --backdrop: radial-gradient(900px 320px at 90% -8%, rgba(184, 140, 255, .12), transparent);
+  }
+}
+/* Neon: electric blue and purple with a glow */
+:root[data-scheme="neon"]:not([data-theme="dark"]) {
+  color-scheme: light;
+  --paper: #f1eefc; --card: #f8f6fc; --field: #f4f1fd; --hover: #ebe6fb; --head: #f0ecfc;
+  --ink: #14102e; --muted: #5a5688;
+  --line: #dcd5f5; --field-line: #8a82c0; --accent: #2a5bf0; --accent-ink: #ffffff; --accent2: #a21fff;
+  --danger: #bd0d51; --ok-bg: #d8f3ec; --ok: #0b6b55; --err-bg: #fbe0ec;
+  --warn-bg: #f7efc4; --warn: #6b4e00;
+  --s1: #2a5bf0; --s2: #b45309; --s3: #0f766e; --s4: #a21fff; --s5: #be185d; --s6: #64748b;
+  --shadow-sm: 0 1px 2px rgba(60, 40, 140, .10), 0 1px 3px rgba(60, 40, 140, .06);
+  --shadow: 0 12px 32px rgba(90, 60, 220, .18);
+  --glow: 0 4px 16px rgba(42, 91, 240, .32), 0 0 22px rgba(162, 31, 255, .16); --text-glow: none; --bar-glow: drop-shadow(0 0 3px rgba(162, 31, 255, .35));
+  --backdrop: radial-gradient(900px 400px at 90% -8%, rgba(162, 31, 255, .12), transparent), radial-gradient(800px 400px at 0% 0%, rgba(42, 91, 240, .10), transparent);
+}
+:root[data-scheme="neon"][data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #07060f; --card: #0f0d22; --field: #0a0919; --hover: #171433; --head: #131030;
+  --ink: #eef0ff; --muted: #a3a6d8;
+  --line: #2b2860; --field-line: #5757b0; --accent: #4d8dff; --accent-ink: #07060f; --accent2: #b45cff;
+  --danger: #ff6fae; --ok-bg: #0b2a2a; --ok: #4be3c0; --err-bg: #2d0f26;
+  --warn-bg: #2a2410; --warn: #ffd166;
+  --s1: #4d8dff; --s2: #ffb454; --s3: #4be3c0; --s4: #b45cff; --s5: #ff6fae; --s6: #9ea4d6;
+  --shadow-sm: 0 0 0 1px rgba(77, 141, 255, .10), 0 1px 2px rgba(0, 0, 0, .5);
+  --shadow: 0 12px 40px rgba(0, 0, 0, .65), 0 0 24px rgba(77, 141, 255, .12);
+  --glow: 0 0 16px rgba(77, 141, 255, .5), 0 0 32px rgba(180, 92, 255, .28); --text-glow: 0 0 16px rgba(77, 141, 255, .5); --bar-glow: drop-shadow(0 0 5px rgba(77, 141, 255, .55));
+  --backdrop: radial-gradient(900px 420px at 88% -8%, rgba(168, 85, 247, .26), transparent), radial-gradient(800px 420px at 0% 0%, rgba(59, 130, 255, .20), transparent);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-scheme="neon"][data-theme="system"] {
+    color-scheme: dark;
+    --paper: #07060f; --card: #0f0d22; --field: #0a0919; --hover: #171433; --head: #131030;
+    --ink: #eef0ff; --muted: #a3a6d8;
+    --line: #2b2860; --field-line: #5757b0; --accent: #4d8dff; --accent-ink: #07060f; --accent2: #b45cff;
+    --danger: #ff6fae; --ok-bg: #0b2a2a; --ok: #4be3c0; --err-bg: #2d0f26;
+    --warn-bg: #2a2410; --warn: #ffd166;
+    --s1: #4d8dff; --s2: #ffb454; --s3: #4be3c0; --s4: #b45cff; --s5: #ff6fae; --s6: #9ea4d6;
+    --shadow-sm: 0 0 0 1px rgba(77, 141, 255, .10), 0 1px 2px rgba(0, 0, 0, .5);
+    --shadow: 0 12px 40px rgba(0, 0, 0, .65), 0 0 24px rgba(77, 141, 255, .12);
+    --glow: 0 0 16px rgba(77, 141, 255, .5), 0 0 32px rgba(180, 92, 255, .28); --text-glow: 0 0 16px rgba(77, 141, 255, .5); --bar-glow: drop-shadow(0 0 5px rgba(77, 141, 255, .55));
+    --backdrop: radial-gradient(900px 420px at 88% -8%, rgba(168, 85, 247, .26), transparent), radial-gradient(800px 420px at 0% 0%, rgba(59, 130, 255, .20), transparent);
+  }
+}
+/* the glow of the neon scheme: shadows only, so no box is moved or resized */
+:root[data-scheme="neon"] h1 { text-shadow: var(--text-glow); }
+:root[data-scheme="neon"] .btn:not(.ghost):not(.danger) { box-shadow: var(--glow); }
+:root[data-scheme="neon"] .range a.on, :root[data-scheme="neon"] .viewtabs a.on, :root[data-scheme="neon"] .chip.on { box-shadow: var(--glow); }
+:root[data-scheme="neon"] .c-bar { filter: var(--bar-glow); }
+:root[data-scheme="neon"] .rk-bar i { box-shadow: var(--glow); }
+/* the little colour dots on the scheme cards in Account > Appearance */
+.dots { display: flex; gap: 5px; margin-bottom: 6px; }
+.dots i { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line); }
+.dots-default i:nth-child(1) { background: #2d4fd1; } .dots-default i:nth-child(2) { background: #7a56d6; } .dots-default i:nth-child(3) { background: #e9edf3; }
+.dots-classic i:nth-child(1) { background: #3a4fd7; } .dots-classic i:nth-child(2) { background: #7b3fe4; } .dots-classic i:nth-child(3) { background: #eceefb; }
+.dots-neon i:nth-child(1) { background: #4d8dff; } .dots-neon i:nth-child(2) { background: #b45cff; } .dots-neon i:nth-child(3) { background: #07060f; }
+
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
+body { margin: 0; background: var(--backdrop) fixed no-repeat, var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
 a { color: var(--accent); }
 main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 64px; }
 h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .4rem; letter-spacing: -0.01em; font-weight: 700; }

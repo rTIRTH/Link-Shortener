@@ -9,6 +9,7 @@ from ..cache import cache_delete, rate_limit
 from ..config import settings
 from ..database import get_db
 from ..deps import require_user
+from ..features import require
 from ..i18n import EMAIL_BODY, EMAIL_SUBJECT, get_lang, translate
 from ..mailer import email_enabled, send_email
 from ..models import Click, EmailChange, Link, ProfilePhoto, User, UsernameAlias, as_utc, utcnow
@@ -21,7 +22,7 @@ from ..otp import (
     new_code,
 )
 from ..photos import MAX_UPLOAD_BYTES, PhotoError, normalise
-from ..profile import AVATARS, MAX_OLD_USERNAMES, THEMES
+from ..profile import AVATARS, MAX_OLD_USERNAMES, SCHEMES, THEMES
 from ..security import hash_password, verify_password
 from ..templating import flash, render
 from ..utils import validate_email, validate_password, validate_username
@@ -144,15 +145,26 @@ def remove_photo(request: Request, user: User = Depends(require_user),
 
 
 @router.post("/theme")
-def set_theme(request: Request, theme: str = Form(...), user: User = Depends(require_user),
-              db: Session = Depends(get_db)):
+def set_theme(request: Request, theme: str = Form(...), scheme: str = Form(""),
+              user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Save the mode (system / light / dark) and, if it is sent, the colour scheme."""
     if theme not in THEMES:
         return back(request, "Unknown theme.", anchor="#appearance")
+    if scheme and scheme not in SCHEMES:
+        return back(request, "Unknown colour scheme.", anchor="#appearance")
+    new_scheme = scheme or user.color_scheme
+    if new_scheme != user.color_scheme and new_scheme != "default":
+        try:
+            require(user, "color_schemes")  # going back to the default is always allowed
+        except ValueError as e:
+            return back(request, str(e), anchor="#appearance")
     user.theme = theme
+    user.color_scheme = new_scheme
     db.commit()
     response = back(request, "Appearance saved.", "success", "#appearance")
-    response.set_cookie("theme", theme, max_age=365 * 24 * 3600, httponly=True,
-                        samesite="lax", secure=settings.https_only)
+    for name, value in (("theme", theme), ("scheme", new_scheme)):
+        response.set_cookie(name, value, max_age=365 * 24 * 3600, httponly=True,
+                            samesite="lax", secure=settings.https_only)
     return response
 
 

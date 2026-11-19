@@ -51,7 +51,9 @@ def test_delete_buttons_keep_a_red_outline():
 
 def test_outline_colours_exist_in_every_theme():
     assert "--accent2" in rule_for(":root")
-    assert CSS.count("--accent2:") == 3  # light, dark, and "system" in a dark browser
+    # light, dark, and "system" in a dark browser: for the default look and for each of the
+    # two colour schemes (classic and neon), which have their own blue and purple
+    assert CSS.count("--accent2:") == 3 + 3 * 2
 
 
 def test_profile_icon_uses_the_outline(alice):

@@ -936,4 +936,21 @@ MESSAGES = {
         "टैग गंतव्य पते में जोड़ दिए जाते हैं। नतीजा आप \"विज़िटर यहाँ पहुँचेंगे:\" के नीचे देख सकते हैं।",
     "On the Edit page, open QR code to choose colours and a logo, and download the code as PNG or SVG.":
         "संपादन पेज पर \"QR कोड\" में रंग और लोगो चुनें, और कोड को PNG या SVG में डाउनलोड करें।",
+    # ---- colour schemes ----
+    "Colour scheme":
+        "रंग योजना",
+    "Default":
+        "डिफ़ॉल्ट",
+    "Classic":
+        "क्लासिक",
+    "Neon":
+        "नियॉन",
+    "The original blues":
+        "मूल नीले रंग",
+    "Soft blue and violet":
+        "हल्का नीला और बैंगनी",
+    "Glowing blue and purple":
+        "चमकदार नीला और बैंगनी",
+    "Unknown colour scheme.":
+        "अज्ञात रंग योजना।",
 }

@@ -40,6 +40,10 @@ class User(Base):
     )
     avatar: Mapped[str] = mapped_column(String(32), default="cat", server_default="cat")
     theme: Mapped[str] = mapped_column(String(8), default="system", server_default="system")
+    # The colour scheme (see SCHEMES in profile.py); works together with the light/dark mode above.
+    color_scheme: Mapped[str] = mapped_column(
+        String(10), default="default", server_default="default"
+    )
     language: Mapped[str] = mapped_column(String(5), default="en", server_default="en")
     # When the profile photo was last set (None = using one of the animal avatars)
     photo_updated_at: Mapped[datetime | None] = mapped_column(

@@ -22,7 +22,7 @@ from ..otp import (
     hash_code,
     new_code,
 )
-from ..profile import AVATARS, THEMES
+from ..profile import AVATARS, SCHEMES, THEMES
 from ..security import hash_password, verify_password
 from ..templating import flash, render
 from ..utils import validate_email, validate_password, validate_username
@@ -45,6 +45,7 @@ def create_user(db: Session, request: Request, username: str, email: str, passwo
                 language: str, verified: bool) -> User | None:
     """Create the account. Returns None if someone grabbed the username or email a moment ago."""
     cookie_theme = request.cookies.get("theme")
+    cookie_scheme = request.cookies.get("scheme")
     user = User(
         username=username,
         email=email,
@@ -52,6 +53,7 @@ def create_user(db: Session, request: Request, username: str, email: str, passwo
         last_login_at=utcnow(),
         avatar=secrets.choice(AVATARS),
         theme=cookie_theme if cookie_theme in THEMES else "system",
+        color_scheme=cookie_scheme if cookie_scheme in SCHEMES else "default",
         language=language,
         email_verified_at=utcnow() if verified else None,
     )
@@ -286,8 +288,9 @@ def login(
     request.session.clear()
     request.session["user_id"] = user.id
     response = RedirectResponse("/dashboard", status_code=303)
-    response.set_cookie("theme", user.theme, max_age=365 * 24 * 3600, httponly=True,
-                        samesite="lax", secure=settings.https_only)
+    for name, value in (("theme", user.theme), ("scheme", user.color_scheme)):
+        response.set_cookie(name, value, max_age=365 * 24 * 3600, httponly=True,
+                            samesite="lax", secure=settings.https_only)
     set_language_cookie(response, user.language)  # their saved language follows them
     return response
 

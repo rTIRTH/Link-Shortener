@@ -936,4 +936,21 @@ MESSAGES = {
         "ટૅગ ગંતવ્ય સરનામામાં ઉમેરાઈ જાય છે. પરિણામ તમે \"મુલાકાતીઓ અહીં પહોંચશે:\" નીચે જોઈ શકો છો.",
     "On the Edit page, open QR code to choose colours and a logo, and download the code as PNG or SVG.":
         "ફેરફાર પેજ પર \"QR કોડ\" માં રંગ અને લોગો પસંદ કરો, અને કોડને PNG અથવા SVG તરીકે ડાઉનલોડ કરો.",
+    # ---- colour schemes ----
+    "Colour scheme":
+        "રંગ યોજના",
+    "Default":
+        "ડિફૉલ્ટ",
+    "Classic":
+        "ક્લાસિક",
+    "Neon":
+        "નિયૉન",
+    "The original blues":
+        "મૂળ વાદળી રંગો",
+    "Soft blue and violet":
+        "નરમ વાદળી અને જાંબલી",
+    "Glowing blue and purple":
+        "ચમકતો વાદળી અને જાંબલી",
+    "Unknown colour scheme.":
+        "અજ્ઞાત રંગ યોજના.",
 }

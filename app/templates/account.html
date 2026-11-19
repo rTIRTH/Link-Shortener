@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ _("Account settings") }} · Link Shortener{% endblock %}
+{% from "_icons.html" import icon %}
 {% block content %}
 {% set example %}<code>/{{ user.username }}/alias</code>{% endset %}
 {% set current_email %}<b>{{ user.email }}</b>{% endset %}
@@ -105,6 +106,17 @@
         </label>
         {% endfor %}
       </fieldset>
+      <h3 class="adv-title">{{ _("Colour scheme") }}</h3>
+      <fieldset class="theme-grid scheme-grid">
+        <legend class="sr-only">{{ _("Colour scheme") }}</legend>
+        {% for value, label, hint in [('default', _('Default'), _('The original blues')), ('classic', _('Classic'), _('Soft blue and violet')), ('neon', _('Neon'), _('Glowing blue and purple'))] %}
+        <label class="theme-opt">
+          <input type="radio" name="scheme" value="{{ value }}" {% if value == user.color_scheme %}checked{% endif %} {% if value != 'default' and not can('color_schemes') %}disabled{% endif %}>
+          <span class="theme-card"><span class="dots dots-{{ value }}" aria-hidden="true"><i></i><i></i><i></i></span><b>{{ label }}</b><small>{{ hint }}</small></span>
+        </label>
+        {% endfor %}
+      </fieldset>
+      {% if not can('color_schemes') %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
       <button class="btn" type="submit">{{ _("Save appearance") }}</button>
     </form>
   </section>
@@ -204,6 +216,9 @@
   });
   document.querySelectorAll('input[name="theme"]').forEach(function (r) {
     r.addEventListener('change', function () { document.documentElement.dataset.theme = r.value; });
+  });
+  document.querySelectorAll('input[name="scheme"]').forEach(function (r) {
+    r.addEventListener('change', function () { document.documentElement.dataset.scheme = r.value; });
   });
 </script>
 {% endblock %}
