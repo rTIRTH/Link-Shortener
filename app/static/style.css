@@ -702,3 +702,6 @@ input:disabled { opacity: .6; cursor: not-allowed; }
 input[type="color"] { width: 56px; height: 38px; padding: 2px; border-radius: 8px; cursor: pointer; }
 .qr-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
 .qr-downloads { margin: 14px 0 0; }
+
+/* the "back" buttons at the top of the inner pages */
+.backbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }

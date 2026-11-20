@@ -2,7 +2,7 @@
 {% from "_charts.html" import analytics with context %}
 {% block title %}{{ _("Compare links") }} · Link Shortener{% endblock %}
 {% block content %}
-<p><a href="/dashboard">{{ _("← All links") }}</a></p>
+<p class="backbar"><a class="btn small ghost" href="/dashboard">{{ _("← All links") }}</a></p>
 <section>
   <h1>{{ _("Compare links") }}</h1>
   <p class="muted">{{ _n("{n} link", "{n} links", entries|length) }}</p>

@@ -203,7 +203,7 @@ def test_analytics_wording_is_used_everywhere_the_old_stats_label_was(alice, app
     assert "see their analytics" in bar
     with app.state.session_factory() as db:
         link_id = db.query(Link).one().id
-    assert ">Analytics</a>" in alice.get(f"/dashboard/links/{link_id}/edit").text
+    assert "<span>Analytics</span></a>" in alice.get(f"/dashboard/links/{link_id}/edit").text
     day = utcnow().date().isoformat()
     page = alice.get(f"/dashboard/links/{link_id}/day/{day}").text
     assert "Back to link analytics" in page

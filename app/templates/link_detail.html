@@ -6,7 +6,7 @@
 {% block content %}
 {% set state_names = {'active': _('Active'), 'scheduled': _('Scheduled'), 'expired': _('Expired'), 'inactive': _('Inactive'), 'limit': _('Limit reached')} %}
 {% set target %}<a href="{{ link.original_url }}" target="_blank" rel="noopener">{{ link.original_url }}</a>{% endset %}
-<p><a href="/dashboard">{{ _("← All links") }}</a></p>
+<p class="backbar"><a class="btn small ghost" href="/dashboard">{{ _("← All links") }}</a></p>
 <section>
   <h1 class="mono">{{ short_url|replace('https://','')|replace('http://','') }}</h1>
   <p class="dest-full">{{ _h("Redirects to {url}", url=target) }}</p>
