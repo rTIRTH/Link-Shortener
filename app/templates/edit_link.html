@@ -73,9 +73,9 @@
         </div>
       </form>
     </div>
-    <p class="qr-downloads">
-      <a href="/dashboard/links/{{ link.id }}/qr.png?download=1">{{ _("Download PNG") }}</a> ·
-      <a href="/dashboard/links/{{ link.id }}/qr.svg?download=1">{{ _("Download SVG") }}</a>
+    <p class="btn-row">
+      <a class="btn small ghost has-icon" href="/dashboard/links/{{ link.id }}/qr.png?download=1">{{ icon('download') }}<span>{{ _("Download PNG") }}</span></a>
+      <a class="btn small ghost has-icon" href="/dashboard/links/{{ link.id }}/qr.svg?download=1">{{ icon('download') }}<span>{{ _("Download SVG") }}</span></a>
     </p>
   </section>
 

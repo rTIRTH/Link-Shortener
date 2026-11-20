@@ -157,9 +157,11 @@
   <div>
     <h2>{{ _("QR code") }}</h2>
     <img class="qr" src="/dashboard/links/{{ link.id }}/qr.png?v={{ qr_version }}" alt="{{ _('QR code for {url}', url=short_url) }}" width="180" height="180">
-    <p><a href="/dashboard/links/{{ link.id }}/qr.png" download="{{ link.slug }}.png">{{ _("Download PNG") }}</a> ·
-       <a href="/dashboard/links/{{ link.id }}/qr.svg?download=1">{{ _("Download SVG") }}</a> ·
-       <a href="/dashboard/links/{{ link.id }}/edit#qr">{{ _("Change style") }}</a></p>
+    <p class="btn-row">
+      <a class="btn small ghost has-icon" href="/dashboard/links/{{ link.id }}/qr.png" download="{{ link.slug }}.png">{{ icon('download') }}<span>{{ _("Download PNG") }}</span></a>
+      <a class="btn small ghost has-icon" href="/dashboard/links/{{ link.id }}/qr.svg?download=1">{{ icon('download') }}<span>{{ _("Download SVG") }}</span></a>
+      <a class="btn small ghost has-icon" href="/dashboard/links/{{ link.id }}/edit#qr">{{ icon('edit') }}<span>{{ _("Change style") }}</span></a>
+    </p>
   </div>
 </section>
 

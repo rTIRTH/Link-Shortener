@@ -701,7 +701,7 @@ input:disabled { opacity: .6; cursor: not-allowed; }
 .color-row { display: flex; flex-wrap: wrap; gap: 18px; }
 input[type="color"] { width: 56px; height: 38px; padding: 2px; border-radius: 8px; cursor: pointer; }
 .qr-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
-.qr-downloads { margin: 14px 0 0; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 0; }  /* a row of buttons under something */
 
 /* the "back" buttons at the top of the inner pages */
 .backbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }

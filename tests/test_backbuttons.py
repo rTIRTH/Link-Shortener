@@ -78,3 +78,54 @@ def test_the_buttons_keep_their_translations(alice, pages, lang, back):
     alice.post("/language", data={"lang": lang, "next": "/"})
     assert back in backbar(alice.get(paths["analytics"]).text)
     assert "Analytics" not in backbar(alice.get(paths["edit"]).text)
+
+
+# ---- the QR download links are buttons too ----------------------------------------
+
+
+def button_row(page: str, after: str) -> str:
+    start = page.index('<p class="btn-row">', page.index(after))
+    return page[start:page.index("</p>", start)]
+
+
+def test_the_analytics_page_qr_links_are_buttons(alice, pages):
+    paths, link_id = pages
+    row = button_row(alice.get(paths["analytics"]).text, "QR code")
+    found = re.findall(r'<a class="([^"]*)" href="([^"]*)"[^>]*>(.*?)</a>', row, re.S)
+    assert [(c, h) for c, h, _ in found] == [
+        ("btn small ghost has-icon", f"/dashboard/links/{link_id}/qr.png"),
+        ("btn small ghost has-icon", f"/dashboard/links/{link_id}/qr.svg?download=1"),
+        ("btn small ghost has-icon", f"/dashboard/links/{link_id}/edit#qr"),
+    ]
+    assert [re.sub(r"<[^>]+>", "", t) for _c, _h, t in found] == [
+        "Download PNG", "Download SVG", "Change style"]
+    assert all("<svg" in t for _c, _h, t in found)  # each button has its small icon
+    assert " · " not in row  # no more text separators
+    assert 'download="one.png"' in row  # the PNG still saves as a file named after the link
+
+
+def test_the_edit_page_qr_links_are_buttons(alice, pages):
+    paths, link_id = pages
+    row = button_row(alice.get(paths["edit"]).text, 'id="qr"')
+    found = re.findall(r'<a class="([^"]*)" href="([^"]*)"', row)
+    assert found == [
+        ("btn small ghost has-icon", f"/dashboard/links/{link_id}/qr.png?download=1"),
+        ("btn small ghost has-icon", f"/dashboard/links/{link_id}/qr.svg?download=1"),
+    ]
+    assert " · " not in row
+
+
+def test_the_download_icon_exists_and_the_row_has_a_rule():
+    icons = open("app/templates/_icons.html", encoding="utf-8").read()
+    assert "name == 'download'" in icons
+    css = open("app/static/style.css", encoding="utf-8").read()
+    assert re.search(r"\.btn-row\s*\{[^}]*display:\s*flex[^}]*gap:\s*10px", css)
+    assert "qr-downloads" not in css
+
+
+@pytest.mark.parametrize("lang, word", [("hi", "PNG डाउनलोड करें"), ("gu", "PNG ડાઉનલોડ કરો")])
+def test_the_qr_buttons_are_translated(alice, pages, lang, word):
+    paths, _id = pages
+    alice.post("/language", data={"lang": lang, "next": "/"})
+    assert word in button_row(alice.get(paths["analytics"]).text, "QR")
+    assert word in button_row(alice.get(paths["edit"]).text, 'id="qr"')
