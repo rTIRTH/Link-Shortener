@@ -144,7 +144,11 @@
 .dots-neon i:nth-child(1) { background: #4d8dff; } .dots-neon i:nth-child(2) { background: #b45cff; } .dots-neon i:nth-child(3) { background: #07060f; }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--backdrop) fixed no-repeat, var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
+body { margin: 0; color: var(--ink); font: 16px/1.55 var(--sans); }
+/* The colour schemes paint a soft glow behind the page. It is one fixed picture the size of the
+   window (no-repeat on EVERY layer, so a short page never shows the glow's edge again below it). */
+body { background-color: var(--paper); background-image: var(--backdrop);
+       background-repeat: no-repeat; background-attachment: fixed; }
 a { color: var(--accent); }
 main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 64px; }
 h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .4rem; letter-spacing: -0.01em; font-weight: 700; }

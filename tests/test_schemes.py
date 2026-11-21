@@ -175,8 +175,7 @@ def test_the_default_look_has_no_scheme_rules_so_it_is_untouched():
     assert 'data-scheme="default"' not in CSS
     root = CSS[CSS.index(":root {"):CSS.index("}", CSS.index(":root {"))]
     assert "--glow: none; --text-glow: none; --bar-glow: none; --backdrop: none;" in root
-    assert re.search(r"body \{[^}]*background: var\(--backdrop\) fixed no-repeat, var\(--paper\)",
-                     CSS)
+    assert re.search(r"body \{[^}]*background-image: var\(--backdrop\)", CSS)
 
 
 def test_no_box_is_moved_by_a_scheme_the_page_html_is_the_same(alice, app):
@@ -359,3 +358,32 @@ def test_the_migration_adds_the_column_for_everyone_with_the_default():
     text = Path("alembic/versions/0013_color_scheme.py").read_text(encoding="utf-8")
     assert "'color_scheme'" in text and "server_default='default'" in text
     assert "down_revision = '0012'" in text and hasattr(User, "color_scheme")
+
+
+# ---- the glow behind the page must never show a hard edge ----------------------------------------
+
+
+def body_background_rule() -> str:
+    rules = re.findall(r"\nbody \{([^}]*)\}", CSS)
+    return " ".join(r for r in rules if "background-image" in r)
+
+
+def test_the_glow_is_one_fixed_picture_that_never_repeats():
+    """The neon glow is TWO pictures. A shorthand such as `background: var(--backdrop) fixed
+    no-repeat, ...` only gives `fixed no-repeat` to the LAST one, so on a short page the first
+    picture repeated below the content and showed a sharp purple edge. The longhands below apply
+    to every picture."""
+    rule = body_background_rule()
+    assert "background-repeat: no-repeat" in rule and "background-attachment: fixed" in rule
+    assert "background-color: var(--paper)" in rule
+    assert not re.search(r"background:\s*var\(--backdrop\)", CSS)  # never the shorthand again
+
+
+@pytest.mark.parametrize("scheme", NEW)
+@pytest.mark.parametrize("mode", list(LOOKS))
+def test_the_glow_pictures_fade_to_nothing_instead_of_ending_in_a_line(scheme, mode):
+    glow = block_text(LOOKS[mode].format(s=scheme))
+    layers = re.findall(r"--backdrop:\s*([^;]*);", glow)[0].split("radial-gradient(")[1:]
+    assert layers  # every scheme has a glow
+    for layer in layers:
+        assert "transparent)" in layer, layer
