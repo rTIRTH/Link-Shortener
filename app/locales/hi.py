@@ -953,4 +953,7 @@ MESSAGES = {
         "चमकदार नीला और बैंगनी",
     "Unknown colour scheme.":
         "अज्ञात रंग योजना।",
+    # ---- mode switch ----
+    "Colour mode":
+        "रंग मोड",
 }

@@ -1,4 +1,4 @@
-<!doctype html>
+{% from "_icons.html" import icon %}<!doctype html>
 <html lang="{{ lang }}" data-theme="{{ theme }}" data-scheme="{{ scheme }}">
 <head>
   <meta charset="utf-8">
@@ -17,6 +17,12 @@
       <a class="navlink" href="/guide">{{ _("Guide") }}</a>
     </div>
     <nav class="topbar-right">
+      <form class="modeswitch" method="post" action="/mode" role="radiogroup" aria-label="{{ _('Colour mode') }}" data-mode-switch>
+        <input type="hidden" name="next" value="{{ request.url.path }}">
+        {% for value, label, glyph in [('light', _('Light'), 'sun'), ('system', _('System default'), 'monitor'), ('dark', _('Dark'), 'moon')] %}
+          <button type="submit" name="theme" value="{{ value }}" role="radio" aria-checked="{{ 'true' if value == theme else 'false' }}" aria-label="{{ label }}" title="{{ label }}"{% if value == theme %} class="on"{% endif %}>{{ icon(glyph) }}</button>
+        {% endfor %}
+      </form>
       <details class="menu langmenu" id="langmenu">
         <summary class="lang-btn" aria-label="{{ _('Change language') }}">
           <span class="lang-icon" aria-hidden="true"><span class="la">{{ lang_icon[0] }}</span><span class="lb">{{ lang_icon[1] }}</span></span>
@@ -81,6 +87,7 @@
     })();
   </script>
   <script type="application/json" id="i18n-data">{{ js_i18n|tojson }}</script>
+  <script src="/static/mode.js?v={{ js_version }}" defer></script>
   <script src="/static/app.js?v={{ js_version }}" defer></script>
   <script src="/static/datetime-picker.js?v={{ js_version }}" defer></script>
   {% block scripts %}{% endblock %}
