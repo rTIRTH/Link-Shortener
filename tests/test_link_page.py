@@ -48,5 +48,6 @@ def test_edit_button_is_translated(alice, app, lang):
 
 def test_toolbar_icons_are_unchanged_by_the_new_icon_argument(alice):
     make(alice)
-    for icon in svgs(alice.get("/dashboard").text):
+    page = alice.get("/dashboard").text.split("</header>", 1)[1]  # below the top bar
+    for icon in svgs(page):
         assert 'class="ico"' in icon  # no stray extra class on the existing icons

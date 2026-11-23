@@ -1,18 +1,19 @@
-"""The light / system default / dark switch in the top bar."""
+"""The small light / system default / dark button in the top bar, and the plain language pill."""
 
 import re
 from pathlib import Path
 
 import pytest
 
-from app import features
+from app import features, templating
 from app.models import User
 from app.profile import THEMES
 from app.templating import templates
 
 STATIC = Path(__file__).resolve().parent.parent / "app" / "static"
 CSS = (STATIC / "style.css").read_text(encoding="utf-8")
-PW = "password123"
+NEXT = {"light": "system", "system": "dark", "dark": "light"}  # the order a tap goes in
+NAMES = {"light": "Light", "system": "System default", "dark": "Dark"}
 
 
 def user_of(app, name="alice") -> User:
@@ -20,53 +21,77 @@ def user_of(app, name="alice") -> User:
         return db.query(User).filter_by(username=name).one()
 
 
-def switch(page: str) -> str:
-    start = page.index('<form class="modeswitch"')
+def form(page: str) -> str:
+    start = page.index('<form class="modebtn-form"')
     return page[start:page.index("</form>", start)]
 
 
-def buttons(page: str):
-    return re.findall(r'<button type="submit" name="theme" value="(\w+)"([^>]*)>', switch(page))
+def button(page: str) -> dict:
+    box = form(page)
+    tag = re.search(r'<button type="submit" class="modebtn"([^>]*)>', box, re.S).group(1)
+    pairs = re.findall(r'([\w-]+)=(?:"([^"]*)"|\'([^\']*)\')', tag)
+    return {name: double or single for name, double, single in pairs}
 
 
-# ---- the switch on every page --------------------------------------------------------------------
+def rule(selector: str) -> str:
+    match = re.search(r"(?m)^" + re.escape(selector) + r"\s*\{([^}]*)\}", CSS)
+    assert match, selector
+    return match.group(1)
 
 
-@pytest.mark.parametrize("path", ["/", "/login", "/guide", "/register"])
-def test_visitors_see_the_switch_in_the_top_bar(make_client, path):
+# ---- the button on every page --------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("path", ["/", "/login", "/register", "/guide"])
+def test_visitors_see_one_small_button_in_the_top_bar(make_client, path):
     page = make_client().get(path).text
-    assert [value for value, _ in buttons(page)] == ["light", "system", "dark"]
-    assert 'role="radiogroup"' in switch(page) and 'action="/mode"' in switch(page)
+    assert page.count('class="modebtn"') == 1 and "modeswitch" not in page  # not the 3-part switch
+    assert 'action="/mode"' in form(page)
 
 
 def test_signed_in_pages_have_it_too(alice):
     for path in ("/dashboard", "/account", "/guide"):
-        assert len(buttons(alice.get(path).text)) == 3, path
+        assert alice.get(path).text.count('class="modebtn"') == 1, path
 
 
-def test_the_current_mode_is_the_marked_one(alice):
-    for mode in THEMES:
-        alice.post("/mode", data={"theme": mode})
-        found = {v: a for v, a in buttons(alice.get("/dashboard").text)}
-        assert 'aria-checked="true"' in found[mode] and 'class="on"' in found[mode]
-        assert all('aria-checked="false"' in a for v, a in found.items() if v != mode)
+@pytest.mark.parametrize("mode", THEMES)
+def test_the_button_names_the_mode_and_asks_for_the_next_one(alice, mode):
+    alice.post("/mode", data={"theme": mode})
+    attrs = button(alice.get("/dashboard").text)
+    assert attrs["value"] == NEXT[mode]  # what a tap chooses
+    expected = f"Colour mode: {NAMES[mode]}. Tap to switch to {NAMES[NEXT[mode]]}."
+    assert attrs["aria-label"] == expected and attrs["title"] == expected
 
 
-def test_each_button_has_an_icon_a_name_and_a_tooltip(make_client):
-    box = switch(make_client().get("/").text)
-    names = re.findall(r'aria-label="([^"]+)" title="([^"]+)"', box)
-    assert names == [("Light", "Light"), ("System default", "System default"), ("Dark", "Dark")]
-    assert box.count("<svg") == 3 and box.count('role="radio"') == 3
-    assert 'aria-label="Colour mode"' in box
-    icons = re.findall(r"<svg.*?</svg>", box, re.S)
-    assert len(set(icons)) == 3 and "<circle" in icons[0] and "<rect" in icons[1]  # sun, monitor
+def test_a_tap_goes_light_then_system_default_then_dark_then_light_again():
+    assert NEXT == {"light": "system", "system": "dark", "dark": "light"}
+    seen, mode = [], "light"
+    for _ in range(4):
+        seen.append(mode)
+        mode = NEXT[mode]
+    assert seen == ["light", "system", "dark", "light"]
 
 
-def test_the_switch_sits_before_the_language_button_and_the_avatar(alice):
+def test_the_button_carries_what_the_script_needs(make_client):
+    attrs = button(make_client().get("/").text)
+    assert attrs["data-aria"] == "Colour mode: {mode}. Tap to switch to {next}."
+    assert re.search(r'"light":\s*"Light"', attrs["data-names"].replace("&#34;", '"'))
+    assert "System default" in attrs["data-names"] and "Dark" in attrs["data-names"]
+
+
+def test_it_has_the_three_icons_and_a_spoken_status(make_client):
+    box = form(make_client().get("/").text)
+    icons = re.findall(r'<svg class="ico (i-\w+)"', box)
+    assert icons == ["i-light", "i-system", "i-dark"]  # sun, monitor, moon; one is shown
+    assert 'role="status" aria-live="polite" data-mode-status' in box
+    assert 'class="sr-only"' in box
+
+
+def test_the_button_sits_after_the_nav_links_and_before_the_language_pill_and_avatar(alice):
     page = alice.get("/dashboard").text
-    assert page.index('class="modeswitch"') < page.index('id="langmenu"') < page.index(
-        'id="usermenu"')
-    assert page.index('class="brand"') < page.index('class="modeswitch"')
+    assert page.index('class="brand"') < page.index('class="modebtn-form"')
+    assert page.index('class="modebtn-form"') < page.index('id="langmenu"')
+    assert page.index('id="langmenu"') < page.index('id="usermenu"')
 
 
 def test_the_rest_of_the_top_bar_is_unchanged(make_client):
@@ -76,22 +101,51 @@ def test_the_rest_of_the_top_bar_is_unchanged(make_client):
     assert 'href="/login"' in bar and 'href="/register"' in bar
 
 
-def test_it_works_in_every_language(make_client):
+@pytest.mark.parametrize("lang, mode_word, tap_word", [
+    ("hi", "रंग मोड", "टैप करें"), ("gu", "રંગ મોડ", "ટૅપ કરો"),
+])
+def test_the_button_speaks_each_language(make_client, lang, mode_word, tap_word):
     visitor = make_client()
-    for lang, label in (("hi", "रंग मोड"), ("gu", "રંગ મોડ")):
-        visitor.cookies.set("lang", lang)
-        box = switch(visitor.get("/").text)
-        assert f'aria-label="{label}"' in box
-        assert "Light" not in box and "Dark" not in box and "System default" not in box
+    visitor.cookies.set("lang", lang)
+    attrs = button(visitor.get("/").text)
+    assert mode_word in attrs["aria-label"] and tap_word in attrs["aria-label"]
+    assert "Light" not in attrs["aria-label"] and "System default" not in attrs["aria-label"]
+    assert "{mode}" in attrs["data-aria"] and "{next}" in attrs["data-aria"]  # filled in later
 
 
-def test_the_switch_is_not_a_paid_feature(alice, monkeypatch):
+def test_the_button_is_not_a_paid_feature(alice, monkeypatch):
     monkeypatch.setattr(features, "PAID", frozenset(features.FEATURES))  # lock everything
     assert alice.post("/mode", data={"theme": "dark"}).status_code == 303
-    assert len(buttons(alice.get("/dashboard").text)) == 3
+    assert alice.get("/dashboard").text.count('class="modebtn"') == 1
 
 
-# ---- the route -------------------------------------------------------------------------------
+# ---- the language button is a plain pill ---------------------------------------------------------
+
+
+def test_the_language_button_is_just_the_language_name_in_a_pill(alice):
+    page = alice.get("/dashboard").text
+    start = page.index('<summary class="lang-btn"')
+    summary = page[start:page.index("</summary>", start)]
+    assert re.sub(r"\s+", "", re.sub(r"<[^>]+>", "", summary)) == "English"
+    assert "<svg" not in summary and "lang-icon" not in summary and "lang-chev" not in summary
+    assert 'aria-label="Change language"' in summary  # still named for screen readers
+
+
+def test_the_language_menu_still_works(alice):
+    page = alice.get("/dashboard").text
+    assert 'name="lang" value="hi"' in page and 'name="lang" value="gu"' in page
+    assert 'name="next" value="/dashboard"' in page
+
+
+def test_the_language_pill_is_drawn_in_the_accent_colour_with_the_shared_outline():
+    pill = rule(".langmenu summary.lang-btn")
+    assert "color: var(--accent)" in pill and "border-radius: 999px" in pill
+    assert "border: 1px solid transparent" in pill  # the gradient ring is drawn over it
+    assert "lang-icon" not in CSS and "lang-chev" not in CSS
+    assert not re.search(r"\.lang-name\s*\{\s*display:\s*none", CSS)  # the name stays on phones
+
+
+# ---- the route -----------------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("mode", THEMES)
@@ -100,6 +154,15 @@ def test_a_signed_in_person_s_mode_is_saved(alice, app, mode):
     assert r.status_code == 303 and r.headers["location"] == "/guide"
     assert user_of(app).theme == mode and alice.cookies.get("theme") == mode
     assert f'data-theme="{mode}"' in alice.get("/guide").text
+
+
+def test_the_button_works_without_javascript_by_posting_its_own_value(alice, app):
+    seen = []
+    for _ in range(4):
+        page = alice.get("/dashboard").text
+        seen.append(re.search(r'data-theme="(\w+)"', page).group(1))
+        alice.post("/mode", data={"theme": button(page)["value"], "next": "/dashboard"})
+    assert seen == ["system", "dark", "light", "system"]  # starts on system, then each tap cycles
 
 
 def test_the_background_request_gets_a_short_answer_and_no_redirect(alice, app):
@@ -137,10 +200,9 @@ def test_it_leaves_the_colour_scheme_alone(alice, app):
     assert 'data-theme="dark" data-scheme="neon"' in alice.get("/dashboard").text
 
 
-def test_the_account_page_radios_show_the_mode_chosen_with_the_switch(alice):
+def test_the_account_page_radios_show_the_mode_chosen_with_the_button(alice):
     alice.post("/mode", data={"theme": "light"})
-    page = alice.get("/account").text
-    assert re.search(r'name="theme" value="light" checked', page)
+    assert re.search(r'name="theme" value="light" checked', alice.get("/account").text)
 
 
 def test_the_cookie_is_set_safely(alice):
@@ -148,7 +210,7 @@ def test_the_cookie_is_set_safely(alice):
     assert "httponly" in header and "samesite=lax" in header and "max-age=31536000" in header
 
 
-# ---- the script ------------------------------------------------------------------------------
+# ---- the script ----------------------------------------------------------------------------------
 
 
 def test_the_script_is_loaded_on_every_page_with_a_version(make_client):
@@ -156,44 +218,42 @@ def test_the_script_is_loaded_on_every_page_with_a_version(make_client):
     assert re.search(r'<script src="/static/mode\.js\?v=\w+" defer>', page)
 
 
-def test_the_script_changes_the_page_saves_it_and_supports_the_keyboard(make_client):
+def test_the_script_cycles_changes_the_page_saves_and_announces(make_client):
     js = make_client().get("/static/mode.js").text
+    assert "['light', 'system', 'dark']" in js and "% ORDER.length" in js  # the tap order
     assert "dataset.theme = mode" in js and "fetch('/mode'" in js and "application/json" in js
-    for key in ("ArrowRight", "ArrowLeft", "Home", "End"):
-        assert key in js
+    assert "data-mode-status" in js and "aria-label" in js
     assert 'input[type="radio"][name="theme"]' in js  # the Account page radios stay in step
-    assert "aria-checked" in js and "tabIndex" in js
 
 
 def test_the_version_in_the_address_follows_the_script_so_browsers_never_use_an_old_copy():
-    from app import templating
-    with_mode = templating._version("app.js", "mode.js")
-    assert with_mode != templating._version("app.js")  # the script is part of the version
+    assert templating._version("app.js", "mode.js") != templating._version("app.js")
     assert templates.env.globals["js_version"] == templating._version(
         "app.js", "datetime-picker.js", "photo-editor.js", "tags.js", "back.js", "utm.js",
         "mode.js")
 
 
-# ---- how it looks ----------------------------------------------------------------------------
+# ---- how it looks --------------------------------------------------------------------------------
 
 
-def rule(selector: str) -> str:
-    match = re.search(re.escape(selector) + r"\s*\{([^}]*)\}", CSS)
-    assert match, selector
-    return match.group(1)
+def test_the_button_is_a_44_pixel_circle_in_theme_colours_only():
+    base = rule(".modebtn")
+    assert "width: 44px" in base and "height: 44px" in base and "border-radius: 50%" in base
+    assert "color: var(--accent)" in base and "background: var(--card)" in base
+    for selector in (".modebtn", ".modebtn:hover, .modebtn:focus-visible"):
+        assert "#" not in rule(selector), selector  # every colour comes from the theme variables
 
 
-def test_the_buttons_are_big_enough_to_tap_and_use_theme_colours_only():
-    button = rule(".modeswitch button")
-    assert "width: 44px" in button and "height: 40px" in button
-    block = " ".join(rule(s) for s in (".modeswitch", ".modeswitch button", ".modeswitch button.on",
-                                       ".modeswitch button:hover"))
-    assert "#" not in block  # every colour comes from the theme variables
-    assert "var(--accent)" in rule(".modeswitch button.on") and "var(--accent2)" in rule(
-        ".modeswitch button.on")
-    assert "box-shadow: var(--glow)" in rule(".modeswitch button.on")  # the glow of Neon
+def test_hover_and_focus_draw_the_gradient_ring_and_the_neon_glow():
+    hover = rule(".modebtn:hover, .modebtn:focus-visible")
+    assert "var(--accent)" in hover and "var(--accent2)" in hover and "border-box" in hover
+    assert "box-shadow: var(--glow)" in hover
+    assert "outline: 2px solid var(--accent)" in rule(".modebtn:focus-visible")
 
 
-def test_the_switch_has_a_visible_focus_ring_and_shrinks_a_little_on_small_phones():
-    assert "outline: 2px solid var(--accent)" in rule(".modeswitch button:focus-visible")
-    assert re.search(r"@media \(max-width: 480px\) \{ \.modeswitch button \{ width: 38px", CSS)
+def test_only_the_icon_of_the_current_mode_is_shown():
+    assert "display: none" in rule(".modebtn .ico")
+    shown = re.search(r'(:root\[data-theme="light"\][^{]*)\{\s*display:\s*block', CSS, re.S)
+    assert shown
+    for mode in THEMES:
+        assert f':root[data-theme="{mode}"] .modebtn .i-{mode}' in shown.group(1)

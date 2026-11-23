@@ -953,7 +953,7 @@ MESSAGES = {
         "ચમકતો વાદળી અને જાંબલી",
     "Unknown colour scheme.":
         "અજ્ઞાત રંગ યોજના.",
-    # ---- mode switch ----
-    "Colour mode":
-        "રંગ મોડ",
+    # ---- mode button ----
+    "Colour mode: {mode}. Tap to switch to {next}.":
+        "રંગ મોડ: {mode}. {next} પર જવા માટે ટૅપ કરો.",
 }

@@ -17,19 +17,20 @@
       <a class="navlink" href="/guide">{{ _("Guide") }}</a>
     </div>
     <nav class="topbar-right">
-      <form class="modeswitch" method="post" action="/mode" role="radiogroup" aria-label="{{ _('Colour mode') }}" data-mode-switch>
+      {% set mode_names = {'light': _('Light'), 'system': _('System default'), 'dark': _('Dark')} %}
+      {% set mode_next = {'light': 'system', 'system': 'dark', 'dark': 'light'}[theme] %}
+      {% set mode_label = _('Colour mode: {mode}. Tap to switch to {next}.', mode=mode_names[theme], next=mode_names[mode_next]) %}
+      <form class="modebtn-form" method="post" action="/mode" data-mode-button>
         <input type="hidden" name="next" value="{{ request.url.path }}">
-        {% for value, label, glyph in [('light', _('Light'), 'sun'), ('system', _('System default'), 'monitor'), ('dark', _('Dark'), 'moon')] %}
-          <button type="submit" name="theme" value="{{ value }}" role="radio" aria-checked="{{ 'true' if value == theme else 'false' }}" aria-label="{{ label }}" title="{{ label }}"{% if value == theme %} class="on"{% endif %}>{{ icon(glyph) }}</button>
-        {% endfor %}
+        <button type="submit" class="modebtn" name="theme" value="{{ mode_next }}" aria-label="{{ mode_label }}" title="{{ mode_label }}"
+                data-aria="{{ _('Colour mode: {mode}. Tap to switch to {next}.', mode='{mode}', next='{next}') }}" data-names='{{ mode_names|tojson }}'>
+          {{ icon('sun', 'i-light') }}{{ icon('monitor', 'i-system') }}{{ icon('moon', 'i-dark') }}
+        </button>
+        <span class="sr-only" role="status" aria-live="polite" data-mode-status></span>
       </form>
       <details class="menu langmenu" id="langmenu">
         <summary class="lang-btn" aria-label="{{ _('Change language') }}">
-          <span class="lang-icon" aria-hidden="true"><span class="la">{{ lang_icon[0] }}</span><span class="lb">{{ lang_icon[1] }}</span></span>
           <span class="lang-name">{{ current_language }}</span>
-          <span class="lang-chev" aria-hidden="true">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6 8 10.5 12.5 6"/></svg>
-          </span>
         </summary>
         <div class="menu-panel lang-panel">
           <form method="post" action="/language">

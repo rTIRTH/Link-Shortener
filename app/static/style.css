@@ -404,22 +404,14 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 .topbar-right { display: flex; align-items: center; gap: 14px; }
 .topbar-left .navlink { text-decoration: none; font-weight: 600; }
 
-.langmenu summary.lang-btn { position: relative; display: inline-flex; align-items: center; gap: 9px;
-  padding: 4px 5px 4px 12px; line-height: 1.2; border: 1px solid transparent; border-radius: 999px;
-  color: var(--ink); font-weight: 600; font-size: .92rem; white-space: nowrap; background: var(--card); }
+.langmenu summary.lang-btn { position: relative; display: inline-flex; align-items: center;
+  padding: 9px 16px; line-height: 1.2; border: 1px solid transparent; border-radius: 999px;
+  color: var(--accent); font-weight: 600; font-size: .92rem; white-space: nowrap; background: var(--card); }
 .langmenu summary.lang-btn:hover { filter: brightness(1.06); }
-.lang-icon { position: relative; flex: none; width: 24px; height: 22px; }
-.lang-icon .la { position: absolute; left: 0; top: 0; font-size: 15px; font-weight: 800; line-height: 1; }
-.lang-icon .lb { position: absolute; right: 0; bottom: 0; font-size: 12px; font-weight: 700; line-height: 1; color: var(--accent); }
-.lang-chev { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
-             background: var(--ink); color: var(--card); }
-.lang-chev svg { transition: transform .15s; }
-.langmenu[open] .lang-chev svg { transform: rotate(180deg); }
 .lang-panel { min-width: 180px; }
 .lang-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .lang-option[aria-current="true"] { font-weight: 700; }
 .lang-option .tick { color: var(--accent); }
-@media (max-width: 520px) { .lang-name { display: none; } .langmenu summary.lang-btn { padding-left: 10px; } }
 
 /* ---- one thin gradient outline for every button ---- */
 .btn::before, .lang-btn::before, .dtp-nav::before, .dtp-period::before, .avatar-btn::before {
@@ -710,15 +702,15 @@ input[type="color"] { width: 56px; height: 38px; padding: 2px; border-radius: 8p
 /* the "back" buttons at the top of the inner pages */
 .backbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }
 
-/* ---- the light / system default / dark switch in the top bar ---- */
-.modeswitch { display: inline-flex; gap: 2px; margin: 0; padding: 3px; background: var(--card);
-              border: 1px solid var(--line); border-radius: 99px; }
-.modeswitch button { display: grid; place-items: center; width: 44px; height: 40px; margin: 0; padding: 0;
-                     color: var(--muted); background: none; border: 0; border-radius: 99px; cursor: pointer; }
-.modeswitch button:hover { color: var(--ink); background: var(--hover); }
-.modeswitch button.on { color: var(--accent-ink); background: linear-gradient(100deg, var(--accent), var(--accent2));
-                        box-shadow: var(--glow); }
-.modeswitch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.modeswitch .ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2;
-                   stroke-linecap: round; stroke-linejoin: round; }
-@media (max-width: 480px) { .modeswitch button { width: 38px; height: 36px; } }
+/* ---- the small light / system default / dark button in the top bar ---- */
+.modebtn-form { display: inline-flex; margin: 0; }
+.modebtn { display: grid; place-items: center; width: 44px; height: 44px; margin: 0; padding: 0;
+           color: var(--accent); background: var(--card); border: 1px solid var(--line); border-radius: 50%; cursor: pointer; }
+.modebtn:hover, .modebtn:focus-visible { border-color: transparent; box-shadow: var(--glow);
+  background: linear-gradient(var(--card), var(--card)) padding-box, linear-gradient(100deg, var(--accent), var(--accent2)) border-box; }
+.modebtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.modebtn .ico { display: none; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2;
+                stroke-linecap: round; stroke-linejoin: round; }
+/* only the icon of the mode you are in is shown; it changes the moment the mode does */
+:root[data-theme="light"] .modebtn .i-light, :root[data-theme="system"] .modebtn .i-system,
+:root[data-theme="dark"] .modebtn .i-dark { display: block; }

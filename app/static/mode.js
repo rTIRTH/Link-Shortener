@@ -1,24 +1,29 @@
-// The light / system default / dark switch in the top bar: changes the page at once and saves the
-// choice in the background. Without this script the buttons are an ordinary form that reloads.
+// The small light / system default / dark button in the top bar. One tap goes to the next mode
+// (light, then system default, then dark, then light again): the page changes at once and the
+// choice is saved in the background. Without this script the button is an ordinary form.
 (function () {
-  var form = document.querySelector('[data-mode-switch]');
+  var form = document.querySelector('[data-mode-button]');
   if (!form) return;
-  var buttons = [].slice.call(form.querySelectorAll('button'));
+  var button = form.querySelector('button');
+  var status = form.querySelector('[data-mode-status]');
+  var names = JSON.parse(button.getAttribute('data-names') || '{}');
+  var template = button.getAttribute('data-aria') || '';
+  var ORDER = ['light', 'system', 'dark'];
 
   function paint(mode) {
-    buttons.forEach(function (b) {
-      var on = b.value === mode;
-      b.classList.toggle('on', on);
-      b.setAttribute('aria-checked', on ? 'true' : 'false');
-      b.tabIndex = on ? 0 : -1; // one tab stop for the group; the arrow keys move inside it
-    });
+    var next = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length];
+    var text = template.replace('{mode}', names[mode]).replace('{next}', names[next]);
+    button.setAttribute('aria-label', text);
+    button.title = text;
+    button.value = next; // what the next tap will choose
+    if (status) status.textContent = names[mode];
     document.querySelectorAll('input[type="radio"][name="theme"]').forEach(function (r) {
       r.checked = r.value === mode; // keep the radio buttons on the Account page in step
     });
   }
 
   function choose(mode) {
-    document.documentElement.dataset.theme = mode;
+    document.documentElement.dataset.theme = mode; // the icon follows from this, in the stylesheet
     paint(mode);
     fetch('/mode', {
       method: 'POST',
@@ -28,23 +33,8 @@
     }).catch(function () { /* offline: the page still changed, it just was not saved */ });
   }
 
-  buttons.forEach(function (b) {
-    b.addEventListener('click', function (e) { e.preventDefault(); choose(b.value); });
-  });
-
-  form.addEventListener('keydown', function (e) {
-    var at = buttons.indexOf(document.activeElement);
-    if (at === -1) return;
-    var to = null;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') to = (at + 1) % buttons.length;
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') to = (at + buttons.length - 1) % buttons.length;
-    else if (e.key === 'Home') to = 0;
-    else if (e.key === 'End') to = buttons.length - 1;
-    if (to === null) return;
-    e.preventDefault();
-    buttons[to].focus();
-    choose(buttons[to].value);
-  });
-
+  button.addEventListener('click', function (e) { e.preventDefault(); choose(button.value); });
+  if (status) status.textContent = '';
   paint(document.documentElement.dataset.theme || 'system');
+  if (status) status.textContent = ''; // say nothing until the person taps
 })();

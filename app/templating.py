@@ -9,7 +9,6 @@ from jinja2 import pass_context
 from .config import settings
 from .features import can
 from .i18n import (
-    LANGUAGE_ICONS,
     LANGUAGES,
     format_date,
     get_lang,
@@ -106,7 +105,6 @@ def render(request: Request, name: str, user=None, status_code: int = 200, **con
     context["lang"] = lang
     context["languages"] = LANGUAGES
     context["current_language"] = LANGUAGES[lang]
-    context["lang_icon"] = LANGUAGE_ICONS[lang]
     context["_"] = lambda text, **params: translate(lang, text, **params)
     context["_n"] = lambda one, many, n: translate_plural(lang, one, many, n)
     context["_h"] = lambda text, **params: translate_html(lang, text, **params)
