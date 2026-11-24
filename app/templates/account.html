@@ -95,18 +95,8 @@
 
   <section class="panel" id="appearance">
     <h2>{{ _("Appearance") }}</h2>
-    <p class="muted">{{ _('Choose how the site looks. "System" follows your device\'s setting.') }}</p>
+    <p class="muted">{{ _("Choose the colours of the site. To switch between light and dark, use the button in the top bar.") }}</p>
     <form method="post" action="/account/theme">
-      <fieldset class="theme-grid">
-        <legend class="sr-only">{{ _("Theme") }}</legend>
-        {% for value, label, hint in [('system', _('System default'), _('Match my device')), ('light', _('Light'), _('Always light')), ('dark', _('Dark'), _('Always dark'))] %}
-        <label class="theme-opt">
-          <input type="radio" name="theme" value="{{ value }}" {% if value == user.theme %}checked{% endif %}>
-          <span class="theme-card"><b>{{ label }}</b><small>{{ hint }}</small></span>
-        </label>
-        {% endfor %}
-      </fieldset>
-      <h3 class="adv-title">{{ _("Colour scheme") }}</h3>
       <fieldset class="theme-grid scheme-grid">
         <legend class="sr-only">{{ _("Colour scheme") }}</legend>
         {% for value, label, hint in [('default', _('Default'), _('The original blues')), ('classic', _('Classic'), _('Soft blue and violet')), ('neon', _('Neon'), _('Glowing blue and purple'))] %}
@@ -213,9 +203,6 @@
     r.addEventListener('change', function () {
       document.getElementById('head-avatar').src = '/static/avatars/' + r.value + '.svg';
     });
-  });
-  document.querySelectorAll('input[name="theme"]').forEach(function (r) {
-    r.addEventListener('change', function () { document.documentElement.dataset.theme = r.value; });
   });
   document.querySelectorAll('input[name="scheme"]').forEach(function (r) {
     r.addEventListener('change', function () { document.documentElement.dataset.scheme = r.value; });

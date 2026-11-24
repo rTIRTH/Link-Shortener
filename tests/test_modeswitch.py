@@ -200,9 +200,61 @@ def test_it_leaves_the_colour_scheme_alone(alice, app):
     assert 'data-theme="dark" data-scheme="neon"' in alice.get("/dashboard").text
 
 
-def test_the_account_page_radios_show_the_mode_chosen_with_the_button(alice):
+def test_the_account_page_no_longer_has_the_light_dark_cards(alice):
+    page = alice.get("/account").text
+    assert 'type="radio" name="theme"' not in page  # the top bar button changes the mode now
+    for gone in ("Match my device", "Always light", "Always dark"):
+        assert gone not in page
+    assert "To switch between light and dark, use the button in the top bar." in page
+    assert page.count('class="modebtn"') == 1  # and that button is on this page too
+
+
+def test_the_account_page_keeps_the_colour_scheme_and_its_button(alice):
+    page = alice.get("/account").text
+    start = page.index('id="appearance"')
+    panel = page[start:page.index("</section>", start)]
+    assert re.findall(r'name="scheme" value="(\w+)"', panel) == ["default", "classic", "neon"]
+    assert "Save appearance" in panel and 'action="/account/theme"' in panel
+
+
+def test_saving_the_scheme_alone_keeps_the_mode(alice, app):
+    alice.post("/mode", data={"theme": "dark"})
+    r = alice.post("/account/theme", data={"scheme": "neon"})  # what the Account page sends
+    assert r.status_code == 303
+    assert "Appearance saved." in alice.get("/account").text
+    assert user_of(app).color_scheme == "neon" and user_of(app).theme == "dark"
+    assert alice.cookies.get("theme") == "dark" and alice.cookies.get("scheme") == "neon"
+
+
+def test_saving_nothing_changes_nothing(alice, app):
     alice.post("/mode", data={"theme": "light"})
-    assert re.search(r'name="theme" value="light" checked', alice.get("/account").text)
+    alice.post("/account/theme", data={"scheme": "classic"})
+    alice.post("/account/theme", data={})
+    assert user_of(app).theme == "light" and user_of(app).color_scheme == "classic"
+
+
+def test_the_mode_can_still_be_sent_to_the_account_form_and_is_checked(alice, app):
+    alice.post("/account/theme", data={"theme": "dark", "scheme": "default"})
+    assert user_of(app).theme == "dark"
+    alice.post("/account/theme", data={"theme": "neon"})
+    assert "Unknown theme." in alice.get("/account").text and user_of(app).theme == "dark"
+
+
+def test_the_account_page_script_only_previews_the_colour_scheme(alice):
+    page = alice.get("/account").text
+    assert "dataset.scheme = r.value" in page and "dataset.theme = r.value" not in page
+
+
+@pytest.mark.parametrize("lang, sentence", [
+    ("hi", "लाइट और डार्क के बीच बदलने के लिए"), ("gu", "લાઇટ અને ડાર્ક વચ્ચે બદલવા માટે"),
+])
+def test_the_new_sentence_is_translated_and_the_old_card_texts_are_gone(alice, lang, sentence):
+    from importlib import import_module
+    alice.post("/language", data={"lang": lang, "next": "/"})
+    assert sentence in alice.get("/account").text
+    messages = import_module(f"app.locales.{lang}").MESSAGES
+    for removed in ("Match my device", "Always light", "Always dark", "Theme"):
+        assert removed not in messages
 
 
 def test_the_cookie_is_set_safely(alice):
@@ -223,7 +275,7 @@ def test_the_script_cycles_changes_the_page_saves_and_announces(make_client):
     assert "['light', 'system', 'dark']" in js and "% ORDER.length" in js  # the tap order
     assert "dataset.theme = mode" in js and "fetch('/mode'" in js and "application/json" in js
     assert "data-mode-status" in js and "aria-label" in js
-    assert 'input[type="radio"][name="theme"]' in js  # the Account page radios stay in step
+    assert 'name="theme"' not in js  # there are no mode radio buttons left to keep in step
 
 
 def test_the_version_in_the_address_follows_the_script_so_browsers_never_use_an_old_copy():

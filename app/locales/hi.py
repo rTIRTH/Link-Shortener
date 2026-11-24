@@ -161,15 +161,9 @@ MESSAGES = {
     "Send verification code": "सत्यापन कोड भेजें",
     "Change password": "पासवर्ड बदलें",
     "8-72 characters.": "8-72 अक्षर।",
-    "Choose how the site looks. \"System\" follows your device's setting.":
-        "साइट कैसी दिखे, यह चुनें। \"सिस्टम\" आपके डिवाइस की सेटिंग का पालन करता है।",
-    "Theme": "थीम",
     "System default": "सिस्टम डिफ़ॉल्ट",
-    "Match my device": "मेरे डिवाइस के अनुसार",
     "Light": "लाइट",
-    "Always light": "हमेशा लाइट",
     "Dark": "डार्क",
-    "Always dark": "हमेशा डार्क",
     "Save appearance": "रूप-रंग सहेजें",
     "This permanently deletes your account, all your links, and their click history. Short links you already shared will stop working. This cannot be undone.":
         "यह आपका खाता, आपके सभी लिंक और उनका क्लिक इतिहास हमेशा के लिए हटा देता है। जो छोटे लिंक आप पहले साझा कर चुके हैं, वे काम करना बंद कर देंगे। इसे वापस नहीं किया जा सकता।",
@@ -956,4 +950,6 @@ MESSAGES = {
     # ---- mode button ----
     "Colour mode: {mode}. Tap to switch to {next}.":
         "रंग मोड: {mode}। {next} पर जाने के लिए टैप करें।",
+    "Choose the colours of the site. To switch between light and dark, use the button in the top bar.":
+        "साइट के रंग चुनें। लाइट और डार्क के बीच बदलने के लिए ऊपर की पट्टी के बटन का उपयोग करें।",
 }

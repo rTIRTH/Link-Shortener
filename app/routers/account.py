@@ -145,11 +145,15 @@ def remove_photo(request: Request, user: User = Depends(require_user),
 
 
 @router.post("/theme")
-def set_theme(request: Request, theme: str = Form(...), scheme: str = Form(""),
+def set_theme(request: Request, theme: str = Form(""), scheme: str = Form(""),
               user: User = Depends(require_user), db: Session = Depends(get_db)):
-    """Save the mode (system / light / dark) and, if it is sent, the colour scheme."""
-    if theme not in THEMES:
+    """Save the colour scheme and, if it is sent, the mode (system / light / dark).
+
+    The Account page only sends the scheme; the mode is changed with the top bar button (/mode).
+    """
+    if theme and theme not in THEMES:
         return back(request, "Unknown theme.", anchor="#appearance")
+    theme = theme or user.theme
     if scheme and scheme not in SCHEMES:
         return back(request, "Unknown colour scheme.", anchor="#appearance")
     new_scheme = scheme or user.color_scheme

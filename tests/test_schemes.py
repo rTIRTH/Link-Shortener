@@ -275,7 +275,7 @@ def scheme_box(page: str) -> str:
     return page[start:page.index("</fieldset>", start)]
 
 
-def test_the_account_page_offers_the_three_schemes_under_the_modes(alice):
+def test_the_account_page_offers_the_three_schemes(alice):
     page = alice.get("/account").text
     box = scheme_box(page)
     assert re.findall(r'name="scheme" value="(\w+)"', box) == ["default", "classic", "neon"]
@@ -283,7 +283,6 @@ def test_the_account_page_offers_the_three_schemes_under_the_modes(alice):
                   "Glowing blue and purple"):
         assert label in box
     assert box.count('class="dots dots-') == 3
-    assert page.index('name="theme" value="dark"') < page.index('name="scheme" value="default"')
     assert page.index('name="scheme" value="neon"') < page.index("Save appearance")  # one form
 
 
@@ -296,13 +295,6 @@ def test_the_current_scheme_is_the_checked_one(alice):
 
 def test_picking_a_scheme_shows_it_straight_away(alice):
     assert "dataset.scheme = r.value" in alice.get("/account").text
-
-
-def test_the_existing_mode_picker_is_unchanged(alice):
-    page = alice.get("/account").text
-    start = page.index('class="theme-grid"')
-    modes = page[start:page.index("</fieldset>", start)]
-    assert re.findall(r'name="theme" value="(\w+)"', modes) == ["system", "light", "dark"]
 
 
 # ---- the paid-plan gate ----------------------------------------------------------------------

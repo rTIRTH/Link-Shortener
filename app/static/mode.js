@@ -17,9 +17,6 @@
     button.title = text;
     button.value = next; // what the next tap will choose
     if (status) status.textContent = names[mode];
-    document.querySelectorAll('input[type="radio"][name="theme"]').forEach(function (r) {
-      r.checked = r.value === mode; // keep the radio buttons on the Account page in step
-    });
   }
 
   function choose(mode) {
