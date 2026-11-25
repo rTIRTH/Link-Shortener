@@ -952,4 +952,27 @@ MESSAGES = {
         "રંગ મોડ: {mode}. {next} પર જવા માટે ટૅપ કરો.",
     "Choose the colours of the site. To switch between light and dark, use the button in the top bar.":
         "સાઇટના રંગ પસંદ કરો. લાઇટ અને ડાર્ક વચ્ચે બદલવા માટે ઉપરની પટ્ટીના બટનનો ઉપયોગ કરો.",
+    # ---- forgot password ----
+    "Forgot password?": "પાસવર્ડ ભૂલી ગયા?",
+    "Reset your password": "તમારો પાસવર્ડ રીસેટ કરો",
+    "Resetting the password by email is not available on this server yet.":
+        "આ સર્વર પર ઇમેઇલથી પાસવર્ડ રીસેટ કરવો હજી ઉપલબ્ધ નથી.",
+    "Enter the email you signed up with and we will send you a link to choose a new password.":
+        "તમે જે ઇમેઇલથી સાઇન અપ કર્યું હતું તે લખો, અમે નવો પાસવર્ડ પસંદ કરવા માટે તમને એક લિંક મોકલીશું.",
+    "Send reset link": "રીસેટ લિંક મોકલો",
+    "Remembered it?": "યાદ આવી ગયો?",
+    "Choose a new password": "નવો પાસવર્ડ પસંદ કરો",
+    "Repeat the new password": "નવો પાસવર્ડ ફરીથી લખો",
+    "The two passwords do not match.": "બંને પાસવર્ડ સરખા નથી.",
+    "Password changed. Log in with your new password.":
+        "પાસવર્ડ બદલાઈ ગયો. તમારા નવા પાસવર્ડથી લૉગ ઇન કરો.",
+    "That reset link has expired or was already used. Ask for a new one.":
+        "આ રીસેટ લિંકની સમય-મર્યાદા પૂરી થઈ ગઈ છે અથવા તે પહેલેથી વપરાઈ ગઈ છે. નવી લિંક માંગો.",
+    "If an account uses {email}, we sent a link to reset its password. It works for one hour.":
+        "જો કોઈ ખાતામાં {email} વપરાયેલ હોય, તો અમે તેનો પાસવર્ડ રીસેટ કરવાની લિંક મોકલી દીધી છે. તે એક કલાક સુધી ચાલે છે.",
+    "Password reset is very busy right now. Please try again later.":
+        "હમણાં પાસવર્ડ રીસેટ પર ઘણી ભીડ છે. કૃપા કરીને પછી ફરી પ્રયત્ન કરો.",
+    "Reset your Link Shortener password": "તમારો Link Shortener પાસવર્ડ રીસેટ કરો",
+    "Someone asked to reset the password of your Link Shortener account.\n\nTo choose a new password, open this link:\n{link}\n\nThe link works for one hour and can be used only once. If you did not ask for this, you can ignore this message. Your password will stay the same.":
+        "કોઈએ તમારા Link Shortener ખાતાનો પાસવર્ડ રીસેટ કરવા કહ્યું છે.\n\nનવો પાસવર્ડ પસંદ કરવા માટે આ લિંક ખોલો:\n{link}\n\nઆ લિંક એક કલાક સુધી ચાલે છે અને ફક્ત એક જ વાર વાપરી શકાય છે. જો તમે આ માંગ્યું ન હોય, તો તમે આ સંદેશ અવગણી શકો છો. તમારો પાસવર્ડ જેવો છે તેવો જ રહેશે.",
 }

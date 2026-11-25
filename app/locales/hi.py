@@ -952,4 +952,27 @@ MESSAGES = {
         "रंग मोड: {mode}। {next} पर जाने के लिए टैप करें।",
     "Choose the colours of the site. To switch between light and dark, use the button in the top bar.":
         "साइट के रंग चुनें। लाइट और डार्क के बीच बदलने के लिए ऊपर की पट्टी के बटन का उपयोग करें।",
+    # ---- forgot password ----
+    "Forgot password?": "पासवर्ड भूल गए?",
+    "Reset your password": "अपना पासवर्ड रीसेट करें",
+    "Resetting the password by email is not available on this server yet.":
+        "इस सर्वर पर ईमेल से पासवर्ड रीसेट करना अभी उपलब्ध नहीं है।",
+    "Enter the email you signed up with and we will send you a link to choose a new password.":
+        "जिस ईमेल से आपने साइन अप किया था वह डालें, हम नया पासवर्ड चुनने के लिए आपको एक लिंक भेजेंगे।",
+    "Send reset link": "रीसेट लिंक भेजें",
+    "Remembered it?": "याद आ गया?",
+    "Choose a new password": "नया पासवर्ड चुनें",
+    "Repeat the new password": "नया पासवर्ड दोबारा डालें",
+    "The two passwords do not match.": "दोनों पासवर्ड एक जैसे नहीं हैं।",
+    "Password changed. Log in with your new password.":
+        "पासवर्ड बदल दिया गया। अपने नए पासवर्ड से लॉग इन करें।",
+    "That reset link has expired or was already used. Ask for a new one.":
+        "यह रीसेट लिंक समाप्त हो गया है या पहले ही इस्तेमाल हो चुका है। नया लिंक माँगें।",
+    "If an account uses {email}, we sent a link to reset its password. It works for one hour.":
+        "अगर किसी खाते में {email} इस्तेमाल हुआ है, तो हमने उसका पासवर्ड रीसेट करने का लिंक भेज दिया है। यह एक घंटे तक काम करता है।",
+    "Password reset is very busy right now. Please try again later.":
+        "अभी पासवर्ड रीसेट पर बहुत भीड़ है। कृपया बाद में फिर कोशिश करें।",
+    "Reset your Link Shortener password": "अपना Link Shortener पासवर्ड रीसेट करें",
+    "Someone asked to reset the password of your Link Shortener account.\n\nTo choose a new password, open this link:\n{link}\n\nThe link works for one hour and can be used only once. If you did not ask for this, you can ignore this message. Your password will stay the same.":
+        "किसी ने आपके Link Shortener खाते का पासवर्ड रीसेट करने के लिए कहा है।\n\nनया पासवर्ड चुनने के लिए यह लिंक खोलें:\n{link}\n\nयह लिंक एक घंटे तक काम करता है और सिर्फ़ एक बार इस्तेमाल हो सकता है। अगर आपने यह नहीं माँगा था, तो आप इस संदेश को अनदेखा कर सकते हैं। आपका पासवर्ड वैसा ही रहेगा।",
 }

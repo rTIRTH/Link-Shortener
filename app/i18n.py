@@ -84,6 +84,13 @@ SIGNUP_EMAIL_BODY = (
     "Your Link Shortener sign-up code is {code}.\n\nIt expires in 10 minutes. "
     "If you did not try to sign up, you can ignore this message."
 )
+RESET_EMAIL_SUBJECT = "Reset your Link Shortener password"
+RESET_EMAIL_BODY = (
+    "Someone asked to reset the password of your Link Shortener account.\n\n"
+    "To choose a new password, open this link:\n{link}\n\n"
+    "The link works for one hour and can be used only once. If you did not ask for this, "
+    "you can ignore this message. Your password will stay the same."
+)
 
 # Sentences that are looked up dynamically (so a text scan cannot find them).
 EXTRA_KEYS = [
@@ -105,6 +112,7 @@ EXTRA_KEYS = [
     "Hamster", "Deer", "Giraffe", "Zebra", "Cow", "Sheep", "Hedgehog", "Turtle", "Bat", "Octopus",
     "Ladybug", "Bee", "Parrot", "Crocodile", "Whale", "Sloth",
     EMAIL_SUBJECT, EMAIL_BODY, SIGNUP_EMAIL_SUBJECT, SIGNUP_EMAIL_BODY,
+    RESET_EMAIL_SUBJECT, RESET_EMAIL_BODY,
 ]
 
 

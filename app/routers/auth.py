@@ -11,7 +11,14 @@ from ..cache import rate_limit
 from ..config import settings
 from ..database import get_db
 from ..deps import client_ip, get_current_user
-from ..i18n import SIGNUP_EMAIL_BODY, SIGNUP_EMAIL_SUBJECT, get_lang, translate
+from ..i18n import (
+    RESET_EMAIL_BODY,
+    RESET_EMAIL_SUBJECT,
+    SIGNUP_EMAIL_BODY,
+    SIGNUP_EMAIL_SUBJECT,
+    get_lang,
+    translate,
+)
 from ..mailer import email_enabled, send_email
 from ..models import PendingSignup, User, UsernameAlias, as_utc, utcnow
 from ..otp import (
@@ -23,6 +30,7 @@ from ..otp import (
     new_code,
 )
 from ..profile import AVATARS, SCHEMES, THEMES
+from ..resettoken import make_token, site_url, user_for_token
 from ..security import hash_password, verify_password
 from ..templating import flash, render
 from ..utils import validate_email, validate_password, validate_username
@@ -265,7 +273,7 @@ def signup_cancel(request: Request, db: Session = Depends(get_db)):
 def login_page(request: Request, user: User | None = Depends(get_current_user)):
     if user:
         return RedirectResponse("/dashboard", status_code=303)
-    return render(request, "login.html")
+    return render(request, "login.html", email_ready=email_enabled())
 
 
 @router.post("/login")
@@ -276,12 +284,12 @@ def login(
     db: Session = Depends(get_db),
 ):
     if not rate_limit(f"rl:login:{client_ip(request)}", 10, 300):
-        return render(request, "login.html", status_code=429,
+        return render(request, "login.html", status_code=429, email_ready=email_enabled(),
                       error="Too many attempts. Wait a few minutes.")
     ident = identifier.strip().lower()
     user = db.scalar(select(User).where(or_(User.username == ident, User.email == ident)))
     if not user or not verify_password(password, user.password_hash):
-        return render(request, "login.html", status_code=400,
+        return render(request, "login.html", status_code=400, email_ready=email_enabled(),
                       error="Wrong username/email or password.", form={"identifier": identifier})
     user.last_login_at = utcnow()
     db.commit()
@@ -299,3 +307,96 @@ def login(
 def logout(request: Request):
     request.session.clear()
     return RedirectResponse("/", status_code=303)
+
+
+# ---------- forgot password: an emailed link ----------
+
+def send_reset_email(request: Request, user: User) -> None:
+    link = f"{site_url(request)}/reset-password/{make_token(user)}"
+    lang = user.language  # their saved language, not whatever this browser happens to use
+    send_email(user.email, translate(lang, RESET_EMAIL_SUBJECT),
+               translate(lang, RESET_EMAIL_BODY, link=link))
+
+
+def reset_form(request: Request, token: str, status_code: int = 200, **context):
+    response = render(request, "reset_password.html", status_code=status_code, token=token,
+                      **context)
+    response.headers["Cache-Control"] = "no-store"  # the link is a secret: keep it out of caches
+    return response
+
+
+def dead_reset_link(request: Request) -> RedirectResponse:
+    flash(request, "That reset link has expired or was already used. Ask for a new one.", "error")
+    return RedirectResponse("/forgot-password", status_code=303)
+
+
+@router.get("/forgot-password")
+def forgot_page(request: Request, user: User | None = Depends(get_current_user)):
+    if user:
+        return RedirectResponse("/dashboard", status_code=303)
+    return render(request, "forgot_password.html", email_ready=email_enabled())
+
+
+@router.post("/forgot-password")
+def forgot(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
+    if not email_enabled():
+        return render(request, "forgot_password.html", status_code=503, email_ready=False)
+    form = {"email": email.strip()}
+    if not rate_limit(f"rl:forgot:{client_ip(request)}", 10, 3600, local_fallback=True):
+        return render(request, "forgot_password.html", status_code=429, email_ready=True,
+                      error="Too many attempts. Try again later.", form=form)
+    try:
+        email = validate_email(email)
+    except ValueError as e:
+        return render(request, "forgot_password.html", status_code=400, email_ready=True,
+                      error=str(e), form=form)
+
+    # The answer is the same whether or not an account uses this address, so nobody can use this
+    # page to find out who is registered. Asking again and again for one address quietly sends
+    # nothing more (it would only fill that person's inbox).
+    if rate_limit(f"rl:forgotmail:{email}", 3, 3600, local_fallback=True):
+        if not rate_limit(f"rl:resetday:{utcnow():%Y%m%d}", settings.reset_email_daily_limit,
+                          86400, local_fallback=True):
+            return render(request, "forgot_password.html", status_code=429, email_ready=True,
+                          error="Password reset is very busy right now. Please try again later.",
+                          form=form)
+        user = db.scalar(select(User).where(User.email == email))
+        if user:
+            send_reset_email(request, user)
+    flash(request, "If an account uses {email}, we sent a link to reset its password. "
+                   "It works for one hour.", "success", email=email)
+    return RedirectResponse("/login", status_code=303)
+
+
+@router.get("/reset-password/{token}")
+def reset_page(request: Request, token: str, db: Session = Depends(get_db)):
+    if user_for_token(db, token) is None:
+        return dead_reset_link(request)
+    return reset_form(request, token)
+
+
+@router.post("/reset-password/{token}")
+def reset_password(
+    request: Request,
+    token: str,
+    new_password: str = Form(...),
+    confirm_password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    if not rate_limit(f"rl:reset:{client_ip(request)}", 20, 3600, local_fallback=True):
+        return reset_form(request, token, 429, error="Too many attempts. Try again later.")
+    user = user_for_token(db, token)
+    if user is None:
+        return dead_reset_link(request)
+    try:
+        validate_password(new_password)
+    except ValueError as e:
+        return reset_form(request, token, 400, error=str(e))
+    if new_password != confirm_password:
+        return reset_form(request, token, 400, error="The two passwords do not match.")
+    user.password_hash = hash_password(new_password)
+    if user.email_verified_at is None:
+        user.email_verified_at = utcnow()  # the link proved they can read this mailbox
+    db.commit()
+    flash(request, "Password changed. Log in with your new password.", "success")
+    return RedirectResponse("/login", status_code=303)

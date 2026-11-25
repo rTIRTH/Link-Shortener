@@ -13,6 +13,7 @@
     </label>
     <button class="btn" type="submit">{{ _("Log in") }}</button>
   </form>
+  {% if email_ready %}<p class="muted"><a href="/forgot-password">{{ _("Forgot password?") }}</a></p>{% endif %}
   <p class="muted">{{ _("New here?") }} <a href="/register">{{ _("Create an account") }}</a></p>
 </section>
 {% endblock %}
