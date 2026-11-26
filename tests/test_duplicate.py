@@ -178,6 +178,14 @@ def test_the_toolbar_button_is_there_and_starts_disabled(alice, app):
     assert "duplicate.disabled = n !== 1" in html                   # it wakes up for exactly one
 
 
+def test_the_one_link_buttons_read_edit_analytics_duplicate_share(alice, app):
+    make(alice, "promo")
+    html = page(alice)
+    group = html[html.index('class="selection-actions"'):]
+    order = [group.index(f">{word}<") for word in ("Edit", "Analytics", "Duplicate", "Share")]
+    assert order == sorted(order)                                   # Share is the last button
+
+
 @pytest.mark.parametrize("ids", [[], [1, 2]])
 def test_the_toolbar_needs_exactly_one_link(alice, app, ids):
     make(alice, "one")

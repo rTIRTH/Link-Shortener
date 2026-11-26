@@ -147,12 +147,12 @@
               id="stats-selected" data-max="{{ max_compare }}" disabled
               title="{{ _('Select one or more links to see their analytics. Pick several to compare them in one graph.') }}">
         {{ icon('analytics') }}<span>{{ _("Analytics") }}</span></button>
-      <button class="btn small ghost" type="button" id="share-selected" disabled
-              title="{{ _('Select one link to share it.') }}">
-        {{ icon('share') }}<span>{{ _("Share") }}</span></button>
       <button class="btn small ghost" type="submit" formaction="/dashboard/links/duplicate"
               id="duplicate-selected" disabled title="{{ _('Select one link to duplicate it.') }}">
         {{ icon('copy') }}<span>{{ _("Duplicate") }}</span></button>
+      <button class="btn small ghost" type="button" id="share-selected" disabled
+              title="{{ _('Select one link to share it.') }}">
+        {{ icon('share') }}<span>{{ _("Share") }}</span></button>
     </div>
   </form>
 
