@@ -191,9 +191,9 @@ def test_each_toolbar_button_has_an_icon_then_its_word(alice):
 def test_the_three_icons_are_different_drawings(alice):
     make(alice)
     bar = toolbar(alice.get("/dashboard").text)
-    bar = bar[bar.index('class="selection-actions"'):]  # Edit, Analytics, Share (not Archive)
+    bar = bar[bar.index('class="selection-actions"'):]  # Edit, Analytics, Share, Duplicate
     icons = re.findall(r'<svg class="ico".*?</svg>', bar, re.S)
-    assert len(icons) == 3 and len(set(icons)) == 3
+    assert len(icons) == 4 and len(set(icons)) == 4
     assert "<circle" in icons[1]  # the magnifier of Analytics
 
 

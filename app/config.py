@@ -31,6 +31,13 @@ class Settings:
         self.signup_code_daily_limit = int(os.getenv("SIGNUP_CODES_PER_DAY", "200"))
         # Most password-reset emails the site will send per day (they share the same email quota)
         self.reset_email_daily_limit = int(os.getenv("RESET_EMAILS_PER_DAY", "50"))
+        # Click-alert emails (link reached its limit, N clicks, ends soon): most per day, in all
+        # and for one person. They share the same email quota.
+        self.alert_email_daily_limit = int(os.getenv("ALERT_EMAILS_PER_DAY", "100"))
+        self.alert_user_daily_limit = int(os.getenv("ALERT_EMAILS_PER_USER", "10"))
+        # A password for /run-alerts, so a free cron service can ask the site to send the alerts
+        # that are due, such as "ends soon" (empty = that address is switched off).
+        self.cron_secret = os.getenv("CRON_SECRET", "")
         # Email (for OTP codes). Render's free tier blocks SMTP, so we use HTTPS email APIs.
         self.brevo_api_key = os.getenv("BREVO_API_KEY", "")
         self.resend_api_key = os.getenv("RESEND_API_KEY", "")

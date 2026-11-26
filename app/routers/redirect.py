@@ -9,6 +9,7 @@ from itsdangerous import BadSignature, URLSafeTimedSerializer
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session, sessionmaker
 
+from .. import alerts
 from ..cache import cache_get, cache_set, rate_limit
 from ..config import settings
 from ..database import get_db
@@ -22,6 +23,7 @@ from ..insights import (
     visitor_id,
 )
 from ..models import Click, Link, User, UsernameAlias, as_utc, utcnow
+from ..resettoken import site_url
 from ..security import verify_password
 from ..templating import render
 from ..utils import parse_device
@@ -46,6 +48,7 @@ def record_click(
     geo: tuple[str | None, str | None] = (None, None),
     tag: str | None = None,
     counted: bool = False,
+    site: str = "",
 ):
     """Runs AFTER the redirect is sent, so analytics never slow the visitor down.
 
@@ -53,6 +56,7 @@ def record_click(
     it before redirecting, so two visitors can never both take the last click).
 
     The address is only used for the country lookup and a one-way visitor id; it is not stored.
+    `site` is where this server lives, for the links inside alert emails.
     """
     try:
         with factory() as db:
@@ -73,6 +77,11 @@ def record_click(
             db.commit()
     except Exception:  # analytics must never break redirects
         log.exception("Failed to record click for link %s", link_id)
+    try:  # the click is counted: did it reach a limit or a milestone its owner wants to hear of?
+        alerts.after_click(factory, link_id, site)
+        alerts.maybe_sweep(factory, site)
+    except Exception:
+        log.exception("Alert check failed for link %s", link_id)
 
 
 def load_link(db: Session, username: str, slug: str) -> dict:
@@ -172,6 +181,7 @@ def count_click(
         geo_from_headers(request.headers),
         request.query_params.get("ref") or request.query_params.get("utm_source"),
         counted,
+        site_url(request),
     )
 
 

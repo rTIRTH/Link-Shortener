@@ -52,6 +52,20 @@
                    placeholder="{{ _('A message for visitors (optional)') }}">
           {% else %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
         </div>
+        {% set alerts_on = email_ready and can('alerts') %}
+        <fieldset class="field field-wide alerts-box">
+          <legend>{{ _("Email alerts") }} <small>{{ _("(optional)") }}</small></legend>
+          <small class="field-note">{{ _("We email you once for each alert, at the address on your account.") }}</small>
+          <div class="alert-choices">
+            <label class="check"><input type="checkbox" name="alert_limit" value="1" {% if not alerts_on %}disabled{% endif %}> {{ _("When the click limit is reached") }}</label>
+            <label class="check"><input type="checkbox" name="alert_expiry" value="1" {% if not alerts_on %}disabled{% endif %}> {{ _("About a day before the link ends") }}</label>
+            <label class="alert-clicks">{{ _("When it reaches this many clicks") }}
+              <input name="alert_clicks" inputmode="numeric" maxlength="9" autocomplete="off" placeholder="{{ _('e.g. {example}', example='100') }}" {% if not alerts_on %}disabled{% endif %}>
+            </label>
+          </div>
+          {% if not email_ready %}<small class="lock-note">{{ icon('lock') }}{{ _("Email alerts need email sending, which is not set up on this server yet.") }}</small>
+          {% elif not can('alerts') %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+        </fieldset>
         <fieldset class="field field-wide utm-box">
           <legend>{{ _("Campaign tracking (UTM)") }} <small>{{ _("(optional)") }}</small></legend>
           <small class="field-note">{{ _("These tags are added to the end of the destination address, so analytics tools can tell where your visitors came from.") }}</small>
@@ -67,7 +81,7 @@
     </details>
   </form>
   <p class="muted import-hint">
-    {% if can('csv_import') %}<a href="/dashboard/links/import">{{ _("Import many links from a CSV file") }}</a>
+    {% if can('csv_import') %}<a class="btn small ghost" href="/dashboard/links/import">{{ _("Import many links from a CSV file") }}</a>
     {% else %}<span class="lock-note">{{ icon('lock') }}{{ _("Import many links from a CSV file") }} · {{ _("This feature is part of a paid plan.") }}</span>{% endif %}
   </p>
 </section>
@@ -104,6 +118,24 @@
     {% else %}
       <button class="btn small ghost has-icon" type="button" disabled title="{{ _('This feature is part of a paid plan.') }}">{{ icon('lock') }}<span>{{ _("Archive") }}</span></button>
     {% endif %}
+    {% if can('tags') %}
+      <details class="bulk-tags">
+        <summary class="btn small ghost has-icon" title="{{ _('Put tags on the selected links, or take them off.') }}">{{ icon('tag') }}<span>{{ _("Tag selected") }}</span></summary>
+        <div class="bt-panel">
+          <label for="bulk-tags-input">{{ _("Tags") }}
+            <input id="bulk-tags-input" name="bulk_tags" data-tag-input data-bulk-tags autocomplete="off" maxlength="200" placeholder="{{ _('e.g. work, school') }}">
+          </label>
+          <small class="field-note">{{ _("Separate tags with commas. Up to 5 per link.") }}</small>
+          {% if all_tags %}<div class="chips">{% for t in all_tags %}<button type="button" class="chip s{{ t.color }}" data-tag-pick="{{ t.name }}" data-target="bulk-tags-input" aria-pressed="false">{{ t.name }}</button>{% endfor %}</div>{% endif %}
+          <div class="bt-buttons">
+            <button class="btn small" type="submit" id="bulk-tag-add" formaction="/dashboard/links/tags" name="action" value="add">{{ _("Add tags") }}</button>
+            <button class="btn small ghost" type="submit" formaction="/dashboard/links/tags" name="action" value="remove">{{ _("Remove tags") }}</button>
+          </div>
+        </div>
+      </details>
+    {% else %}
+      <button class="btn small ghost has-icon" type="button" disabled title="{{ _('This feature is part of a paid plan.') }}">{{ icon('lock') }}<span>{{ _("Tag selected") }}</span></button>
+    {% endif %}
     <button class="btn small ghost" type="submit" formmethod="get" formaction="/dashboard/links/qr.zip"
             title="{{ _('QR download uses the selected links, or all links if none are selected.') }}">{{ _("Download QR codes") }}</button>
     <a class="btn small ghost" href="/dashboard/links/export.csv">{{ _("Export CSV") }}</a>
@@ -118,6 +150,9 @@
       <button class="btn small ghost" type="button" id="share-selected" disabled
               title="{{ _('Select one link to share it.') }}">
         {{ icon('share') }}<span>{{ _("Share") }}</span></button>
+      <button class="btn small ghost" type="submit" formaction="/dashboard/links/duplicate"
+              id="duplicate-selected" disabled title="{{ _('Select one link to duplicate it.') }}">
+        {{ icon('copy') }}<span>{{ _("Duplicate") }}</span></button>
     </div>
   </form>
 
@@ -176,12 +211,14 @@
       var edit = document.getElementById('edit-selected');
       var stats = document.getElementById('stats-selected');
       var share = document.getElementById('share-selected');
+      var duplicate = document.getElementById('duplicate-selected');
       var max = parseInt(stats.getAttribute('data-max'), 10);
       function sync() {
         var n = picks.filter(function (c) { return c.checked; }).length;
         edit.disabled = n !== 1;           // Edit works on exactly one link
         stats.disabled = n < 1 || n > max; // Stats works on one link, or several to compare
         share.disabled = n !== 1;          // Share works on exactly one link
+        duplicate.disabled = n !== 1;      // so does Duplicate
       }
       all.addEventListener('change', function (e) {
         picks.forEach(function (c) { c.checked = e.target.checked; });

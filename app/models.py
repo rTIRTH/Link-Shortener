@@ -126,6 +126,20 @@ class Link(Base):
     qr_logo: Mapped[bytes | None] = deferred(mapped_column(LargeBinary, nullable=True))
     # Archived links are hidden from the dashboard list but keep working and keep their stats.
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Email alerts to the owner (see app/alerts.py): what they asked to hear about ...
+    alert_limit: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    alert_expiry: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    alert_clicks: Mapped[int | None] = mapped_column(Integer, nullable=True)  # tell me at N clicks
+    # ... and when each one was sent (None = not yet). Changing the setting arms it again.
+    alert_limit_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    alert_expiry_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    alert_clicks_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     owner: Mapped[User] = relationship(back_populates="links")
     tags: Mapped[list[Tag]] = relationship(

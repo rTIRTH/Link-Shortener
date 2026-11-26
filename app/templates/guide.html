@@ -15,9 +15,11 @@
   ('schedule', _("Schedule a link")),
   ('password', _("Password-protected links")),
   ('limit', _("Click limit")),
+  ('alerts', _("Email alerts")),
   ('tags', _("Tags")),
   ('archive', _("Archive")),
   ('edit', _("Edit a link")),
+  ('duplicate', _("Duplicate a link")),
   ('preview', _("Preview page")),
   ('utm', _("Campaign tracking (UTM)")),
   ('analytics', _("Analytics")),
@@ -58,10 +60,17 @@
     <li>{{ _("To open the link again, raise the limit on the Edit page.") }}</li>
   {% endcall %}
 
+  {% call feature('alerts', _("Email alerts"), _("Get an email when something happens to a link, without watching the dashboard.")) %}
+    <li>{{ _("Open More options, then Advanced, and find Email alerts. On the Edit page it has its own box.") }}</li>
+    <li>{{ _("Tick When the click limit is reached or About a day before the link ends, or type a number in When it reaches this many clicks.") }}</li>
+    <li>{{ _("You get one email for each alert, at the address on your account. Change a setting and that alert is ready to be sent again.") }}</li>
+  {% endcall %}
+
   {% call feature('tags', _("Tags"), _("Group your links with labels such as work or school.")) %}
     <li>{{ _("Type tags separated by commas when you create or edit a link.") }}</li>
     <li>{{ _("Click a tag above your list to see only the links that have it.") }}</li>
     <li>{{ _("Press Compare this tag to see all its links in one graph.") }}</li>
+    <li>{{ _("To tag many links at once, tick them, press Tag selected, type the tags and press Add tags. Remove tags takes them off again.") }}</li>
   {% endcall %}
 
   {% call feature('archive', _("Archive"), _("Tidy your list without losing anything.")) %}
@@ -74,6 +83,12 @@
     <li>{{ _("Tick a link and press Edit.") }}</li>
     <li>{{ _("Change the destination, schedule, click limit, tags or password, then save.") }}</li>
     <li>{{ _("Every change of destination is written in the activity log, with the old and new address.") }}</li>
+  {% endcall %}
+
+  {% call feature('duplicate', _("Duplicate a link"), _("Make a new link from an old one, with the same settings.")) %}
+    <li>{{ _("Tick a link and press Duplicate, or press Duplicate link on its Edit page.") }}</li>
+    <li>{{ _("The copy has the same destination, schedule, password, tags and settings, and starts with no clicks. Its short name ends in -copy.") }}</li>
+    <li>{{ _("Change whatever you like on the page that opens, then press Save changes.") }}</li>
   {% endcall %}
 
   {% call feature('preview', _("Preview page"), _("Show visitors where they are going before they are sent on.")) %}

@@ -49,6 +49,14 @@
     {% endif %}
   </section>
 
+  <section class="panel">
+    <h2>{{ _("Duplicate") }}</h2>
+    <p class="muted">{{ _("Make a new link with the same destination and settings. It starts with no clicks.") }}</p>
+    <form method="post" action="/dashboard/links/{{ link.id }}/duplicate" class="inline">
+      <button class="btn small ghost has-icon" type="submit">{{ icon('copy') }}<span>{{ _("Duplicate link") }}</span></button>
+    </form>
+  </section>
+
   <section class="panel" id="qr">
     <h2>{{ _("QR code") }}</h2>
     <p class="muted">{{ _("Choose colours and put a small logo in the middle. Keep the code dark on a light background so phones can scan it.") }}</p>
@@ -108,6 +116,23 @@
       </label>
       {% if not can('click_limit') %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
       <p class="muted">{{ _n("{n} click used so far.", "{n} clicks used so far.", link.click_count) }}</p>
+    </section>
+
+    <section class="panel">
+      <h2>{{ _("Email alerts") }}</h2>
+      <p class="muted">{{ _("Get an email when something happens to this link.") }} {{ _("We email you once for each alert, at the address on your account.") }}</p>
+      {% set alerts_on = email_ready and can('alerts') %}
+      {% if alerts_on %}<input type="hidden" name="alerts_box" value="1">{% endif %}
+      <div class="alert-choices">
+        <label class="check"><input type="checkbox" name="alert_limit" value="1" {% if link.alert_limit %}checked{% endif %} {% if not alerts_on %}disabled{% endif %}> {{ _("When the click limit is reached") }}</label>
+        <label class="check"><input type="checkbox" name="alert_expiry" value="1" {% if link.alert_expiry %}checked{% endif %} {% if not alerts_on %}disabled{% endif %}> {{ _("About a day before the link ends") }}</label>
+        <label class="alert-clicks">{{ _("When it reaches this many clicks") }}
+          <input name="alert_clicks" inputmode="numeric" maxlength="9" autocomplete="off" value="{{ link.alert_clicks or '' }}"
+                 placeholder="{{ _('e.g. {example}', example='100') }}" {% if not alerts_on %}disabled{% endif %}>
+        </label>
+      </div>
+      {% if not email_ready %}<p class="lock-note">{{ icon('lock') }}{{ _("Email alerts need email sending, which is not set up on this server yet.") }}</p>
+      {% elif not can('alerts') %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
     </section>
 
     <section class="panel">

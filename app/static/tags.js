@@ -27,5 +27,13 @@
   document.addEventListener('input', function (e) {
     if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-tag-input')) sync(e.target);
   });
+  // Enter in the "Tag selected" box means "Add tags". Without this the browser would press the first
+  // button of the toolbar form, which is "Delete selected".
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || !e.target || !e.target.hasAttribute || !e.target.hasAttribute('data-bulk-tags')) return;
+    e.preventDefault();
+    var add = document.getElementById('bulk-tag-add');
+    if (add) add.click();
+  });
   document.querySelectorAll('[data-tag-input]').forEach(sync);
 })();

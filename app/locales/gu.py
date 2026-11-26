@@ -975,4 +975,87 @@ MESSAGES = {
     "Reset your Link Shortener password": "તમારો Link Shortener પાસવર્ડ રીસેટ કરો",
     "Someone asked to reset the password of your Link Shortener account.\n\nTo choose a new password, open this link:\n{link}\n\nThe link works for one hour and can be used only once. If you did not ask for this, you can ignore this message. Your password will stay the same.":
         "કોઈએ તમારા Link Shortener ખાતાનો પાસવર્ડ રીસેટ કરવા કહ્યું છે.\n\nનવો પાસવર્ડ પસંદ કરવા માટે આ લિંક ખોલો:\n{link}\n\nઆ લિંક એક કલાક સુધી ચાલે છે અને ફક્ત એક જ વાર વાપરી શકાય છે. જો તમે આ માંગ્યું ન હોય, તો તમે આ સંદેશ અવગણી શકો છો. તમારો પાસવર્ડ જેવો છે તેવો જ રહેશે.",
+    # ---- email alerts, duplicate link, tag many links ----
+    "About a day before the link ends":
+        "લિંક પૂરી થવાના લગભગ એક દિવસ પહેલાં",
+    "Add tags":
+        "ટૅગ ઉમેરો",
+    "Change whatever you like on the page that opens, then press Save changes.":
+        "ખુલતા પેજ પર જે જોઈએ તે બદલો, પછી \"ફેરફારો સાચવો\" દબાવો.",
+    "Choose a number higher than the clicks this link already has.":
+        "એવી સંખ્યા પસંદ કરો જે આ લિંકના અત્યાર સુધીના ક્લિક કરતાં વધુ હોય.",
+    "Duplicate":
+        "ડુપ્લિકેટ કરો",
+    "Duplicate a link":
+        "લિંક ડુપ્લિકેટ કરો",
+    "Duplicate link":
+        "લિંક ડુપ્લિકેટ કરો",
+    "Email alerts":
+        "ઇમેઇલ ચેતવણીઓ",
+    "Email alerts need email sending, which is not set up on this server yet.":
+        "ઇમેઇલ ચેતવણીઓ માટે ઇમેઇલ મોકલવો જરૂરી છે, જે આ સર્વર પર હજી સેટ નથી.",
+    "Get an email when something happens to a link, without watching the dashboard.":
+        "ડેશબોર્ડ પર નજર રાખ્યા વિના, લિંક સાથે કંઈક થાય ત્યારે ઇમેઇલ મેળવો.",
+    "Get an email when something happens to this link.":
+        "આ લિંક સાથે કંઈક થાય ત્યારે ઇમેઇલ મેળવો.",
+    "Link duplicated as {slug}. Change what you like below.":
+        "લિંક {slug} નામે ડુપ્લિકેટ થઈ. નીચે જે જોઈએ તે બદલો.",
+    "Make a new link from an old one, with the same settings.":
+        "જૂની લિંકમાંથી એ જ સેટિંગ સાથે નવી લિંક બનાવો.",
+    "Make a new link with the same destination and settings. It starts with no clicks.":
+        "એ જ ગંતવ્ય અને સેટિંગ સાથે નવી લિંક બનાવો. તે એક પણ ક્લિક વિના શરૂ થાય છે.",
+    "Open More options, then Advanced, and find Email alerts. On the Edit page it has its own box.":
+        "\"વધુ વિકલ્પો\" ખોલો, પછી \"ઍડ્વાન્સ્ડ\" માં \"ઇમેઇલ ચેતવણીઓ\" શોધો. \"ફેરફાર કરો\" પેજ પર તેનું પોતાનું બૉક્સ છે.",
+    "Put tags on the selected links, or take them off.":
+        "પસંદ કરેલી લિંક પર ટૅગ લગાવો, અથવા તેમને કાઢી નાખો.",
+    "Remove tags":
+        "ટૅગ કાઢો",
+    "Select exactly one link to duplicate.":
+        "ડુપ્લિકેટ કરવા માટે બરાબર એક લિંક પસંદ કરો.",
+    "Select one link to duplicate it.":
+        "ડુપ્લિકેટ કરવા માટે એક લિંક પસંદ કરો.",
+    "Set a click limit first, then you can be told when it is reached.":
+        "પહેલાં ક્લિક મર્યાદા નક્કી કરો, પછી તે પૂરી થાય ત્યારે તમને જાણ થઈ શકશે.",
+    "Set an end time first, then you can be told before it ends.":
+        "પહેલાં સમાપ્તિનો સમય નક્કી કરો, પછી તે પૂરી થતાં પહેલાં તમને જાણ થઈ શકશે.",
+    "Tag selected":
+        "પસંદ કરેલીને ટૅગ કરો",
+    "Tags added to {n} link(s).":
+        "{n} લિંક પર ટૅગ ઉમેર્યા.",
+    "Tags removed from {n} link(s).":
+        "{n} લિંકમાંથી ટૅગ કાઢ્યા.",
+    "The copy has the same destination, schedule, password, tags and settings, and starts with no clicks. Its short name ends in -copy.":
+        "નકલમાં એ જ ગંતવ્ય, સમયપત્રક, પાસવર્ડ, ટૅગ અને સેટિંગ હોય છે, અને તે એક પણ ક્લિક વિના શરૂ થાય છે. તેના ટૂંકા નામના અંતે -copy હોય છે.",
+    "The number of clicks must be a whole number from 1 to 1,000,000.":
+        "ક્લિકની સંખ્યા 1 થી 1,000,000 વચ્ચેની પૂર્ણ સંખ્યા હોવી જોઈએ.",
+    "Tick When the click limit is reached or About a day before the link ends, or type a number in When it reaches this many clicks.":
+        "\"જ્યારે ક્લિક મર્યાદા પૂરી થાય\" અથવા \"લિંક પૂરી થવાના લગભગ એક દિવસ પહેલાં\" પર ટિક કરો, અથવા \"જ્યારે આટલા ક્લિક પૂરા થાય\" માં એક સંખ્યા લખો.",
+    "Tick a link and press Duplicate, or press Duplicate link on its Edit page.":
+        "એક લિંક પસંદ કરો અને \"ડુપ્લિકેટ કરો\" દબાવો, અથવા તેના \"ફેરફાર કરો\" પેજ પર \"લિંક ડુપ્લિકેટ કરો\" દબાવો.",
+    "To tag many links at once, tick them, press Tag selected, type the tags and press Add tags. Remove tags takes them off again.":
+        "એકસાથે ઘણી લિંકને ટૅગ કરવા માટે તેમને પસંદ કરો, \"પસંદ કરેલીને ટૅગ કરો\" દબાવો, ટૅગ લખો અને \"ટૅગ ઉમેરો\" દબાવો. \"ટૅગ કાઢો\" તેમને ફરી કાઢી નાખે છે.",
+    "Type at least one tag first.":
+        "પહેલાં ઓછામાં ઓછો એક ટૅગ લખો.",
+    "We email you once for each alert, at the address on your account.":
+        "અમે દરેક ચેતવણી માટે એક વાર, તમારા ખાતાના સરનામે ઇમેઇલ મોકલીએ છીએ.",
+    "When it reaches this many clicks":
+        "જ્યારે આટલા ક્લિક પૂરા થાય",
+    "When the click limit is reached":
+        "જ્યારે ક્લિક મર્યાદા પૂરી થાય",
+    "You get one email for each alert, at the address on your account. Change a setting and that alert is ready to be sent again.":
+        "દરેક ચેતવણી માટે તમને એક ઇમેઇલ મળે છે, તમારા ખાતાના સરનામે. કોઈ સેટિંગ બદલો તો તે ચેતવણી ફરી મોકલી શકાય છે.",
+    "{n} link(s) already have 5 tags, so they were skipped.":
+        "{n} લિંક પર પહેલેથી 5 ટૅગ છે, એટલે તેમને છોડી દીધી.",
+    "Your link {name} ends soon":
+        "તમારી લિંક {name} જલ્દી પૂરી થશે",
+    "Your link {name} has reached its click limit":
+        "તમારી લિંક {name} ની ક્લિક મર્યાદા પૂરી થઈ ગઈ",
+    "Your link {name} has reached {count} click(s)":
+        "તમારી લિંક {name} {count} ક્લિક સુધી પહોંચી",
+    "Your short link {link} has now reached {count} click(s).\n\nSee who is clicking:\n{stats}\n\nYou get this email because you asked to be told at this number of clicks. You can change it here:\n{edit}":
+        "તમારી ટૂંકી લિંક {link} હવે {count} ક્લિક સુધી પહોંચી છે.\n\nજુઓ કોણ ક્લિક કરી રહ્યું છે:\n{stats}\n\nતમને આ ઇમેઇલ એટલા માટે મળ્યો છે કારણ કે તમે આટલા ક્લિક પર જાણ કરવા કહ્યું હતું. તમે તેને અહીં બદલી શકો છો:\n{edit}",
+    "Your short link {link} has used all {limit} of its clicks, so it no longer sends people to its destination.\n\nTo open it again, raise the limit here:\n{edit}\n\nYou get this email because you turned on alerts for this link. You can turn them off on the same page.":
+        "તમારી ટૂંકી લિંક {link} ના બધા {limit} ક્લિક વપરાઈ ગયા છે, એટલે હવે તે લોકોને તેના ગંતવ્ય પર મોકલતી નથી.\n\nતેને ફરી ખોલવા માટે અહીં મર્યાદા વધારો:\n{edit}\n\nતમને આ ઇમેઇલ એટલા માટે મળ્યો છે કારણ કે તમે આ લિંક માટે ચેતવણીઓ ચાલુ કરી હતી. તમે તેને આ જ પેજ પર બંધ કરી શકો છો.",
+    "Your short link {link} will stop working on {when}.\n\nTo keep it going, move its end time here:\n{edit}\n\nYou get this email because you turned on alerts for this link. You can turn them off on the same page.":
+        "તમારી ટૂંકી લિંક {link} {when} એ કામ કરવાનું બંધ કરશે.\n\nતેને ચાલુ રાખવા માટે અહીં તેનો સમાપ્તિ સમય આગળ વધારો:\n{edit}\n\nતમને આ ઇમેઇલ એટલા માટે મળ્યો છે કારણ કે તમે આ લિંક માટે ચેતવણીઓ ચાલુ કરી હતી. તમે તેને આ જ પેજ પર બંધ કરી શકો છો.",
 }

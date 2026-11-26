@@ -91,6 +91,27 @@ RESET_EMAIL_BODY = (
     "The link works for one hour and can be used only once. If you did not ask for this, "
     "you can ignore this message. Your password will stay the same."
 )
+ALERT_LIMIT_SUBJECT = "Your link {name} has reached its click limit"
+ALERT_LIMIT_BODY = (
+    "Your short link {link} has used all {limit} of its clicks, so it no longer sends people "
+    "to its destination.\n\nTo open it again, raise the limit here:\n{edit}\n\n"
+    "You get this email because you turned on alerts for this link. "
+    "You can turn them off on the same page."
+)
+ALERT_CLICKS_SUBJECT = "Your link {name} has reached {count} click(s)"
+ALERT_CLICKS_BODY = (
+    "Your short link {link} has now reached {count} click(s).\n\n"
+    "See who is clicking:\n{stats}\n\n"
+    "You get this email because you asked to be told at this number of clicks. "
+    "You can change it here:\n{edit}"
+)
+ALERT_EXPIRY_SUBJECT = "Your link {name} ends soon"
+ALERT_EXPIRY_BODY = (
+    "Your short link {link} will stop working on {when}.\n\n"
+    "To keep it going, move its end time here:\n{edit}\n\n"
+    "You get this email because you turned on alerts for this link. "
+    "You can turn them off on the same page."
+)
 
 # Sentences that are looked up dynamically (so a text scan cannot find them).
 EXTRA_KEYS = [
@@ -113,6 +134,8 @@ EXTRA_KEYS = [
     "Ladybug", "Bee", "Parrot", "Crocodile", "Whale", "Sloth",
     EMAIL_SUBJECT, EMAIL_BODY, SIGNUP_EMAIL_SUBJECT, SIGNUP_EMAIL_BODY,
     RESET_EMAIL_SUBJECT, RESET_EMAIL_BODY,
+    ALERT_LIMIT_SUBJECT, ALERT_LIMIT_BODY, ALERT_CLICKS_SUBJECT, ALERT_CLICKS_BODY,
+    ALERT_EXPIRY_SUBJECT, ALERT_EXPIRY_BODY,
 ]
 
 

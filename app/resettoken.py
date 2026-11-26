@@ -46,12 +46,19 @@ def user_for_token(db: Session, token: str) -> User | None:
     return user
 
 
+def configured_site_url() -> str:
+    """The server's own address from its settings ('' if nobody has set one).
+
+    Render tells every service its own address, so on Render this is always known.
+    """
+    return settings.base_url or os.getenv("RENDER_EXTERNAL_URL", "").rstrip("/")
+
+
 def site_url(request) -> str:
     """The address to put in an emailed link.
 
     It comes from the server's own settings, never from the visitor's Host header: otherwise
     someone could ask for a reset with a made-up Host and get the victim emailed a link that
-    leads to the attacker's site. Render tells every service its own address.
+    leads to the attacker's site. The request's address is only the last resort (local work).
     """
-    fixed = settings.base_url or os.getenv("RENDER_EXTERNAL_URL", "").rstrip("/")
-    return fixed or str(request.base_url).rstrip("/")
+    return configured_site_url() or str(request.base_url).rstrip("/")

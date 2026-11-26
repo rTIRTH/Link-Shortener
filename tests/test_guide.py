@@ -7,8 +7,8 @@ import pytest
 
 from app.models import Link
 
-SECTIONS = ["create", "schedule", "password", "limit", "tags", "archive", "edit", "preview", "utm",
-            "analytics", "share", "data", "safety"]
+SECTIONS = ["create", "schedule", "password", "limit", "alerts", "tags", "archive", "edit",
+            "duplicate", "preview", "utm", "analytics", "share", "data", "safety"]
 
 
 def cards(page):
@@ -72,7 +72,11 @@ def test_the_guide_names_buttons_that_really_exist(alice, app):
              "Deactivate link", "Compare this tag", "Analytics", "Audience", "Share",
              "Download QR", "Download QR codes", "Export CSV",
              "Import many links from a CSV file", "Show a preview page before redirecting",
-             "Source", "Medium", "Campaign", "Visitors will land on", "QR code"]
+             "Source", "Medium", "Campaign", "Visitors will land on", "QR code",
+             "Email alerts", "When the click limit is reached",
+             "About a day before the link ends", "When it reaches this many clicks",
+             "Duplicate", "Duplicate link", "Tag selected", "Add tags", "Remove tags",
+             "Save changes"]
     for label in named:
         assert label in screens, f"the guide mentions '{label}' but no screen has it"
         assert label in guide, f"'{label}' is not used in the guide any more"

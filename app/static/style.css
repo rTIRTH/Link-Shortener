@@ -305,7 +305,7 @@ td .btn.small { padding: 5px 11px; font-size: .82rem; white-space: nowrap; }
 /* Edit and Stats stretch to fill the rest of the row, so it ends flush with the table */
 /* Edit, Analytics and Share: compact buttons (icon + word) on the right of the toolbar, level with the end of the
    table. When the row is too narrow they drop to the next line, still on the right. */
-.selection-actions { display: flex; gap: 8px; flex: 0 0 auto; margin-left: auto; }
+.selection-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; flex: 0 0 auto; max-width: 100%; margin-left: auto; }
 .selection-actions .btn { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
 .btn .ico { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2;
             stroke-linecap: round; stroke-linejoin: round; }
@@ -646,7 +646,7 @@ button.chip { font-family: var(--sans); }
 input:disabled { opacity: .6; cursor: not-allowed; }
 .dest-change { display: block; margin-top: 2px; color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
 .dest-change s { opacity: .75; }
-.import-hint { margin: 10px 2px 0; font-size: .9rem; }
+.import-hint { margin: 14px 2px 20px; font-size: .9rem; }
 .import-form { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .clip { max-width: 22rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -684,9 +684,9 @@ input:disabled { opacity: .6; cursor: not-allowed; }
 .check input { width: 18px; height: 18px; margin: 0; }
 .pv-msg { display: none; margin-top: 8px; }
 .pv-scope:has(.pv-toggle:checked) .pv-msg { display: block; }
-.utm-box { margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
-.utm-box legend { padding: 0 6px; font-weight: 600; font-size: .92rem; }
-.utm-box legend small { font-weight: 400; color: var(--muted); }
+.utm-box, .alerts-box { margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.utm-box legend, .alerts-box legend { padding: 0 6px; font-weight: 600; font-size: .92rem; }
+.utm-box legend small, .alerts-box legend small { font-weight: 400; color: var(--muted); }
 .utm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 10px; }
 .utm-grid label { display: grid; gap: 4px; font-weight: 600; font-size: .9rem; }
 .utm-final { margin: 12px 0 0; overflow-wrap: anywhere; }
@@ -714,3 +714,40 @@ input[type="color"] { width: 56px; height: 38px; padding: 2px; border-radius: 8p
 /* only the icon of the mode you are in is shown; it changes the moment the mode does */
 :root[data-theme="light"] .modebtn .i-light, :root[data-theme="system"] .modebtn .i-system,
 :root[data-theme="dark"] .modebtn .i-dark { display: block; }
+
+/* ---- email alerts: three choices in a column ---- */
+.alert-choices { display: grid; gap: 12px; margin-top: 12px; justify-items: start; }
+.alert-choices .check { font-weight: 500; }
+.alert-clicks { display: grid; gap: 4px; width: min(100%, 260px); font-weight: 600; font-size: .9rem; }
+
+/* ---- "Tag selected" in the dashboard toolbar: a small panel under the button ---- */
+.bulk-tags { position: relative; }
+.bulk-tags summary { display: inline-flex; align-items: center; gap: 7px; list-style: none; cursor: pointer; white-space: nowrap; }
+.bulk-tags summary::-webkit-details-marker { display: none; }
+.bulk-tags[open] summary { border-color: var(--accent); }
+.bt-panel { position: absolute; left: 0; top: calc(100% + 8px); z-index: 20; display: grid; gap: 8px;
+            width: min(320px, 86vw); padding: 14px; background: var(--card); border: 1px solid var(--line);
+            border-radius: 12px; box-shadow: var(--shadow); }
+.bt-panel label { display: grid; gap: 4px; font-weight: 600; font-size: .9rem; }
+.bt-panel .field-note { margin: 0; }
+.bt-panel .chips { margin: 0; }
+.bt-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+@media (max-width: 640px) {  /* on a phone the panel is a sheet at the bottom, like the date picker */
+  .bt-panel { position: fixed; left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 80vh; overflow: auto; }
+}
+
+/* the second button in the share pop-up (Download QR as SVG) spans both columns */
+.sd-top .sd-wide { grid-column: 1 / -1; }
+
+/* ---- a tighter top bar on narrow phones: the name never breaks onto a second line ---- */
+.brand { white-space: nowrap; }
+@media (max-width: 480px) {
+  .topbar { padding: 10px 14px; gap: 8px 12px; }
+  .brand { font-size: .98rem; }
+  .brand-mark { width: 26px; height: 26px; margin-right: 6px; vertical-align: -7px; }
+  .topbar-left { flex-wrap: wrap; gap: 2px 12px; min-width: 0; }
+  .topbar-left .navlink { font-size: .9rem; }
+  .topbar-right { gap: 8px; }
+  .modebtn { width: 40px; height: 40px; }
+  .langmenu summary.lang-btn { padding: 7px 13px; font-size: .88rem; }
+}

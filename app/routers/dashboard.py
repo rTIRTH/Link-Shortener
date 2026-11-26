@@ -4,12 +4,23 @@ import zipfile
 from collections import Counter
 from datetime import date, datetime, timedelta
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+)
 from fastapi.responses import RedirectResponse, Response
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload, undefer
 
+from .. import alerts
 from ..activity import day_state, day_window, link_events, local_date, visitor_timezone
 from ..cache import cache_delete, rate_limit
 from ..charts import chart_set, donut_svg, heatmap_svg
@@ -21,6 +32,7 @@ from ..i18n import format_date, get_lang, native_digits, translate
 from ..importer import MAX_IMPORT_BYTES, TEMPLATE_ROWS, import_links, read_rows
 from ..insights import audience, weekday_name
 from ..linkcheck import NO_ANSWER_MESSAGE, UNSAFE_MESSAGE, check_destination
+from ..mailer import email_enabled
 from ..models import (
     Click,
     Link,
@@ -44,8 +56,16 @@ from ..qr import (
     process_logo,
     svg_text,
 )
+from ..resettoken import site_url
 from ..security import hash_password
-from ..tags import clean_tag, parse_tags, prune_tags, set_link_tags, tag_color
+from ..tags import (
+    MAX_TAGS_PER_LINK,
+    clean_tag,
+    parse_tags,
+    prune_tags,
+    set_link_tags,
+    tag_color,
+)
 from ..templating import flash, render
 from ..utils import (
     csv_safe,
@@ -188,11 +208,15 @@ def qr_file(text: str, style: QrStyle, fmt: str) -> tuple[bytes, str]:
 @router.get("")
 def dashboard(
     request: Request,
+    background: BackgroundTasks,
     tag: str = Query(""),
     view: str = Query(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
+    # A visit is a good moment to send "your link ends soon" emails that are due (at most every
+    # ten minutes, after the page is sent).
+    background.add_task(alerts.maybe_sweep, request.app.state.session_factory, site_url(request))
     show_archived = view == "archived" and can(user, "archive")
     shown = user_links(db, user, archived=show_archived)
     tag_name = clean_tag(tag)
@@ -225,6 +249,7 @@ def dashboard(
             {"name": n, "count": c, "color": tag_color(n)} for n, c in sorted(tag_counts.items())
         ],
         all_tags=[{"name": t.name, "color": tag_color(t.name)} for t in user.tags],
+        email_ready=email_enabled(),
     )
 
 
@@ -245,6 +270,9 @@ def create_link(
     utm_campaign: str = Form(""),
     preview: str = Form(""),
     preview_message: str = Form(""),
+    alert_limit: str = Form(""),
+    alert_expiry: str = Form(""),
+    alert_clicks: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -287,6 +315,11 @@ def create_link(
             require(user, "click_limit")
         if names:
             require(user, "tags")
+        alert = alerts.read_alert_settings(
+            alert_limit == "1", alert_expiry == "1", alert_clicks, limit=limit, end=end, used=0,
+        )
+        if any(alert):
+            require(user, "alerts")
     except ValueError as e:
         return back(str(e))
 
@@ -320,6 +353,9 @@ def create_link(
         click_limit=limit,
         preview=show_preview,
         preview_message=note,
+        alert_limit=alert[0],
+        alert_expiry=alert[1],
+        alert_clicks=alert[2],
     )
     try:
         set_link_tags(db, user, link, names)
@@ -387,6 +423,140 @@ def bulk_archive(
     flash(request, "Archived {n} link(s). They are hidden from your list but still work.",
           "success", n=len(links))
     return RedirectResponse("/dashboard", status_code=303)
+
+
+@router.post("/links/tags")
+def bulk_tags(
+    request: Request,
+    ids: list[int] = Form(default=[]),
+    bulk_tags: str = Form(""),
+    action: str = Form("add"),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Toolbar "Tag selected": put tags on several links at once, or take them off again."""
+    def back(message: str, kind: str = "error", **params):
+        flash(request, message, kind, **params)
+        return RedirectResponse("/dashboard", status_code=303)
+
+    try:
+        require(user, "tags")
+    except ValueError as e:
+        return back(str(e))
+    if not ids:
+        return back("Select at least one link first.")
+    try:
+        names = parse_tags(bulk_tags)
+    except ValueError as e:
+        return back(str(e))
+    if not names:
+        return back("Type at least one tag first.")
+    links = user_links(db, user, ids)  # only the user's own links can match
+
+    if action == "remove":
+        for link in links:
+            link.tags = [t for t in link.tags if t.name not in names]
+        db.flush()
+        prune_tags(db, user)
+        db.commit()
+        return back("Tags removed from {n} link(s).", "success", n=len(links))
+
+    skipped = 0
+    try:
+        for link in links:
+            wanted = [t.name for t in link.tags]
+            wanted += [n for n in names if n not in wanted]
+            if len(wanted) > MAX_TAGS_PER_LINK:  # that link is full: leave it as it is
+                skipped += 1
+                continue
+            set_link_tags(db, user, link, wanted)
+            db.flush()  # the next link must see the tags just made
+    except ValueError as e:
+        db.rollback()
+        return back(str(e))
+    db.commit()
+    if len(links) > skipped:
+        flash(request, "Tags added to {n} link(s).", "success", n=len(links) - skipped)
+    if skipped:
+        flash(request, "{n} link(s) already have 5 tags, so they were skipped.", "warn", n=skipped)
+    return RedirectResponse("/dashboard", status_code=303)
+
+
+def free_copy_slug(db: Session, user: User, slug: str) -> str | None:
+    """'promo' -> 'promo-copy', then 'promo-copy2' ... (a random code if those are all used)."""
+    stem = slug[:25]  # room for '-copy49' inside the 32 characters a slug may have
+    candidates = [f"{stem}-copy"] + [f"{stem}-copy{n}" for n in range(2, 50)]
+    candidates += [generate_slug() for _ in range(5)]
+    taken = set(db.scalars(select(Link.slug).where(Link.user_id == user.id)))
+    return next((c for c in candidates if c not in taken), None)
+
+
+def make_copy(request: Request, db: Session, user: User, link_id: int):
+    """A new link with the same destination and settings as an old one: no clicks, no history."""
+    source = get_owned_link(db, user, link_id)  # somebody else's link is simply "not found"
+    if not rate_limit(f"rl:create:{user.id}", 30, 60):
+        flash(request, "You're creating links too quickly. Wait a minute.", "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    slug = free_copy_slug(db, user, source.slug)
+    if slug is None:
+        flash(request, "Could not generate a unique code. Try again.", "error")
+        return RedirectResponse("/dashboard", status_code=303)
+
+    keep_limit, keep_preview = can(user, "click_limit"), can(user, "preview")
+    keep_qr, keep_alerts = can(user, "qr_style"), can(user, "alerts")
+    copy = Link(
+        user_id=user.id, slug=slug, original_url=source.original_url,
+        starts_at=source.starts_at, expires_at=source.expires_at,
+        password_hash=source.password_hash,
+        click_limit=source.click_limit if keep_limit else None,
+        preview=source.preview and keep_preview,
+        preview_message=source.preview_message if keep_preview and source.preview else None,
+        qr_fg=source.qr_fg if keep_qr else None, qr_bg=source.qr_bg if keep_qr else None,
+        qr_logo=source.qr_logo if keep_qr else None,
+        # alerts are copied armed, as new ones: nothing has been sent for the copy yet
+        alert_limit=source.alert_limit and keep_alerts and keep_limit,
+        alert_expiry=source.alert_expiry and keep_alerts,
+        alert_clicks=source.alert_clicks if keep_alerts else None,
+    )
+    try:
+        set_link_tags(db, user, copy, [t.name for t in source.tags] if can(user, "tags") else [])
+    except ValueError as e:
+        db.rollback()
+        flash(request, str(e), "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    db.add(copy)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        flash(request, "That alias was just taken. Try another.", "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    flash(request, "Link duplicated as {slug}. Change what you like below.", "success", slug=slug)
+    return RedirectResponse(f"/dashboard/links/{copy.id}/edit", status_code=303)
+
+
+@router.post("/links/duplicate")
+def duplicate_selected(
+    request: Request,
+    ids: list[int] = Form(default=[]),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Toolbar "Duplicate": only works when exactly one link is selected."""
+    unique = list(dict.fromkeys(ids))
+    if len(unique) != 1:
+        flash(request, "Select exactly one link to duplicate.", "error")
+        return RedirectResponse("/dashboard", status_code=303)
+    return make_copy(request, db, user, unique[0])
+
+
+@router.post("/links/{link_id}/duplicate")
+def duplicate_one(
+    request: Request, link_id: int,
+    user: User = Depends(require_user), db: Session = Depends(get_db),
+):
+    """Edit page button."""
+    return make_copy(request, db, user, link_id)
 
 
 @router.get("/links/import")
@@ -917,6 +1087,7 @@ def edit_page(
         tags=tag_chips(link), tag_text=", ".join(t.name for t in link.tags),
         all_tags=[{"name": t.name, "color": tag_color(t.name)} for t in user.tags],
         linked={t.name for t in link.tags},
+        email_ready=email_enabled(),
     )
 
 
@@ -993,6 +1164,10 @@ def edit_save(
     preview: str = Form(""),
     preview_message: str = Form(""),
     preview_box: str = Form(""),
+    alert_limit: str = Form(""),
+    alert_expiry: str = Form(""),
+    alert_clicks: str = Form(""),
+    alerts_box: str = Form(""),  # "1" when the email-alerts box was on the page (not locked)
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -1040,12 +1215,24 @@ def edit_save(
         if set(names) != set(current):
             require(user, "tags")
             set_link_tags(db, user, link, names)
+        alert = (link.alert_limit, link.alert_expiry, link.alert_clicks)
+        if alerts_box == "1":
+            alert = alerts.read_alert_settings(
+                alert_limit == "1", alert_expiry == "1", alert_clicks, limit=limit, end=end,
+                used=link.click_count, old_clicks=link.alert_clicks,
+            )
+        if alert != (link.alert_limit, link.alert_expiry, link.alert_clicks):
+            require(user, "alerts")
     except ValueError as e:
         db.rollback()
         return back(str(e))
 
     if url != link.original_url:  # remember where it used to go (shown in the activity log)
         link.edits.append(LinkEdit(old_url=link.original_url, new_url=url))
+    alerts.apply_alert_settings(  # whatever changed is armed again, so it can be sent once more
+        link, *alert, limit_changed=limit != link.click_limit,
+        end_changed=not alerts.same_moment(end, link.expires_at),
+    )
     link.original_url = url
     link.starts_at = start
     link.expires_at = end
