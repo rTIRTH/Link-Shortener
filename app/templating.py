@@ -34,7 +34,8 @@ def _version(*names: str) -> str:
 
 templates.env.globals["css_version"] = _version("style.css")
 templates.env.globals["js_version"] = _version(
-    "app.js", "datetime-picker.js", "photo-editor.js", "tags.js", "back.js", "utm.js", "mode.js"
+    "app.js", "datetime-picker.js", "photo-editor.js", "tags.js", "back.js", "utm.js", "mode.js",
+    "bulk.js",
 )
 
 

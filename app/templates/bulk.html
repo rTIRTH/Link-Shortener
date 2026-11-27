@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "_picker.html" import datetime_picker with context %}
+{% block title %}{{ _("Bulk") }} · Link Shortener{% endblock %}
+
+{# One setting: a "Change this" box and, under it, the choices. They stay switched off until the box is ticked. #}
+{% macro setting(name, title, off=False) -%}
+<fieldset class="bs" data-bs>
+  <legend><label class="check"><input type="checkbox" name="change_{{ name }}" value="1" class="bs-toggle" {% if off %}disabled{% endif %}> {{ _("Change this") }}: <strong>{{ title }}</strong></label></legend>
+  <div class="bs-body">{{ caller() }}</div>
+</fieldset>
+{%- endmacro %}
+
+{% block content %}
+{% set bulk_on = can('bulk_edit') %}
+<h1>{{ _("Bulk") }}</h1>
+<p class="muted">{{ _("Add many links from a file, or change the same setting on many links at once.") }}</p>
+
+<section class="panel">
+  <h2>{{ _("Import links") }}</h2>
+  <p class="muted">{{ _("Add many links at once from a CSV file, for example one made with Export CSV.") }}</p>
+  {% if can('csv_import') %}
+    <a class="btn small ghost" href="/dashboard/links/import">{{ _("Import many links from a CSV file") }}</a>
+  {% else %}
+    <p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>
+  {% endif %}
+</section>
+
+<section class="panel" id="change">
+  <h2>{{ _("Change many links at once") }}</h2>
+  <p class="muted">{{ _("Pick the links, then tick Change this next to each setting you want to change. Settings you leave unticked stay as they are.") }}</p>
+  {% if not bulk_on %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
+
+  <form method="post" action="/dashboard/bulk" id="bulk-form" data-max="{{ max_bulk }}" {% if not bulk_on %}data-locked="1"{% endif %}
+        data-confirm="{{ _('This will change {n} link(s). Continue?', n='{n}') }}"
+        data-one="{{ _('{n} link selected.', n='{n}') }}" data-many="{{ _('{n} links selected.', n='{n}') }}"
+        data-toomany="{{ _('You can change up to {n} links at once.', n=max_bulk) }}">
+
+    <h3 class="adv-title">{{ _("1. Choose the links") }}</h3>
+    {% if tag_bar %}
+    <nav class="tagbar" aria-label="{{ _('Tags') }}">
+      <a class="chip all{{ ' on' if not tag_name }}" href="/dashboard/bulk#change">{{ _("All") }}</a>
+      {% for t in tag_bar %}
+        <a class="chip s{{ t.color }}{{ ' on' if t.name == tag_name }}" href="/dashboard/bulk?tag={{ t.name|urlencode }}#change">{{ t.name }} <b>{{ t.count|num }}</b></a>
+      {% endfor %}
+    </nav>
+    {% endif %}
+    {% if rows %}
+    <div class="bulk-bar">
+      <label class="check"><input type="checkbox" id="bulk-all" {% if not bulk_on %}disabled{% endif %}> {{ _("Select all") }}</label>
+      <span class="muted" id="bulk-count" role="status" aria-live="polite"></span>
+    </div>
+    <div class="bulk-list">
+      {% for row in rows %}
+      <label class="bulk-row">
+        <input type="checkbox" name="ids" value="{{ row.link.id }}" class="bulk-pick" {% if not bulk_on %}disabled{% endif %}>
+        <span class="mono clip">{{ row.short_url }}</span>
+        <span class="muted clip">{{ row.link.original_url }}</span>
+        {% if row.tags %}<span class="bulk-tags-list">{% for t in row.tags %}<span class="chip s{{ t.color }}">{{ t.name }}</span>{% endfor %}</span>{% endif %}
+      </label>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="empty"><h3>{{ _("No links yet") }}</h3><p>{{ _("Paste a long URL above to create your first short link.") }}</p></div>
+    {% endif %}
+
+    <h3 class="adv-title">{{ _("2. Choose what to change") }}</h3>
+    <div class="bs-grid">
+      {% call setting('password', _("Password"), not bulk_on) %}
+        <label class="check"><input type="radio" name="password_action" value="set" checked> {{ _("Set a password") }}</label>
+        <input type="password" name="new_password" maxlength="72" autocomplete="new-password" aria-label="{{ _('New password') }}" placeholder="{{ _('Visitors must enter it') }}">
+        <label class="check"><input type="radio" name="password_action" value="remove"> {{ _("Remove the password") }}</label>
+      {% endcall %}
+
+      {% call setting('start', _("Start time"), not bulk_on) %}
+        {{ datetime_picker(_("Starts at"), "starts_at", "start") }}
+        <small class="field-note">{{ _("Leave the box empty to remove the start time.") }}</small>
+      {% endcall %}
+
+      {% call setting('end', _("End time"), not bulk_on) %}
+        {{ datetime_picker(_("Ends at"), "expires_at", "end") }}
+        <small class="field-note">{{ _("Leave the box empty to remove the end time.") }}</small>
+      {% endcall %}
+
+      {% call setting('limit', _("Click limit"), not (bulk_on and can('click_limit'))) %}
+        <label>{{ _("Maximum clicks") }}
+          <input name="click_limit" inputmode="numeric" maxlength="9" autocomplete="off" placeholder="{{ _('No limit') }}" {% if not can('click_limit') %}disabled data-locked="1"{% endif %}>
+        </label>
+        <small class="field-note">{{ _("Leave the box empty to remove the limit.") }}</small>
+        {% if not can('click_limit') %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+      {% endcall %}
+
+      {% call setting('status', _("Status"), not bulk_on) %}
+        <label class="check"><input type="radio" name="status" value="on" checked> {{ _("Switch the links on") }}</label>
+        <label class="check"><input type="radio" name="status" value="off"> {{ _("Switch the links off") }}</label>
+      {% endcall %}
+
+      {% call setting('preview', _("Preview page"), not (bulk_on and can('preview'))) %}
+        <label class="check"><input type="radio" name="preview" value="1" checked {% if not can('preview') %}disabled data-locked="1"{% endif %}> {{ _("Show a preview page before redirecting") }}</label>
+        <input name="preview_message" maxlength="200" autocomplete="off" aria-label="{{ _('Message for visitors') }}" placeholder="{{ _('A message for visitors (optional)') }}" {% if not can('preview') %}disabled data-locked="1"{% endif %}>
+        <label class="check"><input type="radio" name="preview" value="0"> {{ _("Do not show a preview page") }}</label>
+        {% if not can('preview') %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+      {% endcall %}
+
+      {% set alerts_on = email_ready and can('alerts') %}
+      {% call setting('alerts', _("Email alerts"), not (bulk_on and alerts_on)) %}
+        <label class="check"><input type="checkbox" name="alert_limit" value="1" {% if not alerts_on %}disabled data-locked="1"{% endif %}> {{ _("When the click limit is reached") }}</label>
+        <label class="check"><input type="checkbox" name="alert_expiry" value="1" {% if not alerts_on %}disabled data-locked="1"{% endif %}> {{ _("About a day before the link ends") }}</label>
+        <label class="alert-clicks">{{ _("When it reaches this many clicks") }}
+          <input name="alert_clicks" inputmode="numeric" maxlength="9" autocomplete="off" placeholder="{{ _('e.g. {example}', example='100') }}" {% if not alerts_on %}disabled data-locked="1"{% endif %}>
+        </label>
+        {% if not email_ready %}<small class="lock-note">{{ icon('lock') }}{{ _("Email alerts need email sending, which is not set up on this server yet.") }}</small>
+        {% elif not can('alerts') %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+      {% endcall %}
+
+      {% call setting('qr', _("QR colours"), not bulk_on) %}
+        <label class="check"><input type="radio" name="qr_action" value="set" checked> {{ _("Use these colours") }}</label>
+        <div class="color-row">
+          <label>{{ _("Code colour") }}<input type="color" name="qr_fg" value="{{ qr_fg }}" {% if not can('qr_style') %}disabled data-locked="1"{% endif %}></label>
+          <label>{{ _("Background colour") }}<input type="color" name="qr_bg" value="{{ qr_bg }}" {% if not can('qr_style') %}disabled data-locked="1"{% endif %}></label>
+        </div>
+        <label class="check"><input type="radio" name="qr_action" value="reset"> {{ _("Back to the plain code") }}</label>
+        {% if not can('qr_style') %}<small class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</small>{% endif %}
+      {% endcall %}
+    </div>
+
+    <div class="bulk-go">
+      <button class="btn" type="submit" id="bulk-go" {% if not bulk_on %}disabled{% endif %}>{{ _("Change the selected links") }}</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="/static/bulk.js?v={{ js_version }}" defer></script>
+{% endblock %}

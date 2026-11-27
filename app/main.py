@@ -14,6 +14,7 @@ from .routers import (
     admin,
     appearance,
     auth,
+    bulk,
     dashboard,
     guide,
     language,
@@ -62,6 +63,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     # because /{username}/{slug} would otherwise swallow other two-part URLs.
     app.include_router(auth.router)
     app.include_router(dashboard.router)
+    app.include_router(bulk.router)
     app.include_router(admin.router)
     app.include_router(account.router)
     app.include_router(language.router)

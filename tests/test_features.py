@@ -29,7 +29,7 @@ def test_every_feature_is_free_for_now():
     assert all(features.can(None, name) for name in features.FEATURES)
     assert set(features.FEATURES) == {
         "click_limit", "tags", "archive", "csv_import", "preview", "utm", "qr_style",
-        "color_schemes", "alerts",
+        "color_schemes", "alerts", "bulk_edit",
     }
 
 

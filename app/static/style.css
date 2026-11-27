@@ -646,7 +646,6 @@ button.chip { font-family: var(--sans); }
 input:disabled { opacity: .6; cursor: not-allowed; }
 .dest-change { display: block; margin-top: 2px; color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
 .dest-change s { opacity: .75; }
-.import-hint { margin: 14px 2px 20px; font-size: .9rem; }
 .import-form { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .clip { max-width: 22rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -751,3 +750,34 @@ input[type="color"] { width: 56px; height: 38px; padding: 2px; border-radius: 8p
   .modebtn { width: 40px; height: 40px; }
   .langmenu summary.lang-btn { padding: 7px 13px; font-size: .88rem; }
 }
+
+/* when the mode / language / avatar group wraps to its own row on a phone, keep it at the right edge, where
+   its menus (which open leftwards) have room, instead of at the left edge where they ran off the screen */
+.topbar-right { margin-left: auto; }
+
+/* ---- the Bulk link in the top bar: on the very narrowest phones it moves into the avatar menu ---- */
+.menu-bulk { display: none; }
+@media (max-width: 370px) {
+  .nav-bulk { display: none; }
+  .menu-bulk { display: block; }
+}
+
+/* ---- Bulk page ---- */
+.bulk-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 10px 0 6px; }
+.bulk-bar .over { color: var(--danger); font-weight: 600; }
+.bulk-list { display: grid; gap: 4px; max-height: 340px; overflow: auto; padding: 6px; background: var(--field);
+             border: 1px solid var(--line); border-radius: 12px; }
+.bulk-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; align-items: center;
+            padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+.bulk-row:hover { background: var(--hover); }
+.bulk-row input { grid-row: 1 / span 3; margin: 0; }
+.bulk-row .clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.bulk-tags-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.bs-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); }
+.bs { margin: 0; padding: 10px 14px 14px; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+.bs legend { padding: 0 6px; }
+.bs-body { display: grid; gap: 10px; margin-top: 6px; min-width: 0; }
+.bs-body label { min-width: 0; }
+.bs.on { border-color: var(--accent); }
+.ready .bs:not(.on) .bs-body { opacity: .55; }  /* switched off until "Change this" is ticked (only once the page script runs) */
+.bulk-go { margin-top: 18px; }

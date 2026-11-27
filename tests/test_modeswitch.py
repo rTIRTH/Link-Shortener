@@ -282,7 +282,7 @@ def test_the_version_in_the_address_follows_the_script_so_browsers_never_use_an_
     assert templating._version("app.js", "mode.js") != templating._version("app.js")
     assert templates.env.globals["js_version"] == templating._version(
         "app.js", "datetime-picker.js", "photo-editor.js", "tags.js", "back.js", "utm.js",
-        "mode.js")
+        "mode.js", "bulk.js")
 
 
 # ---- how it looks --------------------------------------------------------------------------------

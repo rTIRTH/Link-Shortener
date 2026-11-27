@@ -13,7 +13,7 @@
   <header class="topbar">
     <div class="topbar-left">
       <a class="brand" href="/"><img class="brand-mark" src="/static/brand/logo-mark.svg" alt="" width="30" height="30"><span>Link Shortener</span></a>
-      {% if user %}<a class="navlink" href="/dashboard">{{ _("Dashboard") }}</a>{% endif %}
+      {% if user %}<a class="navlink" href="/dashboard">{{ _("Dashboard") }}</a><a class="navlink nav-bulk" href="/dashboard/bulk">{{ _("Bulk") }}</a>{% endif %}
       <a class="navlink" href="/guide">{{ _("Guide") }}</a>
     </div>
     <nav class="topbar-right">
@@ -53,6 +53,7 @@
               <img class="avatar" src="{{ avatar_src(user) }}" alt="" width="40" height="40">
               <div><strong>{{ user.username }}</strong><small>{{ user.email }}</small></div>
             </div>
+            <a class="menu-item menu-bulk" href="/dashboard/bulk">{{ _("Bulk") }}</a>
             <a class="menu-item" href="/account">{{ _("Account settings") }}</a>
             {% if is_admin %}<a class="menu-item" href="/admin">Admin</a>{% endif %}
             <form method="post" action="/logout"><button class="menu-item" type="submit">{{ _("Log out") }}</button></form>

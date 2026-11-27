@@ -250,7 +250,7 @@ def test_the_form_page_and_the_entry_link(alice):
     page = alice.get("/dashboard/links/import").text
     assert 'enctype="multipart/form-data"' in page and 'name="file"' in page
     assert "original_url" in page and "Passwords are never imported" in page
-    assert 'href="/dashboard/links/import"' in alice.get("/dashboard").text
+    assert 'href="/dashboard/links/import"' in alice.get("/dashboard/bulk").text  # its home
 
 
 def test_importing_too_often_is_slowed_down(alice, redis_fake):
@@ -266,7 +266,7 @@ def test_a_locked_import_is_refused(alice, app, monkeypatch):
     assert "paid plan" in page and 'name="file"' not in page
     r = upload(alice, "original_url\nhttps://example.com/a\n")
     assert r.status_code == 403 and not links(app)
-    assert "paid plan" in alice.get("/dashboard").text
+    assert "paid plan" in alice.get("/dashboard/bulk").text
 
 
 def test_locked_click_limits_and_tags_cannot_sneak_in_through_a_file(alice, app, monkeypatch):

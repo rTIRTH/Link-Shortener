@@ -816,8 +816,8 @@ MESSAGES = {
         "સ્પ્રેડશીટ ફાઇલથી તમારી લિંક અંદર અને બહાર લઈ જાઓ.",
     "Press Export CSV to download all your links.":
         "તમારી બધી લિંક ડાઉનલોડ કરવા \"CSV એક્સપોર્ટ કરો\" દબાવો.",
-    "Press Import many links from a CSV file and choose a file with an original_url column.":
-        "\"CSV ફાઇલમાંથી ઘણી લિંક આયાત કરો\" દબાવો અને original_url કૉલમવાળી ફાઇલ પસંદ કરો.",
+    "Open Bulk in the top bar, press Import many links from a CSV file and choose a file with an original_url column.":
+        "ઉપરની પટ્ટીમાં \"બલ્ક\" ખોલો, \"CSV ફાઇલમાંથી ઘણી લિંક આયાત કરો\" દબાવો અને original_url કૉલમવાળી ફાઇલ પસંદ કરો.",
     "Rows that cannot be imported are skipped and listed with the reason.":
         "જે પંક્તિઓ આયાત થઈ શકતી નથી તે કારણ સાથે છોડી દઈને યાદીમાં બતાવવામાં આવે છે.",
     "Safety check":
@@ -1058,4 +1058,69 @@ MESSAGES = {
         "તમારી ટૂંકી લિંક {link} ના બધા {limit} ક્લિક વપરાઈ ગયા છે, એટલે હવે તે લોકોને તેના ગંતવ્ય પર મોકલતી નથી.\n\nતેને ફરી ખોલવા માટે અહીં મર્યાદા વધારો:\n{edit}\n\nતમને આ ઇમેઇલ એટલા માટે મળ્યો છે કારણ કે તમે આ લિંક માટે ચેતવણીઓ ચાલુ કરી હતી. તમે તેને આ જ પેજ પર બંધ કરી શકો છો.",
     "Your short link {link} will stop working on {when}.\n\nTo keep it going, move its end time here:\n{edit}\n\nYou get this email because you turned on alerts for this link. You can turn them off on the same page.":
         "તમારી ટૂંકી લિંક {link} {when} એ કામ કરવાનું બંધ કરશે.\n\nતેને ચાલુ રાખવા માટે અહીં તેનો સમાપ્તિ સમય આગળ વધારો:\n{edit}\n\nતમને આ ઇમેઇલ એટલા માટે મળ્યો છે કારણ કે તમે આ લિંક માટે ચેતવણીઓ ચાલુ કરી હતી. તમે તેને આ જ પેજ પર બંધ કરી શકો છો.",
+    # ---- bulk page ----
+    "1. Choose the links":
+        "1. લિંક પસંદ કરો",
+    "2. Choose what to change":
+        "2. શું બદલવું છે તે પસંદ કરો",
+    "Add many links from a file, or change the same setting on many links at once.":
+        "ફાઇલમાંથી ઘણી લિંક ઉમેરો, અથવા ઘણી લિંક પર એક જ સેટિંગ એકસાથે બદલો.",
+    "Bulk":
+        "બલ્ક",
+    "Change many links at once":
+        "ઘણી લિંક એકસાથે બદલો",
+    "Change the selected links":
+        "પસંદ કરેલી લિંક બદલો",
+    "Change this":
+        "આ બદલો",
+    "Changed {n} link(s).":
+        "{n} લિંક બદલાઈ.",
+    "Choose at least one thing to change.":
+        "ઓછામાં ઓછી એક બાબત પસંદ કરો જે બદલવી છે.",
+    "Do not show a preview page":
+        "પ્રિવ્યૂ પેજ ન બતાવો",
+    "End time":
+        "સમાપ્ત થવાનો સમય",
+    "Leave the box empty to remove the end time.":
+        "સમાપ્ત થવાનો સમય કાઢવા માટે બૉક્સ ખાલી રાખો.",
+    "Leave the box empty to remove the limit.":
+        "મર્યાદા કાઢવા માટે બૉક્સ ખાલી રાખો.",
+    "Leave the box empty to remove the start time.":
+        "શરૂ થવાનો સમય કાઢવા માટે બૉક્સ ખાલી રાખો.",
+    "No links were changed.":
+        "કોઈ લિંક બદલાઈ નથી.",
+    "Pick the links, then tick Change this next to each setting you want to change. Settings you leave unticked stay as they are.":
+        "લિંક પસંદ કરો, પછી જે સેટિંગ બદલવી હોય તેની બાજુમાં \"આ બદલો\" પર ટિક કરો. જેના પર ટિક ન કરો તે સેટિંગ જેવી છે તેવી જ રહે છે.",
+    "QR colours":
+        "QR ના રંગ",
+    "Select all":
+        "બધી પસંદ કરો",
+    "Start time":
+        "શરૂ થવાનો સમય",
+    "Switch the links off":
+        "લિંક બંધ કરો",
+    "Switch the links on":
+        "લિંક ચાલુ કરો",
+    "This will change {n} link(s). Continue?":
+        "આનાથી {n} લિંક બદલાશે. ચાલુ રાખો?",
+    "Use these colours":
+        "આ રંગ વાપરો",
+    "You can change up to {n} links at once.":
+        "તમે એક વખતમાં {n} લિંક સુધી બદલી શકો છો.",
+    "{n} link selected.":
+        "{n} લિંક પસંદ કરી.",
+    "{n} links selected.":
+        "{n} લિંક પસંદ કરી.",
+    "{n} link(s) were skipped because the alerts you chose do not fit them: an alert needs a click limit or an end time, and a number of clicks must be higher than the clicks so far.":
+        "{n} લિંક છોડી દીધી કારણ કે તમે પસંદ કરેલી ચેતવણીઓ તેમને બંધ બેસતી નથી: ચેતવણી માટે ક્લિક મર્યાદા અથવા સમાપ્તિનો સમય જોઈએ, અને ક્લિકની સંખ્યા અત્યાર સુધીના ક્લિક કરતાં વધુ હોવી જોઈએ.",
+    "{n} link(s) were skipped because their start time would not be before their end time.":
+        "{n} લિંક છોડી દીધી કારણ કે તેમનો શરૂ થવાનો સમય સમાપ્ત થવાના સમય પહેલાં રહેતો નથી.",
+    "Change the same setting on many links at once.":
+        "ઘણી લિંક પર એક જ સેટિંગ એકસાથે બદલો.",
+    "Open Bulk in the top bar and tick the links you want to change. Press a tag first to see only its links.":
+        "ઉપરની પટ્ટીમાં \"બલ્ક\" ખોલો અને જે લિંક બદલવી છે તેમના પર ટિક કરો. ફક્ત કોઈ ટૅગની લિંક જોવા માટે પહેલાં તે ટૅગ દબાવો.",
+    "Tick Change this next to each setting you want to change, then fill it in. Settings you leave unticked stay as they are.":
+        "જે સેટિંગ બદલવી છે તેની બાજુમાં \"આ બદલો\" પર ટિક કરો, પછી તે ભરો. જેના પર ટિક ન કરો તે સેટિંગ જેવી છે તેવી જ રહે છે.",
+    "Press Change the selected links. You are asked to confirm first, and links the new settings do not fit are skipped and counted.":
+        "\"પસંદ કરેલી લિંક બદલો\" દબાવો. પહેલાં તમને ખાતરી કરવા કહેવાય છે, અને જેમને નવી સેટિંગ બંધ બેસતી નથી તે લિંક છોડી દઈને ગણી લેવાય છે.",
 }

@@ -24,6 +24,7 @@
   ('utm', _("Campaign tracking (UTM)")),
   ('analytics', _("Analytics")),
   ('share', _("Share and QR codes")),
+  ('bulk', _("Bulk")),
   ('data', _("Import and export")),
   ('safety', _("Safety check")),
 ] %}
@@ -117,9 +118,15 @@
     <li>{{ _("On the Edit page, open QR code to choose colours and a logo, and download the code as PNG or SVG.") }}</li>
   {% endcall %}
 
+  {% call feature('bulk', _("Bulk"), _("Change the same setting on many links at once.")) %}
+    <li>{{ _("Open Bulk in the top bar and tick the links you want to change. Press a tag first to see only its links.") }}</li>
+    <li>{{ _("Tick Change this next to each setting you want to change, then fill it in. Settings you leave unticked stay as they are.") }}</li>
+    <li>{{ _("Press Change the selected links. You are asked to confirm first, and links the new settings do not fit are skipped and counted.") }}</li>
+  {% endcall %}
+
   {% call feature('data', _("Import and export"), _("Move your links in and out with a spreadsheet file.")) %}
     <li>{{ _("Press Export CSV to download all your links.") }}</li>
-    <li>{{ _("Press Import many links from a CSV file and choose a file with an original_url column.") }}</li>
+    <li>{{ _("Open Bulk in the top bar, press Import many links from a CSV file and choose a file with an original_url column.") }}</li>
     <li>{{ _("Rows that cannot be imported are skipped and listed with the reason.") }}</li>
   {% endcall %}
 

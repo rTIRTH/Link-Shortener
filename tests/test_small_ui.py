@@ -34,29 +34,6 @@ def media(query, containing):
     raise AssertionError(f"no @media {query} with {containing}")
 
 
-# ---------- "Import many links from a CSV file" ----------
-
-def test_the_csv_import_link_is_a_button(alice):
-    make(alice)
-    html = alice.get("/dashboard").text
-    assert re.search(
-        r'<a class="btn small ghost" href="/dashboard/links/import">Import many links from a '
-        r'CSV file</a>', html)
-
-
-def test_a_locked_import_is_not_a_button_but_still_says_why(alice, monkeypatch):
-    from app import features
-    monkeypatch.setattr(features, "PAID", frozenset({"csv_import"}))
-    html = alice.get("/dashboard").text
-    assert 'href="/dashboard/links/import"' not in html
-    assert "This feature is part of a paid plan." in html
-
-
-def test_the_button_has_room_around_it(alice):
-    rule = " ".join(blocks(".import-hint"))
-    assert "margin: 14px 2px 20px" in rule
-
-
 # ---------- "Download QR as SVG" in the share pop-up ----------
 
 def test_the_svg_download_is_a_button_in_the_popup(alice):
@@ -102,3 +79,9 @@ def test_the_one_link_buttons_wrap_instead_of_pushing_the_page_wide():
     rule = " ".join(blocks(".selection-actions"))
     assert "flex-wrap: wrap" in rule and "max-width: 100%" in rule
     assert "flex: 0 0 auto" in rule                                  # still never stretched
+
+
+def test_the_wrapped_icon_row_stays_at_the_right_edge_where_its_menus_fit():
+    """On a phone the mode / language / avatar group wraps under the name. Its menus open
+    leftwards from their button, so left-aligned they ran off the screen."""
+    assert "margin-left: auto" in " ".join(blocks(".topbar-right"))
