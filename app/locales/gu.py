@@ -1123,4 +1123,35 @@ MESSAGES = {
         "જે સેટિંગ બદલવી છે તેની બાજુમાં \"આ બદલો\" પર ટિક કરો, પછી તે ભરો. જેના પર ટિક ન કરો તે સેટિંગ જેવી છે તેવી જ રહે છે.",
     "Press Change the selected links. You are asked to confirm first, and links the new settings do not fit are skipped and counted.":
         "\"પસંદ કરેલી લિંક બદલો\" દબાવો. પહેલાં તમને ખાતરી કરવા કહેવાય છે, અને જેમને નવી સેટિંગ બંધ બેસતી નથી તે લિંક છોડી દઈને ગણી લેવાય છે.",
+    # ---- bulk: one by one ----
+    "Edit these links one by one":
+        "આ લિંક એક-એક કરીને બદલો",
+    "Give each link its own settings. Change only what you need, then press Save all links. Links you do not touch stay as they are.":
+        "દરેક લિંકને તેની પોતાની સેટિંગ આપો. ફક્ત જે જરૂરી હોય તે જ બદલો, પછી \"બધી લિંક સાચવો\" દબાવો. જેને તમે અડતા નથી તે લિંક જેવી છે તેવી જ રહે છે.",
+    "Leave empty to keep it":
+        "રાખવા માટે ખાલી છોડો",
+    "Nothing was changed.":
+        "કંઈ બદલાયું નથી.",
+    "One by one":
+        "એક-એક કરીને",
+    "Only the first {n} links are shown. Press a tag to narrow the list.":
+        "ફક્ત પહેલી {n} લિંક દેખાય છે. યાદી નાની કરવા કોઈ ટૅગ દબાવો.",
+    "Same for all links":
+        "બધી લિંક માટે એકસરખું",
+    "Save all links":
+        "બધી લિંક સાચવો",
+    "Saved {n} link(s).":
+        "{n} લિંક સાચવાઈ.",
+    "Show all my links":
+        "મારી બધી લિંક બતાવો",
+    "Showing only the links you chose.":
+        "ફક્ત તમે પસંદ કરેલી લિંક દેખાય છે.",
+    "Switched off":
+        "બંધ",
+    "Switched on":
+        "ચાલુ",
+    "{n} link(s) were not saved. The reason is written on each one below.":
+        "{n} લિંક સાચવાઈ નથી. કારણ નીચે દરેક લિંક પર લખ્યું છે.",
+    "For different settings on each link, open One by one, change the boxes on any link and press Save all links.":
+        "દરેક લિંક માટે અલગ સેટિંગ માટે \"એક-એક કરીને\" ખોલો, કોઈ પણ લિંકના બૉક્સ બદલો અને \"બધી લિંક સાચવો\" દબાવો.",
 }

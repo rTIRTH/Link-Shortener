@@ -781,3 +781,21 @@ input[type="color"] { width: 56px; height: 38px; padding: 2px; border-radius: 8p
 .bs.on { border-color: var(--accent); }
 .ready .bs:not(.on) .bs-body { opacity: .55; }  /* switched off until "Change this" is ticked (only once the page script runs) */
 .bulk-go { margin-top: 18px; }
+
+/* ---- Bulk: one by one (a card for every link) ---- */
+.each { margin: 0 0 14px; padding: 10px 14px 14px; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+.each legend { max-width: 100%; padding: 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.each.changed { border-color: var(--accent); }  /* edited, so it will be saved */
+.each.bad { border-color: var(--danger); }
+.each-error { margin: 0 0 10px; color: var(--danger); font-weight: 600; }
+.each-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr)); }
+.each-grid label { display: grid; gap: 4px; align-content: start; min-width: 0; font-weight: 600; font-size: .9rem; }
+.each-grid .each-wide { grid-column: 1 / -1; }
+.each-grid input:not([type="checkbox"]), .each-grid select { width: 100%; min-width: 0; box-sizing: border-box; }
+.each-grid select { font: inherit; padding: 9px 11px; color: var(--ink); background: var(--field); border: 1px solid var(--field-line); border-radius: 8px; }
+.each-grid select:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--field-line)); }
+.each-grid select:focus { border-color: var(--accent); }
+.each-grid select:disabled { opacity: .6; cursor: not-allowed; }
+.each-grid .check { font-weight: 500; font-size: .85rem; }
+.each-save { position: sticky; bottom: 10px; z-index: 5; display: flex; justify-content: flex-end; margin-top: 8px; padding: 10px 14px;
+             background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }

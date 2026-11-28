@@ -14,6 +14,8 @@
 {% block content %}
 {% set bulk_on = can('bulk_edit') %}
 <h1>{{ _("Bulk") }}</h1>
+{% set bulk_tab = 'same' %}
+{% include "_bulk_tabs.html" %}
 <p class="muted">{{ _("Add many links from a file, or change the same setting on many links at once.") }}</p>
 
 <section class="panel">

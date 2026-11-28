@@ -64,7 +64,7 @@ def test_the_guide_names_buttons_that_really_exist(alice, app):
         alice.get("/dashboard").text, alice.get("/dashboard?tag=work").text,
         alice.get("/dashboard?view=archived").text, alice.get(f"/dashboard/links/{one}/edit").text,
         alice.get(f"/dashboard/links/{one}").text, alice.get("/dashboard/links/import").text,
-        alice.get("/dashboard/bulk").text,
+        alice.get("/dashboard/bulk").text, alice.get("/dashboard/bulk/each").text,
     ]
     screens = unescape(" ".join(pages))
     guide = unescape(alice.get("/guide").text)
@@ -77,7 +77,8 @@ def test_the_guide_names_buttons_that_really_exist(alice, app):
              "Email alerts", "When the click limit is reached",
              "About a day before the link ends", "When it reaches this many clicks",
              "Duplicate", "Duplicate link", "Tag selected", "Add tags", "Remove tags",
-             "Save changes", "Bulk", "Change this", "Change the selected links"]
+             "Save changes", "Bulk", "Change this", "Change the selected links",
+             "One by one", "Save all links"]
     for label in named:
         assert label in screens, f"the guide mentions '{label}' but no screen has it"
         assert label in guide, f"'{label}' is not used in the guide any more"

@@ -1,4 +1,4 @@
-/* Bulk page: pick links, tick "Change this" next to the settings to change, confirm, send.
+/* Bulk pages. (1) Same for all links: pick links, tick "Change this" next to the settings to change, confirm, send.
  *
  *  - Each setting's choices stay switched off (and are not sent) until its "Change this" box is ticked.
  *  - "Select all" and the count of ticked links.
@@ -70,4 +70,41 @@
 
   form.classList.add('ready');
   sync();
+})();
+
+
+/* (2) One by one: every link has its own boxes.
+ *
+ *  - The start and end boxes are the browser's own date-and-time boxes, shown in the visitor's time.
+ *    The exact moment (UTC) travels in a hidden box next to each, which is what the server reads.
+ *    An untouched box keeps the value the server sent, so nothing changes by accident.
+ *  - A link that has been edited is marked, so it is easy to see what will be saved.
+ */
+(function () {
+  'use strict';
+  var form = document.getElementById('each-form');
+  if (!form) return;
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+  function toLocal(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' +
+           pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  Array.prototype.forEach.call(form.querySelectorAll('.each-dt'), function (box) {
+    var hidden = form.querySelector('input[type="hidden"][name="' + box.getAttribute('data-target') + '"]');
+    if (!hidden) return;
+    box.value = hidden.value ? toLocal(hidden.value) : '';
+    box.addEventListener('input', function () {
+      hidden.value = box.value ? new Date(box.value).toISOString() : '';
+    });
+  });
+
+  Array.prototype.forEach.call(form.querySelectorAll('fieldset.each'), function (card) {
+    var mark = function () { card.classList.add('changed'); };
+    card.addEventListener('input', mark);
+    card.addEventListener('change', mark);
+  });
 })();

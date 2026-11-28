@@ -27,7 +27,10 @@
   </div>
   {% if result.skipped|length > 20 %}<p class="muted"><small>{{ _("Only the first 20 skipped rows are shown.") }}</small></p>{% endif %}
   {% endif %}
-  {% if result.created %}<p><a class="btn small" href="/dashboard">{{ _("Go to my links") }}</a></p>{% endif %}
+  {% if result.created %}<p class="btn-row">
+    <a class="btn small" href="/dashboard">{{ _("Go to my links") }}</a>
+    {% if can('bulk_edit') %}<a class="btn small ghost" href="/dashboard/bulk/each?{% for i in result.created_ids[:200] %}ids={{ i }}{{ '&' if not loop.last }}{% endfor %}">{{ _("Edit these links one by one") }}</a>{% endif %}
+  </p>{% endif %}
 </section>
 {% endif %}
 

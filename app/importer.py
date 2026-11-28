@@ -56,6 +56,7 @@ class RowError(ValueError):
 @dataclass
 class ImportResult:
     created: int = 0
+    created_ids: list[int] = field(default_factory=list)  # the new links, in file order
     skipped: list[dict] = field(default_factory=list)  # {"line", "url", "why"}
 
 
@@ -153,6 +154,7 @@ def import_links(
         else:
             taken.add(slug)
             result.created += 1
+            result.created_ids.append(link.id)
     db.commit()
     return result
 

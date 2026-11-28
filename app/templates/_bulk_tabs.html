@@ -1,0 +1,4 @@
+<nav class="viewtabs" aria-label="{{ _('Bulk') }}">
+  <a href="/dashboard/bulk" {% if bulk_tab == 'same' %}class="on" aria-current="page"{% endif %}>{{ _("Same for all links") }}</a>
+  <a href="/dashboard/bulk/each" {% if bulk_tab == 'each' %}class="on" aria-current="page"{% endif %}>{{ _("One by one") }}</a>
+</nav>

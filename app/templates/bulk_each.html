@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ _("One by one") }} · Link Shortener{% endblock %}
+
+{% block content %}
+{% set bulk_on = can('bulk_edit') %}
+{% set bulk_tab = 'each' %}
+<h1>{{ _("Bulk") }}</h1>
+{% include "_bulk_tabs.html" %}
+<p class="muted">{{ _("Give each link its own settings. Change only what you need, then press Save all links. Links you do not touch stay as they are.") }}</p>
+{% if not bulk_on %}<p class="lock-note">{{ icon('lock') }}{{ _("This feature is part of a paid plan.") }}</p>{% endif %}
+
+{% if only %}
+  <p class="muted">{{ _("Showing only the links you chose.") }} <a href="/dashboard/bulk/each">{{ _("Show all my links") }}</a></p>
+{% elif tag_bar %}
+<nav class="tagbar" aria-label="{{ _('Tags') }}">
+  <a class="chip all{{ ' on' if not tag_name }}" href="/dashboard/bulk/each">{{ _("All") }}</a>
+  {% for t in tag_bar %}
+    <a class="chip s{{ t.color }}{{ ' on' if t.name == tag_name }}" href="/dashboard/bulk/each?tag={{ t.name|urlencode }}">{{ t.name }} <b>{{ t.count|num }}</b></a>
+  {% endfor %}
+</nav>
+{% endif %}
+
+{% if rows %}
+<form method="post" action="/dashboard/bulk/each" id="each-form">
+  {% if only %}<input type="hidden" name="subset" value="1">{% endif %}
+  {% if tag_name %}<input type="hidden" name="tag" value="{{ tag_name }}">{% endif %}
+  {% for row in rows %}
+  {% set id = row.link.id %}
+  <fieldset class="each{{ ' bad' if row.error }}" {% if not bulk_on %}disabled{% endif %}>
+    <input type="hidden" name="ids" value="{{ id }}">
+    <legend><span class="mono">{{ row.short_url }}</span></legend>
+    {% if row.error %}<p class="each-error" role="alert">{{ row.error }}</p>{% endif %}
+    <div class="each-grid">
+      <label class="each-wide">{{ _("Destination") }}
+        <input name="url_{{ id }}" value="{{ row.url }}" inputmode="url" autocomplete="off" spellcheck="false">
+      </label>
+
+      <label>{{ _("Password") }}
+        <input type="password" name="password_{{ id }}" maxlength="72" autocomplete="new-password"
+               placeholder="{{ _('Leave empty to keep it') if row.has_password else _('No password') }}">
+        {% if row.has_password %}<span class="check"><input type="checkbox" name="clear_password_{{ id }}" value="1"> {{ _("Remove the password") }}</span>{% endif %}
+      </label>
+
+      <label>{{ _("Start time") }}
+        <input type="datetime-local" class="each-dt" data-target="start_{{ id }}">
+        <input type="hidden" name="start_{{ id }}" value="{{ row.start }}">
+      </label>
+
+      <label>{{ _("End time") }}
+        <input type="datetime-local" class="each-dt" data-target="end_{{ id }}">
+        <input type="hidden" name="end_{{ id }}" value="{{ row.end }}">
+      </label>
+
+      <label>{{ _("Click limit") }}
+        <input name="limit_{{ id }}" value="{{ row.limit }}" inputmode="numeric" maxlength="9" autocomplete="off" placeholder="{{ _('No limit') }}" {% if not can('click_limit') %}disabled{% endif %}>
+      </label>
+
+      <label>{{ _("Status") }}
+        <select name="active_{{ id }}">
+          <option value="1" {% if row.active != '0' %}selected{% endif %}>{{ _("Switched on") }}</option>
+          <option value="0" {% if row.active == '0' %}selected{% endif %}>{{ _("Switched off") }}</option>
+        </select>
+      </label>
+
+      <label>{{ _("Tags") }}
+        <input name="tags_{{ id }}" value="{{ row.tags }}" maxlength="200" autocomplete="off" placeholder="{{ _('e.g. work, school') }}" {% if not can('tags') %}disabled{% endif %}>
+      </label>
+    </div>
+  </fieldset>
+  {% endfor %}
+  {% if more %}<p class="muted">{{ _("Only the first {n} links are shown. Press a tag to narrow the list.", n=max_bulk) }}</p>{% endif %}
+  <div class="each-save"><button class="btn" type="submit" {% if not bulk_on %}disabled{% endif %}>{{ _("Save all links") }}</button></div>
+</form>
+{% else %}
+  <div class="empty"><h3>{{ _("No links yet") }}</h3><p>{{ _("Paste a long URL above to create your first short link.") }}</p></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="/static/bulk.js?v={{ js_version }}" defer></script>
+{% endblock %}
